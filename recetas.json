@@ -1951,5 +1951,1954 @@
       "tradicional",
       "técnico"
     ]
+  },
+  {
+    "id": 16,
+    "nombre": "Pollo Asado al Horno",
+    "foto": "pollo_asado_horno.jpg",
+    "categoria": "carne",
+    "origen": "España",
+    "tiempo_preparacion_min": 20,
+    "tiempo_coccion_min": 90,
+    "raciones": 4,
+    "dificultad": "fácil",
+    "descripcion": "El pollo de los domingos de toda la vida. Crujiente por fuera, jugoso por dentro, con patatas al fondo.",
+    "ingredientes": [
+      {
+        "ingrediente_id": 41,
+        "nombre": "Pollo entero",
+        "cantidad": 1.8,
+        "unidad": "kg"
+      },
+      {
+        "ingrediente_id": 8,
+        "nombre": "Patata",
+        "cantidad": 600,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 3,
+        "nombre": "Ajo",
+        "cantidad": 20,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 210,
+        "nombre": "Limón",
+        "cantidad": 150,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 162,
+        "nombre": "Aceite de oliva virgen extra",
+        "cantidad": 50,
+        "unidad": "ml"
+      },
+      {
+        "ingrediente_id": 274,
+        "nombre": "Romero fresco",
+        "cantidad": 15,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 275,
+        "nombre": "Tomillo fresco",
+        "cantidad": 10,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 165,
+        "nombre": "Sal fina",
+        "cantidad": 12,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 168,
+        "nombre": "Pimienta negra",
+        "cantidad": 4,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 170,
+        "nombre": "Pimentón dulce",
+        "cantidad": 6,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 261,
+        "nombre": "Vino blanco para cocinar",
+        "cantidad": 0.1,
+        "unidad": "litro"
+      }
+    ],
+    "pasos": [
+      {
+        "orden": 1,
+        "descripcion": "Saca el pollo de la nevera 30 minutos antes. Precalienta el horno a 200°C."
+      },
+      {
+        "orden": 2,
+        "descripcion": "Mezcla el aceite, ajo machacado, pimentón, sal, pimienta y las hierbas picadas. Frota esta mezcla por todo el pollo, por fuera y por dentro de la cavidad."
+      },
+      {
+        "orden": 3,
+        "descripcion": "Introduce dentro del pollo el limón cortado a la mitad, un diente de ajo y unas ramitas de romero y tomillo."
+      },
+      {
+        "orden": 4,
+        "descripcion": "Pela las patatas, córtalas en gajos y sazónalas con sal, pimienta y un chorrito de aceite. Colócalas en el fondo de la bandeja."
+      },
+      {
+        "orden": 5,
+        "descripcion": "Coloca el pollo encima de las patatas con la pechuga hacia arriba. Vierte el vino blanco en la bandeja."
+      },
+      {
+        "orden": 6,
+        "descripcion": "Hornea 20 minutos a 200°C para que dore la piel. Luego baja a 180°C y continúa 60-70 minutos más."
+      },
+      {
+        "orden": 7,
+        "descripcion": "Cada 20 minutos, baña el pollo con los jugos que van soltándose en la bandeja. Esto es lo que da la piel crujiente y brillante."
+      },
+      {
+        "orden": 8,
+        "descripcion": "El pollo está listo cuando al pinchar el muslo con una brocheta los jugos salen transparentes, no rosados."
+      },
+      {
+        "orden": 9,
+        "descripcion": "Saca del horno y deja reposar 10 minutos antes de trinchar. Este reposo es clave para que los jugos se redistribuyan."
+      },
+      {
+        "orden": 10,
+        "descripcion": "Trincha el pollo y sirve con las patatas y los jugos de la bandeja por encima."
+      }
+    ],
+    "tags": [
+      "carne",
+      "sin_gluten",
+      "domingo",
+      "tradicional",
+      "horno"
+    ]
+  },
+  {
+    "id": 17,
+    "nombre": "Fabada Asturiana",
+    "foto": "fabada_asturiana.jpg",
+    "categoria": "guiso",
+    "origen": "Asturias",
+    "tiempo_preparacion_min": 20,
+    "tiempo_coccion_min": 120,
+    "raciones": 6,
+    "dificultad": "media",
+    "descripcion": "El guiso de legumbres más contundente de España. Fabes cremosas con compango asturiano.",
+    "ingredientes": [
+      {
+        "ingrediente_id": 152,
+        "nombre": "Alubias blancas",
+        "cantidad": 500,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 52,
+        "nombre": "Chorizo",
+        "cantidad": 200,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 53,
+        "nombre": "Morcilla",
+        "cantidad": 200,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 51,
+        "nombre": "Panceta",
+        "cantidad": 200,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 54,
+        "nombre": "Jamón serrano",
+        "cantidad": 100,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 2,
+        "nombre": "Cebolla",
+        "cantidad": 100,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 3,
+        "nombre": "Ajo",
+        "cantidad": 10,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 185,
+        "nombre": "Azafrán",
+        "cantidad": 0.3,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 170,
+        "nombre": "Pimentón dulce",
+        "cantidad": 8,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 178,
+        "nombre": "Laurel",
+        "cantidad": 2,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 162,
+        "nombre": "Aceite de oliva virgen extra",
+        "cantidad": 40,
+        "unidad": "ml"
+      },
+      {
+        "ingrediente_id": 165,
+        "nombre": "Sal fina",
+        "cantidad": 8,
+        "unidad": "gramos"
+      }
+    ],
+    "pasos": [
+      {
+        "orden": 1,
+        "descripcion": "La noche anterior pon las alubias a remojo en agua fría abundante. También pon la panceta y el jamón en remojo por separado si son muy salados."
+      },
+      {
+        "orden": 2,
+        "descripcion": "Al día siguiente escurre las alubias. Ponlas en una olla grande cubiertas de agua fría. Lleva a ebullición y cuando rompa a hervir, tira ese agua (este primer hervor elimina impurezas)."
+      },
+      {
+        "orden": 3,
+        "descripcion": "Cubre de nuevo con agua fría y añade la cebolla entera, el ajo, el laurel y el aceite. Lleva a ebullición suave."
+      },
+      {
+        "orden": 4,
+        "descripcion": "Añade el chorizo, la morcilla y la panceta enteros. Cocina a fuego muy suave durante 1h30, sin que hierva fuerte para que las alubias no se rompan."
+      },
+      {
+        "orden": 5,
+        "descripcion": "El truco del asustado: cada 30 minutos añade un chorrito de agua fría para cortar el hervor. Esto hace que las alubias queden enteras y cremosas."
+      },
+      {
+        "orden": 6,
+        "descripcion": "A mitad de cocción, disuelve el azafrán en un poco del caldo caliente e incorpora al guiso junto con el pimentón."
+      },
+      {
+        "orden": 7,
+        "descripcion": "Cuando las alubias estén tiernas, saca el compango (chorizo, morcilla, panceta) y córtalo en rodajas. Reserva."
+      },
+      {
+        "orden": 8,
+        "descripcion": "Saca un par de cucharones de alubias, aplástala con un tenedor y devuélvelas al guiso. Esto espesa el caldo naturalmente."
+      },
+      {
+        "orden": 9,
+        "descripcion": "Rectifica de sal con cuidado, el compango ya aporta bastante sal."
+      },
+      {
+        "orden": 10,
+        "descripcion": "Sirve las alubias en cazuela de barro con el compango por encima. Reposa mejor al día siguiente."
+      }
+    ],
+    "tags": [
+      "tradicional",
+      "sin_gluten",
+      "asturiano",
+      "invierno",
+      "contundente"
+    ]
+  },
+  {
+    "id": 18,
+    "nombre": "Croquetas de Jamón",
+    "foto": "croquetas_jamon.jpg",
+    "categoria": "tapa",
+    "origen": "España",
+    "tiempo_preparacion_min": 30,
+    "tiempo_coccion_min": 40,
+    "raciones": 4,
+    "dificultad": "media",
+    "descripcion": "Las croquetas perfectas: bechamel cremosa, crujiente por fuera, fundente por dentro. El bocado más adictivo de España.",
+    "ingredientes": [
+      {
+        "ingrediente_id": 54,
+        "nombre": "Jamón serrano",
+        "cantidad": 150,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 137,
+        "nombre": "Harina de trigo",
+        "cantidad": 100,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 106,
+        "nombre": "Mantequilla",
+        "cantidad": 80,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 102,
+        "nombre": "Leche entera",
+        "cantidad": 0.75,
+        "unidad": "litro"
+      },
+      {
+        "ingrediente_id": 2,
+        "nombre": "Cebolla",
+        "cantidad": 80,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 101,
+        "nombre": "Huevos",
+        "cantidad": 3,
+        "unidad": "unidad"
+      },
+      {
+        "ingrediente_id": 281,
+        "nombre": "Pan rallado",
+        "cantidad": 150,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 163,
+        "nombre": "Aceite de girasol",
+        "cantidad": 0.5,
+        "unidad": "litro"
+      },
+      {
+        "ingrediente_id": 186,
+        "nombre": "Nuez moscada",
+        "cantidad": 2,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 165,
+        "nombre": "Sal fina",
+        "cantidad": 6,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 168,
+        "nombre": "Pimienta negra",
+        "cantidad": 2,
+        "unidad": "gramos"
+      }
+    ],
+    "pasos": [
+      {
+        "orden": 1,
+        "descripcion": "Pica el jamón en taquitos muy pequeños. Pica también la cebolla muy fina."
+      },
+      {
+        "orden": 2,
+        "descripcion": "En una sartén amplia, derrite la mantequilla a fuego medio. Sofríe la cebolla hasta que esté muy tierna y transparente, unos 10 minutos. No debe dorarse."
+      },
+      {
+        "orden": 3,
+        "descripcion": "Añade el jamón picado y sofríe 2 minutos más."
+      },
+      {
+        "orden": 4,
+        "descripcion": "Incorpora toda la harina de golpe y remueve con varillas sin parar durante 3 minutos para tostar la harina. Debe quedar una pasta (roux) sin grumos."
+      },
+      {
+        "orden": 5,
+        "descripcion": "Calienta la leche por separado. Añádela a la sartén poco a poco, sin dejar de remover con las varillas. Empieza con poca cantidad y ve añadiendo más cuando se absorba la anterior."
+      },
+      {
+        "orden": 6,
+        "descripcion": "Cocina la bechamel a fuego medio-bajo unos 15 minutos sin parar de remover hasta que esté muy espesa, se despegue de las paredes y brille. Sazona con sal, pimienta y nuez moscada."
+      },
+      {
+        "orden": 7,
+        "descripcion": "Vierte la masa en una fuente, tapa con papel film pegado a la superficie (para que no forme costra) y deja enfriar. Mete en la nevera mínimo 3 horas, mejor toda la noche."
+      },
+      {
+        "orden": 8,
+        "descripcion": "Forma las croquetas con dos cucharas o con las manos enharinadas. Pásalas primero por huevo batido y luego por pan rallado. Para un rebozado más grueso, repite el proceso."
+      },
+      {
+        "orden": 9,
+        "descripcion": "Calienta el aceite de girasol a 180°C en una sartén honda. Fríe las croquetas en tandas pequeñas (no más de 4-5 a la vez) durante 2-3 minutos hasta que estén doradas."
+      },
+      {
+        "orden": 10,
+        "descripcion": "Escurre sobre papel absorbente y sirve inmediatamente. El interior debe estar fundente y cremoso."
+      }
+    ],
+    "tags": [
+      "tapa",
+      "tradicional",
+      "frito",
+      "jamón"
+    ]
+  },
+  {
+    "id": 19,
+    "nombre": "Pisto Manchego",
+    "foto": "pisto_manchego.jpg",
+    "categoria": "verdura",
+    "origen": "Castilla-La Mancha",
+    "tiempo_preparacion_min": 20,
+    "tiempo_coccion_min": 45,
+    "raciones": 4,
+    "dificultad": "fácil",
+    "descripcion": "El ratatouille español. Verduras de temporada pochadas lentamente hasta conseguir una mermelada de sabores.",
+    "ingredientes": [
+      {
+        "ingrediente_id": 12,
+        "nombre": "Calabacín",
+        "cantidad": 400,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 13,
+        "nombre": "Berenjena",
+        "cantidad": 300,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 4,
+        "nombre": "Pimiento rojo",
+        "cantidad": 200,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 5,
+        "nombre": "Pimiento verde",
+        "cantidad": 200,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 1,
+        "nombre": "Tomate",
+        "cantidad": 400,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 2,
+        "nombre": "Cebolla",
+        "cantidad": 200,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 3,
+        "nombre": "Ajo",
+        "cantidad": 15,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 162,
+        "nombre": "Aceite de oliva virgen extra",
+        "cantidad": 80,
+        "unidad": "ml"
+      },
+      {
+        "ingrediente_id": 246,
+        "nombre": "Azúcar blanco",
+        "cantidad": 8,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 165,
+        "nombre": "Sal fina",
+        "cantidad": 8,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 168,
+        "nombre": "Pimienta negra",
+        "cantidad": 2,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 174,
+        "nombre": "Orégano",
+        "cantidad": 4,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 101,
+        "nombre": "Huevos",
+        "cantidad": 4,
+        "unidad": "unidad"
+      }
+    ],
+    "pasos": [
+      {
+        "orden": 1,
+        "descripcion": "Corta la berenjena en dados medianos, ponla en un escurridor con sal y deja reposar 20 minutos para que suelte el amargor. Enjuaga y seca bien."
+      },
+      {
+        "orden": 2,
+        "descripcion": "Corta el calabacín, los pimientos y la cebolla en dados similares de 1-2 cm. Pela y pica el ajo fino. Pela y trocea los tomates."
+      },
+      {
+        "orden": 3,
+        "descripcion": "En una cazuela grande, calienta el aceite a fuego medio. Sofríe la cebolla 8 minutos hasta que esté blanda."
+      },
+      {
+        "orden": 4,
+        "descripcion": "Añade los pimientos y sofríe 5 minutos más."
+      },
+      {
+        "orden": 5,
+        "descripcion": "Incorpora el ajo y la berenjena. Sofríe otros 5 minutos."
+      },
+      {
+        "orden": 6,
+        "descripcion": "Añade el calabacín y sofríe 5 minutos más. El secreto del pisto es sofreír cada verdura por separado o en etapas para que cada una conserve su sabor."
+      },
+      {
+        "orden": 7,
+        "descripcion": "Incorpora los tomates troceados, el azúcar, el orégano, sal y pimienta. El azúcar corta la acidez del tomate."
+      },
+      {
+        "orden": 8,
+        "descripcion": "Baja el fuego al mínimo y cocina tapado 25-30 minutos removiendo de vez en cuando, hasta que todas las verduras estén muy tiernas y los sabores integrados."
+      },
+      {
+        "orden": 9,
+        "descripcion": "Prueba y ajusta de sal. El pisto debe tener una textura casi de mermelada, sin líquido suelto."
+      },
+      {
+        "orden": 10,
+        "descripcion": "Sirve con un huevo frito encima, que es como se come en La Mancha. También es perfecto como acompañamiento de carnes o sobre tostadas."
+      }
+    ],
+    "tags": [
+      "vegetariano",
+      "sin_gluten",
+      "verano",
+      "tradicional",
+      "económico"
+    ]
+  },
+  {
+    "id": 20,
+    "nombre": "Lasaña de Carne",
+    "foto": "lasana_carne.jpg",
+    "categoria": "pasta",
+    "origen": "Italia",
+    "tiempo_preparacion_min": 30,
+    "tiempo_coccion_min": 60,
+    "raciones": 6,
+    "dificultad": "media",
+    "descripcion": "Capas de pasta, boloñesa rica y bechamel cremosa. La lasaña que todo el mundo quiere comer.",
+    "ingredientes": [
+      {
+        "ingrediente_id": 132,
+        "nombre": "Pasta lasaña",
+        "cantidad": 250,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 45,
+        "nombre": "Ternera picada",
+        "cantidad": 500,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 194,
+        "nombre": "Tomate triturado lata",
+        "cantidad": 400,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 2,
+        "nombre": "Cebolla",
+        "cantidad": 150,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 3,
+        "nombre": "Ajo",
+        "cantidad": 10,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 7,
+        "nombre": "Zanahoria",
+        "cantidad": 100,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 262,
+        "nombre": "Vino tinto para cocinar",
+        "cantidad": 0.1,
+        "unidad": "litro"
+      },
+      {
+        "ingrediente_id": 137,
+        "nombre": "Harina de trigo",
+        "cantidad": 80,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 106,
+        "nombre": "Mantequilla",
+        "cantidad": 80,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 102,
+        "nombre": "Leche entera",
+        "cantidad": 0.8,
+        "unidad": "litro"
+      },
+      {
+        "ingrediente_id": 110,
+        "nombre": "Queso rallado",
+        "cantidad": 150,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 162,
+        "nombre": "Aceite de oliva virgen extra",
+        "cantidad": 30,
+        "unidad": "ml"
+      },
+      {
+        "ingrediente_id": 174,
+        "nombre": "Orégano",
+        "cantidad": 5,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 178,
+        "nombre": "Laurel",
+        "cantidad": 2,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 186,
+        "nombre": "Nuez moscada",
+        "cantidad": 2,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 165,
+        "nombre": "Sal fina",
+        "cantidad": 12,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 168,
+        "nombre": "Pimienta negra",
+        "cantidad": 3,
+        "unidad": "gramos"
+      }
+    ],
+    "pasos": [
+      {
+        "orden": 1,
+        "descripcion": "Boloñesa: sofríe en aceite la cebolla, zanahoria y ajo picados finos 8 minutos. Añade la carne picada y dórala bien desmigando con una cuchara."
+      },
+      {
+        "orden": 2,
+        "descripcion": "Sube el fuego, añade el vino tinto y deja evaporar 2 minutos. Incorpora el tomate triturado, orégano, laurel, sal y pimienta."
+      },
+      {
+        "orden": 3,
+        "descripcion": "Cocina la boloñesa a fuego bajo 30 minutos hasta que esté espesa y sabrosa. Retira el laurel."
+      },
+      {
+        "orden": 4,
+        "descripcion": "Bechamel: derrite la mantequilla, añade la harina y tuéstala 2 minutos con varillas. Ve añadiendo la leche caliente poco a poco sin dejar de remover. Cocina 10 minutos hasta que espese. Sazona con sal, pimienta y nuez moscada."
+      },
+      {
+        "orden": 5,
+        "descripcion": "Si usas pasta seca normal (no precocida), cuécela 2 minutos menos del tiempo indicado. Escurre y separa las láminas con aceite para que no se peguen."
+      },
+      {
+        "orden": 6,
+        "descripcion": "Precalienta el horno a 180°C. Unta una fuente de horno con mantequilla."
+      },
+      {
+        "orden": 7,
+        "descripcion": "Empieza las capas: primero una fina capa de bechamel en el fondo. Luego láminas de pasta, boloñesa y bechamel. Repite hasta acabar los ingredientes (mínimo 3 capas)."
+      },
+      {
+        "orden": 8,
+        "descripcion": "La capa final debe ser de bechamel generosa. Cubre con queso rallado abundante."
+      },
+      {
+        "orden": 9,
+        "descripcion": "Hornea 30-35 minutos hasta que esté dorada y burbujeante. Si se dora demasiado pronto, tapa con papel de aluminio."
+      },
+      {
+        "orden": 10,
+        "descripcion": "Deja reposar 10 minutos antes de cortar. Las capas se asientan y se sirve mucho mejor."
+      }
+    ],
+    "tags": [
+      "pasta",
+      "italiano",
+      "familiar",
+      "horno"
+    ]
+  },
+  {
+    "id": 21,
+    "nombre": "Gambas al Ajillo",
+    "foto": "gambas_ajillo.jpg",
+    "categoria": "tapa",
+    "origen": "España",
+    "tiempo_preparacion_min": 5,
+    "tiempo_coccion_min": 8,
+    "raciones": 4,
+    "dificultad": "fácil",
+    "descripcion": "La tapa más rápida y espectacular. Gambas jugosas en aceite ardiente con ajo y guindilla. Pan obligatorio para la salsa.",
+    "ingredientes": [
+      {
+        "ingrediente_id": 78,
+        "nombre": "Gambas",
+        "cantidad": 500,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 3,
+        "nombre": "Ajo",
+        "cantidad": 30,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 304,
+        "nombre": "Guindilla fresca",
+        "cantidad": 15,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 162,
+        "nombre": "Aceite de oliva virgen extra",
+        "cantidad": 100,
+        "unidad": "ml"
+      },
+      {
+        "ingrediente_id": 261,
+        "nombre": "Vino blanco para cocinar",
+        "cantidad": 0.05,
+        "unidad": "litro"
+      },
+      {
+        "ingrediente_id": 270,
+        "nombre": "Perejil fresco",
+        "cantidad": 10,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 165,
+        "nombre": "Sal fina",
+        "cantidad": 5,
+        "unidad": "gramos"
+      }
+    ],
+    "pasos": [
+      {
+        "orden": 1,
+        "descripcion": "Pela las gambas dejando la cola. Si son grandes, hazles un corte en el lomo y retira el intestino negro."
+      },
+      {
+        "orden": 2,
+        "descripcion": "Sécalas bien con papel de cocina. Las gambas húmedas no se marcan, se cuecen."
+      },
+      {
+        "orden": 3,
+        "descripcion": "Lamina los ajos finos. Corta la guindilla en rodajas (retira las semillas si no quieres demasiado picante)."
+      },
+      {
+        "orden": 4,
+        "descripcion": "Calienta la cazuela de barro (o sartén) a fuego fuerte hasta que humee. El calor extremo es el secreto."
+      },
+      {
+        "orden": 5,
+        "descripcion": "Añade el aceite y el ajo al mismo tiempo. En 30 segundos el ajo empezará a dorarse."
+      },
+      {
+        "orden": 6,
+        "descripcion": "Incorpora las gambas y la guindilla. El aceite debe chisporrotear intensamente, ese es el sonido del ajillo."
+      },
+      {
+        "orden": 7,
+        "descripcion": "Cocina 1 minuto sin tocar, luego voltea las gambas. Otro minuto más. Las gambas están listas cuando cambian de color y se curvan. No las sobrecocines."
+      },
+      {
+        "orden": 8,
+        "descripcion": "Añade el vino blanco, sube el fuego 30 segundos para que evapore el alcohol."
+      },
+      {
+        "orden": 9,
+        "descripcion": "Sala al gusto y espolvorea con perejil picado."
+      },
+      {
+        "orden": 10,
+        "descripcion": "Sirve inmediatamente en la misma cazuela de barro. Con mucho pan para mojar en el aceite con ajo."
+      }
+    ],
+    "tags": [
+      "tapa",
+      "sin_gluten",
+      "rápido",
+      "marisco",
+      "tradicional"
+    ]
+  },
+  {
+    "id": 22,
+    "nombre": "Ensaladilla Rusa",
+    "foto": "ensaladilla_rusa.jpg",
+    "categoria": "ensalada",
+    "origen": "España",
+    "tiempo_preparacion_min": 20,
+    "tiempo_coccion_min": 25,
+    "raciones": 6,
+    "dificultad": "fácil",
+    "descripcion": "La tapa fría más pedida en los bares españoles. Patata, atún, guisantes y mayonesa casera.",
+    "ingredientes": [
+      {
+        "ingrediente_id": 8,
+        "nombre": "Patata",
+        "cantidad": 600,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 75,
+        "nombre": "Atún en lata",
+        "cantidad": 3,
+        "unidad": "unidad"
+      },
+      {
+        "ingrediente_id": 156,
+        "nombre": "Guisantes",
+        "cantidad": 150,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 7,
+        "nombre": "Zanahoria",
+        "cantidad": 150,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 101,
+        "nombre": "Huevos",
+        "cantidad": 3,
+        "unidad": "unidad"
+      },
+      {
+        "ingrediente_id": 200,
+        "nombre": "Mayonesa",
+        "cantidad": 200,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 299,
+        "nombre": "Pepinillos en vinagre",
+        "cantidad": 60,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 300,
+        "nombre": "Aceitunas verdes",
+        "cantidad": 60,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 165,
+        "nombre": "Sal fina",
+        "cantidad": 6,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 168,
+        "nombre": "Pimienta negra",
+        "cantidad": 2,
+        "unidad": "gramos"
+      }
+    ],
+    "pasos": [
+      {
+        "orden": 1,
+        "descripcion": "Cuece las patatas y zanahorias enteras con piel en agua con sal durante 20-25 minutos hasta que estén tiernas pero firmes. Cuece también los huevos 10 minutos para que queden duros."
+      },
+      {
+        "orden": 2,
+        "descripcion": "Cuece los guisantes 5 minutos en agua con sal. Escurre y enfría bajo el grifo para que mantengan el color verde."
+      },
+      {
+        "orden": 3,
+        "descripcion": "Deja enfriar completamente todas las verduras y huevos. Nunca pongas ingredientes calientes con la mayonesa."
+      },
+      {
+        "orden": 4,
+        "descripcion": "Pela y corta las patatas en dados de 1 cm. Haz lo mismo con las zanahorias. Pela los huevos: reserva uno para decorar y pica los otros dos."
+      },
+      {
+        "orden": 5,
+        "descripcion": "Escurre bien el atún en lata eliminando todo el aceite."
+      },
+      {
+        "orden": 6,
+        "descripcion": "En un bol grande, mezcla las patatas, zanahoria, guisantes, atún desmenuzado y huevos picados."
+      },
+      {
+        "orden": 7,
+        "descripcion": "Añade los pepinillos y aceitunas picados en trozos pequeños."
+      },
+      {
+        "orden": 8,
+        "descripcion": "Incorpora la mayonesa poco a poco y mezcla con cuidado para no machacar las patatas. La cantidad de mayonesa es al gusto."
+      },
+      {
+        "orden": 9,
+        "descripcion": "Prueba de sal y ajusta. Vuelca en una fuente y alísala con una espátula."
+      },
+      {
+        "orden": 10,
+        "descripcion": "Decora con el huevo duro en rodajas, aceitunas y un poco de pimentón dulce por encima. Enfría en nevera mínimo 1 hora antes de servir."
+      }
+    ],
+    "tags": [
+      "tapa",
+      "sin_gluten",
+      "frío",
+      "tradicional",
+      "económico"
+    ]
+  },
+  {
+    "id": 23,
+    "nombre": "Estofado de Ternera con Verduras",
+    "foto": "estofado_ternera_verduras.jpg",
+    "categoria": "guiso",
+    "origen": "España",
+    "tiempo_preparacion_min": 20,
+    "tiempo_coccion_min": 90,
+    "raciones": 4,
+    "dificultad": "media",
+    "descripcion": "Carne tierna que se deshace con vino tinto y verduras. Un guiso que llena el piso de un olor increíble.",
+    "ingredientes": [
+      {
+        "ingrediente_id": 64,
+        "nombre": "Ternera estofado",
+        "cantidad": 700,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 8,
+        "nombre": "Patata",
+        "cantidad": 400,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 7,
+        "nombre": "Zanahoria",
+        "cantidad": 200,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 2,
+        "nombre": "Cebolla",
+        "cantidad": 200,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 3,
+        "nombre": "Ajo",
+        "cantidad": 15,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 19,
+        "nombre": "Champiñones",
+        "cantidad": 200,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 262,
+        "nombre": "Vino tinto para cocinar",
+        "cantidad": 0.2,
+        "unidad": "litro"
+      },
+      {
+        "ingrediente_id": 290,
+        "nombre": "Caldo de carne",
+        "cantidad": 0.5,
+        "unidad": "litro"
+      },
+      {
+        "ingrediente_id": 137,
+        "nombre": "Harina de trigo",
+        "cantidad": 30,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 162,
+        "nombre": "Aceite de oliva virgen extra",
+        "cantidad": 50,
+        "unidad": "ml"
+      },
+      {
+        "ingrediente_id": 178,
+        "nombre": "Laurel",
+        "cantidad": 2,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 176,
+        "nombre": "Romero seco",
+        "cantidad": 3,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 177,
+        "nombre": "Tomillo seco",
+        "cantidad": 3,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 170,
+        "nombre": "Pimentón dulce",
+        "cantidad": 5,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 165,
+        "nombre": "Sal fina",
+        "cantidad": 10,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 168,
+        "nombre": "Pimienta negra",
+        "cantidad": 3,
+        "unidad": "gramos"
+      }
+    ],
+    "pasos": [
+      {
+        "orden": 1,
+        "descripcion": "Corta la carne en dados de 4 cm. Sécala con papel, sazona con sal y pimienta y pásala por harina sacudiendo el exceso."
+      },
+      {
+        "orden": 2,
+        "descripcion": "Calienta el aceite en una olla grande a fuego fuerte. Dora la carne en tandas sin amontonar. El objetivo es sellarla bien por todos los lados. Retira y reserva."
+      },
+      {
+        "orden": 3,
+        "descripcion": "En la misma olla, baja a fuego medio. Sofríe la cebolla picada 8 minutos hasta que esté blanda."
+      },
+      {
+        "orden": 4,
+        "descripcion": "Añade el ajo picado y el pimentón. Remueve 1 minuto."
+      },
+      {
+        "orden": 5,
+        "descripcion": "Sube el fuego, añade el vino tinto y raspa el fondo de la olla para soltar todos los jugos caramelizados. Deja reducir a la mitad, unos 3 minutos."
+      },
+      {
+        "orden": 6,
+        "descripcion": "Devuelve la carne a la olla. Añade el caldo caliente, las hierbas y el laurel. El líquido debe cubrir casi toda la carne."
+      },
+      {
+        "orden": 7,
+        "descripcion": "Lleva a ebullición suave, tapa y cocina a fuego bajo 45 minutos."
+      },
+      {
+        "orden": 8,
+        "descripcion": "Añade las patatas en dados, las zanahorias en rodajas y los champiñones laminados. Continúa cociendo tapado 30 minutos más."
+      },
+      {
+        "orden": 9,
+        "descripcion": "Comprueba que la carne esté tierna. Debe deshacerse al tocarla con el tenedor. Si no, cocina 15 minutos más."
+      },
+      {
+        "orden": 10,
+        "descripcion": "Rectifica de sal. Retira el laurel. Sirve caliente con pan para mojar en la salsa. Mejora mucho de un día para otro."
+      }
+    ],
+    "tags": [
+      "carne",
+      "sin_gluten",
+      "invierno",
+      "contundente",
+      "tradicional"
+    ]
+  },
+  {
+    "id": 24,
+    "nombre": "Tortilla Francesa con Jamón y Queso",
+    "foto": "tortilla_francesa_jamon_queso.jpg",
+    "categoria": "huevos",
+    "origen": "Francia",
+    "tiempo_preparacion_min": 5,
+    "tiempo_coccion_min": 5,
+    "raciones": 1,
+    "dificultad": "fácil",
+    "descripcion": "La tortilla más rápida del mundo. Cremosa por dentro, dorada por fuera, con jamón y queso fundido.",
+    "ingredientes": [
+      {
+        "ingrediente_id": 101,
+        "nombre": "Huevos",
+        "cantidad": 3,
+        "unidad": "unidad"
+      },
+      {
+        "ingrediente_id": 55,
+        "nombre": "Jamón cocido",
+        "cantidad": 50,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 110,
+        "nombre": "Queso rallado",
+        "cantidad": 40,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 106,
+        "nombre": "Mantequilla",
+        "cantidad": 15,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 165,
+        "nombre": "Sal fina",
+        "cantidad": 2,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 168,
+        "nombre": "Pimienta negra",
+        "cantidad": 1,
+        "unidad": "gramos"
+      }
+    ],
+    "pasos": [
+      {
+        "orden": 1,
+        "descripcion": "Bate los huevos con sal y pimienta. No añadas leche ni agua: la tortilla francesa de calidad solo lleva huevo."
+      },
+      {
+        "orden": 2,
+        "descripcion": "Calienta una sartén pequeña antiadherente a fuego medio-alto. Añade la mantequilla y espera a que deje de burbujear."
+      },
+      {
+        "orden": 3,
+        "descripcion": "Vierte los huevos batidos. Espera 10 segundos."
+      },
+      {
+        "orden": 4,
+        "descripcion": "Con una espátula o tenedor, remueve suavemente en círculos mientras agitas la sartén. El huevo debe cuajar pero quedar cremoso, no seco."
+      },
+      {
+        "orden": 5,
+        "descripcion": "Cuando el huevo esté casi cuajado pero aún brillante en la superficie, reparte el jamón y el queso rallado en el centro."
+      },
+      {
+        "orden": 6,
+        "descripcion": "Dobla la tortilla por la mitad sobre el relleno. Presiona ligeramente."
+      },
+      {
+        "orden": 7,
+        "descripcion": "Desliza a un plato. La tortilla perfecta es de color amarillo dorado uniforme, sin manchas marrones."
+      },
+      {
+        "orden": 8,
+        "descripcion": "Sirve inmediatamente. La tortilla francesa no espera."
+      }
+    ],
+    "tags": [
+      "huevos",
+      "rápido",
+      "sin_gluten",
+      "desayuno",
+      "almuerzo"
+    ]
+  },
+  {
+    "id": 25,
+    "nombre": "Sopa de Cebolla Gratinada",
+    "foto": "sopa_cebolla_gratinada.jpg",
+    "categoria": "sopa",
+    "origen": "Francia",
+    "tiempo_preparacion_min": 15,
+    "tiempo_coccion_min": 60,
+    "raciones": 4,
+    "dificultad": "media",
+    "descripcion": "La sopa más reconfortante del invierno. Cebolla caramelizada, caldo rico, pan y queso fundido gratinado.",
+    "ingredientes": [
+      {
+        "ingrediente_id": 2,
+        "nombre": "Cebolla",
+        "cantidad": 1000,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 106,
+        "nombre": "Mantequilla",
+        "cantidad": 60,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 162,
+        "nombre": "Aceite de oliva virgen extra",
+        "cantidad": 30,
+        "unidad": "ml"
+      },
+      {
+        "ingrediente_id": 261,
+        "nombre": "Vino blanco para cocinar",
+        "cantidad": 0.15,
+        "unidad": "litro"
+      },
+      {
+        "ingrediente_id": 290,
+        "nombre": "Caldo de carne",
+        "cantidad": 1.2,
+        "unidad": "litro"
+      },
+      {
+        "ingrediente_id": 140,
+        "nombre": "Pan baguette",
+        "cantidad": 1,
+        "unidad": "unidad"
+      },
+      {
+        "ingrediente_id": 110,
+        "nombre": "Queso rallado",
+        "cantidad": 150,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 3,
+        "nombre": "Ajo",
+        "cantidad": 10,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 178,
+        "nombre": "Laurel",
+        "cantidad": 2,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 177,
+        "nombre": "Tomillo seco",
+        "cantidad": 3,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 165,
+        "nombre": "Sal fina",
+        "cantidad": 8,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 168,
+        "nombre": "Pimienta negra",
+        "cantidad": 3,
+        "unidad": "gramos"
+      }
+    ],
+    "pasos": [
+      {
+        "orden": 1,
+        "descripcion": "Pela y corta todas las cebollas en juliana muy fina. Sí, parece muchísima, pero se reduce enormemente al caramelizarse."
+      },
+      {
+        "orden": 2,
+        "descripcion": "En una olla grande, calienta la mantequilla y el aceite a fuego medio. Añade las cebollas con una pizca de sal."
+      },
+      {
+        "orden": 3,
+        "descripcion": "La clave: cocina las cebollas a fuego medio-bajo durante 40-45 minutos removiendo cada 5 minutos. Deben caramelizarse y quedar de color marrón dorado oscuro. No hay atajos aquí."
+      },
+      {
+        "orden": 4,
+        "descripcion": "Añade el ajo picado y el tomillo. Sofríe 2 minutos más."
+      },
+      {
+        "orden": 5,
+        "descripcion": "Sube el fuego, añade el vino blanco y deja evaporar el alcohol raspando el fondo, 2 minutos."
+      },
+      {
+        "orden": 6,
+        "descripcion": "Vierte el caldo caliente con el laurel. Lleva a ebullición y cocina 15 minutos a fuego medio. Rectifica de sal y pimienta."
+      },
+      {
+        "orden": 7,
+        "descripcion": "Corta el pan baguette en rebanadas de 2 cm. Tuéstalas en el horno a 180°C hasta que estén doradas y crujientes."
+      },
+      {
+        "orden": 8,
+        "descripcion": "Precalienta el grill del horno al máximo."
+      },
+      {
+        "orden": 9,
+        "descripcion": "Sirve la sopa en cazuelas individuales aptas para horno. Coloca 2-3 rebanadas de pan tostado encima y cubre generosamente con queso rallado."
+      },
+      {
+        "orden": 10,
+        "descripcion": "Gratina bajo el grill 3-4 minutos hasta que el queso esté fundido y dorado con manchas tostadas. Sirve inmediatamente con cuidado de no quemarte."
+      }
+    ],
+    "tags": [
+      "sopa",
+      "francés",
+      "invierno",
+      "reconfortante",
+      "gratinado"
+    ]
+  },
+  {
+    "id": 26,
+    "nombre": "Tacos de Pollo",
+    "foto": "tacos_pollo.jpg",
+    "categoria": "mexicano",
+    "origen": "México",
+    "tiempo_preparacion_min": 20,
+    "tiempo_coccion_min": 20,
+    "raciones": 4,
+    "dificultad": "fácil",
+    "descripcion": "Tacos jugosos con pollo especiado, aguacate cremoso, pico de gallo y lima. Una fiesta en cada bocado.",
+    "ingredientes": [
+      {
+        "ingrediente_id": 42,
+        "nombre": "Pechuga de pollo",
+        "cantidad": 600,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 144,
+        "nombre": "Tortilla de trigo",
+        "cantidad": 8,
+        "unidad": "unidad"
+      },
+      {
+        "ingrediente_id": 26,
+        "nombre": "Aguacate",
+        "cantidad": 2,
+        "unidad": "unidad"
+      },
+      {
+        "ingrediente_id": 33,
+        "nombre": "Tomate cherry",
+        "cantidad": 200,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 37,
+        "nombre": "Cebolla morada",
+        "cantidad": 100,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 271,
+        "nombre": "Cilantro fresco",
+        "cantidad": 20,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 211,
+        "nombre": "Lima",
+        "cantidad": 100,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 182,
+        "nombre": "Curry en polvo",
+        "cantidad": 8,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 173,
+        "nombre": "Comino",
+        "cantidad": 5,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 170,
+        "nombre": "Pimentón dulce",
+        "cantidad": 5,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 162,
+        "nombre": "Aceite de oliva virgen extra",
+        "cantidad": 40,
+        "unidad": "ml"
+      },
+      {
+        "ingrediente_id": 121,
+        "nombre": "Yogur griego",
+        "cantidad": 100,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 165,
+        "nombre": "Sal fina",
+        "cantidad": 8,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 305,
+        "nombre": "Jalapeño",
+        "cantidad": 30,
+        "unidad": "gramos"
+      }
+    ],
+    "pasos": [
+      {
+        "orden": 1,
+        "descripcion": "Marina el pollo: mezcla el comino, pimentón, la mitad del curry, sal y aceite. Unta el pollo y deja marinar 15 minutos mínimo."
+      },
+      {
+        "orden": 2,
+        "descripcion": "Pico de gallo: pica los tomates cherry, la cebolla morada y el cilantro en dados pequeños. Mezcla con zumo de lima y sal. Reserva."
+      },
+      {
+        "orden": 3,
+        "descripcion": "Guacamole express: aplasta el aguacate con un tenedor, añade zumo de lima, sal y la mitad del cilantro. Mezcla hasta conseguir una textura algo rústica."
+      },
+      {
+        "orden": 4,
+        "descripcion": "Salsa de yogur: mezcla el yogur griego con el resto del curry, zumo de lima y sal. Reserva."
+      },
+      {
+        "orden": 5,
+        "descripcion": "Calienta una sartén o plancha a fuego fuerte. Cocina el pollo 4-5 minutos por cada lado hasta que esté bien dorado y cocinado. Deja reposar 3 minutos."
+      },
+      {
+        "orden": 6,
+        "descripcion": "Corta el pollo en tiras finas o daditos con un cuchillo afilado."
+      },
+      {
+        "orden": 7,
+        "descripcion": "Calienta las tortillas de trigo en la sartén sin aceite, 30 segundos por cada lado, hasta que estén blandas y con manchas tostadas."
+      },
+      {
+        "orden": 8,
+        "descripcion": "Monta los tacos: extiende guacamole en la tortilla, añade el pollo, el pico de gallo, jalapeño al gusto y la salsa de yogur."
+      },
+      {
+        "orden": 9,
+        "descripcion": "Termina con cilantro fresco y un chorro de lima."
+      },
+      {
+        "orden": 10,
+        "descripcion": "Sirve inmediatamente para que las tortillas estén calientes. Pon el relleno en boles en el centro de la mesa para que cada uno se monte el suyo."
+      }
+    ],
+    "tags": [
+      "mexicano",
+      "rápido",
+      "verano",
+      "festivo"
+    ]
+  },
+  {
+    "id": 27,
+    "nombre": "Arroz con Leche",
+    "foto": "arroz_con_leche.jpg",
+    "categoria": "postre",
+    "origen": "España",
+    "tiempo_preparacion_min": 5,
+    "tiempo_coccion_min": 50,
+    "raciones": 6,
+    "dificultad": "fácil",
+    "descripcion": "El postre de las abuelas españolas. Cremoso, perfumado de limón y canela, irresistible.",
+    "ingredientes": [
+      {
+        "ingrediente_id": 124,
+        "nombre": "Arroz blanco",
+        "cantidad": 200,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 102,
+        "nombre": "Leche entera",
+        "cantidad": 1.5,
+        "unidad": "litro"
+      },
+      {
+        "ingrediente_id": 246,
+        "nombre": "Azúcar blanco",
+        "cantidad": 150,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 210,
+        "nombre": "Limón",
+        "cantidad": 100,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 180,
+        "nombre": "Canela en rama",
+        "cantidad": 5,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 179,
+        "nombre": "Canela en polvo",
+        "cantidad": 5,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 106,
+        "nombre": "Mantequilla",
+        "cantidad": 20,
+        "unidad": "gramos"
+      }
+    ],
+    "pasos": [
+      {
+        "orden": 1,
+        "descripcion": "Pela la corteza del limón en tiras largas evitando la parte blanca (amarga). Reserva."
+      },
+      {
+        "orden": 2,
+        "descripcion": "En una olla grande, calienta la leche con la corteza de limón y la canela en rama a fuego medio hasta que esté a punto de hervir. Apaga el fuego y deja infusionar 10 minutos. Retira la corteza y la canela."
+      },
+      {
+        "orden": 3,
+        "descripcion": "Vuelve a calentar la leche infusionada. Cuando esté caliente, añade el arroz."
+      },
+      {
+        "orden": 4,
+        "descripcion": "Cocina a fuego muy suave removiendo con frecuencia durante 40-45 minutos. El arroz debe quedar muy tierno y la mezcla muy cremosa. Si se queda seco, añade más leche caliente."
+      },
+      {
+        "orden": 5,
+        "descripcion": "A mitad de cocción, añade el azúcar y la mantequilla. Remueve bien."
+      },
+      {
+        "orden": 6,
+        "descripcion": "El punto correcto: cuando levantes la cuchara y el arroz caiga despacio y de forma cremosa. Al enfriar espesará más."
+      },
+      {
+        "orden": 7,
+        "descripcion": "Vierte en boles o cuencos individuales. Deja templar y después mete en la nevera al menos 2 horas."
+      },
+      {
+        "orden": 8,
+        "descripcion": "Antes de servir, espolvorea generosamente con canela en polvo por encima. Hay quien hace una rejilla con la canela usando una plantilla."
+      }
+    ],
+    "tags": [
+      "postre",
+      "sin_gluten",
+      "tradicional",
+      "económico",
+      "niños"
+    ]
+  },
+  {
+    "id": 28,
+    "nombre": "Sopa de Tomate con Albahaca",
+    "foto": "sopa_tomate_albahaca.jpg",
+    "categoria": "sopa",
+    "origen": "Internacional",
+    "tiempo_preparacion_min": 10,
+    "tiempo_coccion_min": 30,
+    "raciones": 4,
+    "dificultad": "fácil",
+    "descripcion": "Sopa aterciopelada de tomate con albahaca fresca. Reconfortante, simple y llena de sabor mediterráneo.",
+    "ingredientes": [
+      {
+        "ingrediente_id": 1,
+        "nombre": "Tomate",
+        "cantidad": 800,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 2,
+        "nombre": "Cebolla",
+        "cantidad": 150,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 3,
+        "nombre": "Ajo",
+        "cantidad": 15,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 269,
+        "nombre": "Albahaca fresca",
+        "cantidad": 20,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 196,
+        "nombre": "Caldo de verduras",
+        "cantidad": 0.5,
+        "unidad": "litro"
+      },
+      {
+        "ingrediente_id": 118,
+        "nombre": "Nata para cocinar",
+        "cantidad": 0.1,
+        "unidad": "litro"
+      },
+      {
+        "ingrediente_id": 162,
+        "nombre": "Aceite de oliva virgen extra",
+        "cantidad": 40,
+        "unidad": "ml"
+      },
+      {
+        "ingrediente_id": 246,
+        "nombre": "Azúcar blanco",
+        "cantidad": 8,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 165,
+        "nombre": "Sal fina",
+        "cantidad": 8,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 168,
+        "nombre": "Pimienta negra",
+        "cantidad": 2,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 113,
+        "nombre": "Queso parmesano",
+        "cantidad": 40,
+        "unidad": "gramos"
+      }
+    ],
+    "pasos": [
+      {
+        "orden": 1,
+        "descripcion": "Pela los tomates haciéndoles un corte en cruz en la base, escáldalos 30 segundos en agua hirviendo y pásalos a agua fría. La piel saldrá sola."
+      },
+      {
+        "orden": 2,
+        "descripcion": "Córtalos en cuartos y retira las semillas si quieres una sopa más suave y menos ácida."
+      },
+      {
+        "orden": 3,
+        "descripcion": "Sofríe la cebolla picada en aceite a fuego medio 8 minutos. Añade el ajo y sofríe 2 minutos más."
+      },
+      {
+        "orden": 4,
+        "descripcion": "Añade los tomates, el azúcar, sal y pimienta. Cocina 10 minutos a fuego medio."
+      },
+      {
+        "orden": 5,
+        "descripcion": "Vierte el caldo caliente y añade la mitad de la albahaca. Cocina 10 minutos más."
+      },
+      {
+        "orden": 6,
+        "descripcion": "Tritura completamente con la batidora. Pasa por un colador fino para obtener una crema sedosa."
+      },
+      {
+        "orden": 7,
+        "descripcion": "Devuelve al fuego suave, añade la nata y calienta 2 minutos sin que hierva. Ajusta de sal."
+      },
+      {
+        "orden": 8,
+        "descripcion": "Sirve en boles con un hilo de aceite de oliva, hojas de albahaca fresca y parmesano rallado por encima."
+      }
+    ],
+    "tags": [
+      "vegetariano",
+      "sin_gluten",
+      "rápido",
+      "verano",
+      "mediterráneo"
+    ]
+  },
+  {
+    "id": 29,
+    "nombre": "Berenjenas Rellenas de Carne",
+    "foto": "berenjenas_rellenas_carne.jpg",
+    "categoria": "carne",
+    "origen": "España",
+    "tiempo_preparacion_min": 25,
+    "tiempo_coccion_min": 50,
+    "raciones": 4,
+    "dificultad": "media",
+    "descripcion": "Berenjenas vaciadas, rellenas de carne especiada y gratinadas con bechamel y queso. Un plato completo y vistoso.",
+    "ingredientes": [
+      {
+        "ingrediente_id": 13,
+        "nombre": "Berenjena",
+        "cantidad": 800,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 45,
+        "nombre": "Ternera picada",
+        "cantidad": 400,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 2,
+        "nombre": "Cebolla",
+        "cantidad": 150,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 3,
+        "nombre": "Ajo",
+        "cantidad": 10,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 194,
+        "nombre": "Tomate triturado lata",
+        "cantidad": 200,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 106,
+        "nombre": "Mantequilla",
+        "cantidad": 40,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 137,
+        "nombre": "Harina de trigo",
+        "cantidad": 40,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 102,
+        "nombre": "Leche entera",
+        "cantidad": 0.4,
+        "unidad": "litro"
+      },
+      {
+        "ingrediente_id": 110,
+        "nombre": "Queso rallado",
+        "cantidad": 100,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 162,
+        "nombre": "Aceite de oliva virgen extra",
+        "cantidad": 40,
+        "unidad": "ml"
+      },
+      {
+        "ingrediente_id": 174,
+        "nombre": "Orégano",
+        "cantidad": 4,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 173,
+        "nombre": "Comino",
+        "cantidad": 3,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 186,
+        "nombre": "Nuez moscada",
+        "cantidad": 2,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 165,
+        "nombre": "Sal fina",
+        "cantidad": 10,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 168,
+        "nombre": "Pimienta negra",
+        "cantidad": 3,
+        "unidad": "gramos"
+      }
+    ],
+    "pasos": [
+      {
+        "orden": 1,
+        "descripcion": "Precalienta el horno a 180°C. Corta las berenjenas por la mitad a lo largo y hazles cortes en la pulpa en forma de rejilla sin llegar a la piel."
+      },
+      {
+        "orden": 2,
+        "descripcion": "Pinta las berenjenas con aceite, sala y hornéalas 20 minutos con la pulpa hacia arriba hasta que estén tiernas."
+      },
+      {
+        "orden": 3,
+        "descripcion": "Saca del horno y deja templar. Con una cuchara, vacía la pulpa dejando una pared de 1 cm. Pica la pulpa extraída y reserva."
+      },
+      {
+        "orden": 4,
+        "descripcion": "Sofríe la cebolla y el ajo picados en aceite 8 minutos. Añade la carne picada y dórala bien."
+      },
+      {
+        "orden": 5,
+        "descripcion": "Incorpora la pulpa de berenjena picada, el tomate triturado, orégano, comino, sal y pimienta. Cocina 10 minutos a fuego medio hasta que el relleno esté seco y sabroso."
+      },
+      {
+        "orden": 6,
+        "descripcion": "Prepara una bechamel ligera: derrite la mantequilla, añade la harina, tuéstala y ve añadiendo la leche caliente. Sazona con sal, pimienta y nuez moscada."
+      },
+      {
+        "orden": 7,
+        "descripcion": "Rellena generosamente cada mitad de berenjena con la mezcla de carne."
+      },
+      {
+        "orden": 8,
+        "descripcion": "Cubre con la bechamel y espolvorea con queso rallado."
+      },
+      {
+        "orden": 9,
+        "descripcion": "Gratina en el horno a 200°C durante 15 minutos hasta que estén doradas."
+      },
+      {
+        "orden": 10,
+        "descripcion": "Deja reposar 5 minutos y sirve. Son igual de buenas recalentadas al día siguiente."
+      }
+    ],
+    "tags": [
+      "carne",
+      "horno",
+      "completo",
+      "gratinado"
+    ]
+  },
+  {
+    "id": 30,
+    "nombre": "Hummus Casero",
+    "foto": "hummus_casero.jpg",
+    "categoria": "tapa",
+    "origen": "Oriente Medio",
+    "tiempo_preparacion_min": 15,
+    "tiempo_coccion_min": 0,
+    "raciones": 6,
+    "dificultad": "fácil",
+    "descripcion": "Hummus sedoso y cremoso hecho en casa. Sin conservantes, infinitamente mejor que el del súper.",
+    "ingredientes": [
+      {
+        "ingrediente_id": 151,
+        "nombre": "Garbanzos",
+        "cantidad": 400,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 201,
+        "nombre": "Tahini",
+        "cantidad": 60,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 210,
+        "nombre": "Limón",
+        "cantidad": 100,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 3,
+        "nombre": "Ajo",
+        "cantidad": 8,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 162,
+        "nombre": "Aceite de oliva virgen extra",
+        "cantidad": 50,
+        "unidad": "ml"
+      },
+      {
+        "ingrediente_id": 173,
+        "nombre": "Comino",
+        "cantidad": 4,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 165,
+        "nombre": "Sal fina",
+        "cantidad": 6,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 170,
+        "nombre": "Pimentón dulce",
+        "cantidad": 3,
+        "unidad": "gramos"
+      },
+      {
+        "ingrediente_id": 260,
+        "nombre": "Agua mineral",
+        "cantidad": 0.05,
+        "unidad": "litro"
+      },
+      {
+        "ingrediente_id": 270,
+        "nombre": "Perejil fresco",
+        "cantidad": 10,
+        "unidad": "gramos"
+      }
+    ],
+    "pasos": [
+      {
+        "orden": 1,
+        "descripcion": "Si usas garbanzos de bote, escúrrelos y enjuágalos bien. El truco para un hummus más cremoso: pela los garbanzos uno a uno (sí, da pereza pero marca la diferencia)."
+      },
+      {
+        "orden": 2,
+        "descripcion": "Reserva unos pocos garbanzos enteros para decorar."
+      },
+      {
+        "orden": 3,
+        "descripcion": "En el vaso de la batidora o procesador, pon el tahini y el zumo de limón. Bate 1 minuto hasta que blanquee y espese. Este paso es el secreto del hummus cremoso."
+      },
+      {
+        "orden": 4,
+        "descripcion": "Añade el ajo (crudo da sabor intenso, asado da sabor suave), el comino y la sal. Bate otro minuto."
+      },
+      {
+        "orden": 5,
+        "descripcion": "Incorpora los garbanzos y bate 3-4 minutos. Al principio quedará espeso y granuloso."
+      },
+      {
+        "orden": 6,
+        "descripcion": "Con la batidora en marcha, añade el agua helada poco a poco hasta conseguir la textura deseada: suave y sedosa."
+      },
+      {
+        "orden": 7,
+        "descripcion": "Prueba y ajusta de sal, limón o comino. El hummus debe tener un sabor equilibrado: nítido de limón, fondo de tahini y toque de comino."
+      },
+      {
+        "orden": 8,
+        "descripcion": "Extiende en un plato haciendo un hueco en el centro con el dorso de una cuchara. Vierte aceite de oliva en el hueco."
+      },
+      {
+        "orden": 9,
+        "descripcion": "Decora con los garbanzos reservados, pimentón dulce, un hilo más de aceite y perejil picado."
+      },
+      {
+        "orden": 10,
+        "descripcion": "Sirve con pan de pita, crudités o pan tostado. Se conserva en nevera hasta 5 días."
+      }
+    ],
+    "tags": [
+      "vegano",
+      "sin_gluten",
+      "tapa",
+      "oriente_medio",
+      "sano"
+    ]
   }
 ]
