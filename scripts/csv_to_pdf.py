@@ -1,132 +1,141 @@
 #!/usr/bin/env python3
 
 import csv
+import os
 from datetime import datetime
-from reportlab.lib.pagesizes import letter, A4
+from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak
-from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_JUSTIFY
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak, KeepTogether
+from reportlab.lib.enums import TA_LEFT, TA_CENTER
 from reportlab.lib import colors
 
 def csv_to_pdf(csv_file='issues.csv', pdf_file='issues.pdf'):
     """Convierte CSV de issues a PDF formateado"""
 
+    if not os.path.exists(csv_file):
+        print(f"❌ Error: {csv_file} not found")
+        return
+
     # Crear documento PDF
     doc = SimpleDocTemplate(
         pdf_file,
         pagesize=letter,
-        rightMargin=0.75*inch,
-        leftMargin=0.75*inch,
+        rightMargin=0.5*inch,
+        leftMargin=0.5*inch,
         topMargin=0.75*inch,
         bottomMargin=0.75*inch
     )
 
-    # Contenedor de elementos
     elements = []
-
-    # Estilos
     styles = getSampleStyleSheet()
+
+    # Estilos personalizados
     title_style = ParagraphStyle(
         'CustomTitle',
         parent=styles['Heading1'],
-        fontSize=24,
+        fontSize=20,
         textColor=colors.HexColor('#0366d6'),
-        spaceAfter=30,
+        spaceAfter=12,
         alignment=TA_CENTER
     )
 
-    heading_style = ParagraphStyle(
-        'CustomHeading',
-        parent=styles['Heading2'],
-        fontSize=12,
-        textColor=colors.HexColor('#1f6feb'),
-        spaceAfter=10,
-        spaceBefore=10
-    )
-
-    # Título
-    title = Paragraph("GitHub Issues Report", title_style)
-    elements.append(title)
-
-    # Información del reporte
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    info = Paragraph(f"<b>Generated:</b> {timestamp}", styles['Normal'])
-    elements.append(info)
-    elements.append(Spacer(1, 0.3*inch))
-
-    # Leer CSV y crear tabla
+    # Leer CSV
     issues_data = []
     with open(csv_file, 'r', encoding='utf-8') as f:
         reader = csv.DictReader(f)
-        for row in reader:
-            issues_data.append(row)
+        issues_data = list(reader)
 
-    # Crear tabla con encabezados
-    table_data = [['#', 'Title', 'State', 'Created', 'Comments']]
+    # Título
+    title = Paragraph("📋 GitHub Issues Report", title_style)
+    elements.append(title)
+
+    # Metadatos
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    repo_info = f"<b>Repository:</b> croquetas-coquetas/app<br/><b>Generated:</b> {timestamp}<br/><b>Total Issues:</b> {len(issues_data)}"
+    elements.append(Paragraph(repo_info, styles['Normal']))
+    elements.append(Spacer(1, 0.3*inch))
+
+    # Crear tabla resumen
+    table_data = [['#', 'Title', 'Status', 'Created', 'Comments']]
 
     for issue in issues_data:
         row = [
-            issue.get('number', '')[:5],
-            issue.get('title', '')[:50],
-            issue.get('state', ''),
-            issue.get('created_at', '')[:10],
+            issue.get('number', '')[:4],
+            issue.get('title', '')[:45],
+            issue.get('state', '').upper(),
+            issue.get('created_at', ''),
             issue.get('comments', '0')
         ]
         table_data.append(row)
 
-    # Crear tabla
-    table = Table(table_data, colWidths=[0.5*inch, 3*inch, 0.8*inch, 1*inch, 0.7*inch])
+    # Tabla
+    table = Table(table_data, colWidths=[0.4*inch, 3.2*inch, 0.7*inch, 0.8*inch, 0.6*inch])
 
-    # Estilo de tabla
     table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0366d6')),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
         ('ALIGN', (0, 0), (-1, -1), TA_LEFT),
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 11),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('FONTSIZE', (0, 0), (-1, 0), 10),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#f6f8fa')),
         ('GRID', (0, 0), (-1, -1), 1, colors.grey),
-        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f6f8fa')]),
-        ('FONTSIZE', (0, 1), (-1, -1), 9),
-        ('TOPPADDING', (0, 1), (-1, -1), 8),
-        ('BOTTOMPADDING', (0, 1), (-1, -1), 8),
+        ('FONTSIZE', (0, 1), (-1, -1), 8),
+        ('TOPPADDING', (0, 1), (-1, -1), 6),
+        ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#ffffff')]),
     ]))
 
     elements.append(table)
 
-    # Agregar detalles de cada issue en páginas separadas si hay muchas
-    if len(issues_data) > 10:
+    # Detalles de issues
+    if len(issues_data) > 0:
         elements.append(PageBreak())
-        elements.append(Paragraph("Detailed Issues", heading_style))
+        elements.append(Paragraph("📝 Detailed Issues", styles['Heading2']))
         elements.append(Spacer(1, 0.2*inch))
 
         for idx, issue in enumerate(issues_data):
-            # Título de issue
-            issue_title = Paragraph(
-                f"<b>#{issue.get('number', 'N/A')}: {issue.get('title', 'N/A')}</b>",
-                heading_style
-            )
-            elements.append(issue_title)
+            # Evitar orphans con KeepTogether
+            issue_block = []
+
+            # Título
+            issue_title = f"<b>#{issue.get('number', 'N/A')}: {issue.get('title', 'N/A')}</b>"
+            issue_block.append(Paragraph(issue_title, styles['Heading3']))
 
             # Detalles
             details = f"""
-            <b>State:</b> {issue.get('state', 'N/A')}<br/>
+            <font size=8>
+            <b>Status:</b> {issue.get('state', 'N/A')}<br/>
             <b>Created:</b> {issue.get('created_at', 'N/A')}<br/>
-            <b>Author:</b> {issue.get('user', 'N/A')}<br/>
+            <b>Author:</b> {issue.get('author', 'Unknown')}<br/>
             <b>Comments:</b> {issue.get('comments', '0')}<br/>
-            <b>Body:</b> {issue.get('body', 'No description')[:200]}...
+            </font>
             """
-            elements.append(Paragraph(details, styles['Normal']))
-            elements.append(Spacer(1, 0.2*inch))
+            issue_block.append(Paragraph(details, styles['Normal']))
 
+            # Descripción
+            body = issue.get('body', 'No description')
+            if body and len(body) > 0:
+                body_text = body[:150] + "..." if len(body) > 150 else body
+                issue_block.append(Paragraph(f"<i>{body_text}</i>", styles['Normal']))
+
+            issue_block.append(Spacer(1, 0.15*inch))
+
+            # Agregar bloque con espaciado
+            elements.extend(issue_block)
+
+            # Page break cada 5 issues
             if (idx + 1) % 5 == 0 and idx < len(issues_data) - 1:
                 elements.append(PageBreak())
 
     # Crear PDF
-    doc.build(elements)
-    print(f"✅ PDF generado exitosamente: {pdf_file}")
+    try:
+        doc.build(elements)
+        print(f"✅ PDF generado exitosamente: {pdf_file}")
+        print(f"📊 Issues incluidas: {len(issues_data)}")
+    except Exception as e:
+        print(f"❌ Error al generar PDF: {e}")
 
 if __name__ == "__main__":
     csv_to_pdf()
