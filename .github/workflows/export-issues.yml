@@ -1,0 +1,58 @@
+name: Export Issues to PDF
+
+on:
+  # Ejecutar manualmente desde GitHub UI
+  workflow_dispatch:
+  # Ejecutar diariamente a las 2 AM UTC
+  schedule:
+    - cron: '0 2 * * *'
+  # Ejecutar cuando se cree o modifique una issue
+  issues:
+    types: [opened, edited, closed]
+
+jobs:
+  export-issues:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Export issues to CSV
+        uses: stefanbuck/gh-issues-export@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          format: csv
+          output: issues.csv
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install pandas reportlab
+
+      - name: Convert CSV to PDF
+        run: python scripts/csv_to_pdf.py
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: issues-export
+          path: |
+            issues.csv
+            issues.pdf
+
+      - name: Create Release with PDF
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            issues.pdf
+            issues.csv
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
