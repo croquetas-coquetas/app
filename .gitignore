@@ -90,3 +90,7 @@ dist-ssr
 *.sw?
 issues.csv
 issues.pdf
+
+#pycache
+__pycache__/
+*.pyc
