@@ -1,117 +1,213 @@
-import importlib
-import sys
-from subprocess import check_call
-from pymongo import MongoClient
+import json
+import os
+import random
 from collections import deque
+from copy import deepcopy
+from datetime import date, datetime, timezone
+from pathlib import Path
+from typing import Any
+
+from bson import ObjectId
+from pymongo import MongoClient
+from pymongo.collection import Collection
+from pymongo.errors import PyMongoError
+
+
+class PlanningError(RuntimeError):
+    """Error genérico al construir la planificación semanal."""
+
+
+class InsufficientRecipesError(PlanningError):
+    """No hay suficientes recetas únicas para generar la semana completa."""
+
 
 class API_planificacion:
-    __CONEXION = 'mongodb+srv://dbuser:BJTRyr8OmeGBZTd4@smartcookcluster0.gjtttqf.mongodb.net/'
-    __DIAS_TOTALES = 7
-    __COMIDAS_POR_DIA = 2
-    __UMBRAL_DIAS = 1
+    def __init__(
+        self,
+        connection_uri: str | None = None,
+        db_name: str | None = None,
+        collection_name: str | None = None,
+        recipes_path: str | Path | None = None,
+        dias_totales: int = 7,
+        comidas_por_dia: int = 2,
+        umbral_dias: int = 1,
+        rng: random.Random | None = None,
+    ):
+        self.__DIAS_TOTALES = dias_totales
+        self.__COMIDAS_POR_DIA = comidas_por_dia
+        self.__UMBRAL_DIAS = umbral_dias
+        self.__RNG = rng or random.Random()
 
-    __CLIENT = MongoClient(__CONEXION)
+        self.__CONEXION = connection_uri if connection_uri is not None else os.getenv("MONGODB_URI")
+        self.__DB_NAME = db_name or os.getenv("MONGODB_DB", "smartCook")
+        self.__COLLECTION_NAME = collection_name or os.getenv("MONGODB_COLLECTION", "recetas")
+        self.__RECIPES_PATH = Path(
+            recipes_path
+            or os.getenv("RECETAS_JSON_PATH")
+            or Path(__file__).resolve().parent.parent / "recetas.json"
+        )
 
-    # LUEGO CAMBIAR DE VUELTA
-    __DB = __CLIENT["smartCook"]        # base de datos
-    __RECETAS = __DB["recetas"]         # colección
+        self.__CLIENT: MongoClient | None = None
+        self.__RECETAS: Collection | None = None
+        self.__FUENTE_DATOS = "json"
+        self.__conectar_mongodb_si_esta_configurado()
 
-    def __init__(self):
-        self.__DIAS_TOTALES = 7
-        self.__COMIDAS_POR_DIA = 2
-        self.__UMBRAL_DIAS = 1
+    def __conectar_mongodb_si_esta_configurado(self) -> None:
+        if not self.__CONEXION:
+            return
 
-    def __recetas_suficientes(self):
-        return self.__RECETAS.count_documents({}) >= self.__DIAS_TOTALES * self.__COMIDAS_POR_DIA
-    
-    def __selecciona_siguiente_plato(self, ids_usados: set, elementos_prohibidos: deque) -> map:
+        try:
+            client = MongoClient(self.__CONEXION, serverSelectionTimeoutMS=2000)
+            client.admin.command("ping")
+            self.__CLIENT = client
+            self.__RECETAS = client[self.__DB_NAME][self.__COLLECTION_NAME]
+            self.__FUENTE_DATOS = "mongodb"
+        except PyMongoError:
+            self.__CLIENT = None
+            self.__RECETAS = None
+            self.__FUENTE_DATOS = "json"
+
+    def __carga_recetas(self) -> list[dict[str, Any]]:
+        if self.__RECETAS is not None:
+            try:
+                recetas = list(self.__RECETAS.find({}))
+            except PyMongoError as exc:
+                raise PlanningError("No se pudieron cargar las recetas desde MongoDB.") from exc
+        else:
+            if not self.__RECIPES_PATH.exists():
+                raise PlanningError(
+                    f"No se encontró el fichero de recetas en '{self.__RECIPES_PATH}'."
+                )
+
+            with self.__RECIPES_PATH.open("r", encoding="utf-8") as recipes_file:
+                recetas = json.load(recipes_file)
+
+            if not isinstance(recetas, list):
+                raise PlanningError("El fichero de recetas no contiene una lista válida de recetas.")
+
+        return [self.__normaliza_receta(receta) for receta in recetas]
+
+    def __normaliza_receta(self, receta: dict[str, Any]) -> dict[str, Any]:
+        return self.__to_json_compatible(deepcopy(receta))
+
+    def __to_json_compatible(self, value: Any) -> Any:
+        if isinstance(value, dict):
+            return {key: self.__to_json_compatible(inner_value) for key, inner_value in value.items()}
+        if isinstance(value, list):
+            return [self.__to_json_compatible(item) for item in value]
+        if isinstance(value, tuple):
+            return [self.__to_json_compatible(item) for item in value]
+        if isinstance(value, (datetime, date)):
+            return value.isoformat()
+        if isinstance(value, ObjectId):
+            return str(value)
+        if isinstance(value, (str, int, float, bool)) or value is None:
+            return value
+        return str(value)
+
+    def __recetas_suficientes(self, total_recetas: int) -> bool:
+        return total_recetas >= self.__DIAS_TOTALES * self.__COMIDAS_POR_DIA
+
+    def __identificador_receta(self, receta: dict[str, Any]) -> str:
+        for clave in ("_id", "id", "nombre"):
+            valor = receta.get(clave)
+            if valor is not None:
+                return str(valor)
+
+        return json.dumps(receta, ensure_ascii=False, sort_keys=True)
+
+    def __tag_principal(self, receta: dict[str, Any]) -> str | None:
+        tags = receta.get("tags")
+        if isinstance(tags, list) and tags:
+            return str(tags[0])
+        return None
+
+    def __selecciona_siguiente_plato(
+        self,
+        recetas: list[dict[str, Any]],
+        ids_usados: set[str],
+        elementos_prohibidos: deque[str],
+    ) -> dict[str, Any]:
         """
-        Selecciona el siguiente plato para la planificación teniendo en cuenta las selcciones anteriores.
-
-        Parameters:
-            ids_usados (set): ids de los alimentos usados en la planificación de esta semana.
-            elementos_prohibidos (deque): tags que han sido usados en los dias anteriores.
-        
-        Returns:
-            map: mapa con los datos del plato seleccionado
+        Selecciona el siguiente plato para la planificación teniendo en cuenta las selecciones anteriores.
         """
 
-        # query para seleccionar un plato excluyendo ids ya usados y tags
-        plato_seleccionado = [
-            {
-                "$match": {
-                    "_id": {"$nin": list(ids_usados)},
-                    "tags.0": {"$nin": list(elementos_prohibidos)}
-                }
-            },
-            {
-                "$sample": {"size": 1}
-            }
+        recetas_no_usadas = [
+            receta for receta in recetas if self.__identificador_receta(receta) not in ids_usados
         ]
 
-        resultado = list(self.__RECETAS.aggregate(plato_seleccionado))
+        candidatas = [
+            receta
+            for receta in recetas_no_usadas
+            if (tag_principal := self.__tag_principal(receta)) is None
+            or tag_principal not in elementos_prohibidos
+        ]
 
-        # si no se puede seleccionar con las restricciones de tipos se selecciona un plato cualquiera que no haya sido añadido ya
-        # A LO MEJOR HABRIA QUE COMPROBAR QUE PUEDE HABER SUFICIENTE VARIEDAD ANTES DE HACER EL ALGORITMO
-        if len(resultado) == 0:
-            plato_seleccionado = [
-            {
-                "$match": {
-                    "_id": {"$nin": list(ids_usados)},
-                }
-            },
-            {
-                "$sample": {"size": 1}
-            }
-            ]
-            return list(self.__RECETAS.aggregate(plato_seleccionado))[0]
+        if not candidatas:
+            candidatas = recetas_no_usadas
 
-        return resultado[0]
+        if not candidatas:
+            raise InsufficientRecipesError(
+                "No hay suficientes recetas únicas para planificar la semana completa."
+            )
 
-    def planifica(self) -> map:
+        return deepcopy(self.__RNG.choice(candidatas))
+
+    def planifica(self) -> dict[str, Any]:
         """
-        Genera la planificación semanal teniendo en cuenta las restricciones
-        
+        Genera la planificación semanal teniendo en cuenta las restricciones.
+
         Returns:
-            map: mapa con la planificación semanal completa
+            dict[str, Any]: mapa con la planificación semanal completa y serializable a JSON.
         """
 
-        # prepara las estructuras que se van a usar
-        # conjunto con los ids de platos que se han usado en esta planificacion
-        ids_usados = set()
-        # cola donde se almacenan los tags usados en los alimentos en los UMBRAL_DIAS anteriores
-        elementos_prohibidos = deque()
-        # mapa que almacena la planificación semanal
-        planificacion = {
-            "dias": []
+        recetas = self.__carga_recetas()
+
+        if not self.__recetas_suficientes(len(recetas)):
+            raise InsufficientRecipesError(
+                "No hay suficientes recetas para planificar el menú semanal."
+            )
+
+        ids_usados: set[str] = set()
+        elementos_prohibidos: deque[str] = deque()
+        max_tags_prohibidos = self.__COMIDAS_POR_DIA * self.__UMBRAL_DIAS
+
+        planificacion: dict[str, Any] = {
+            "generado_en": datetime.now(timezone.utc).isoformat(),
+            "fuente_datos": self.__FUENTE_DATOS,
+            "total_recetas_disponibles": len(recetas),
+            "restricciones": {
+                "dias_totales": self.__DIAS_TOTALES,
+                "comidas_por_dia": self.__COMIDAS_POR_DIA,
+                "umbral_dias": self.__UMBRAL_DIAS,
+            },
+            "dias": [],
         }
 
-        # por cada dia de la semana
         for i in range(self.__DIAS_TOTALES):
-            # si hay almacenados tags de mas dias de los que se desea guardar se eliminan los que llevan mas tiempo(comida y cena)
-            if len(elementos_prohibidos) > (self.__COMIDAS_POR_DIA * self.__UMBRAL_DIAS):
-                for j in range(self.__COMIDAS_POR_DIA):
-                    elementos_prohibidos.popleft()
-            
-            # selecciona comida y cena y actualiza las restricciones para el siguiente dia
-            plato_comida = self.__selecciona_siguiente_plato(ids_usados, elementos_prohibidos)
-            ids_usados.add(plato_comida.get("_id"))
-            elementos_prohibidos.append(plato_comida.get("tags")[0])
-            
-            #for elem in plato_comida.get("tags"):
-            #    elementos_prohibidos.append((i + 1, elem))
+            while len(elementos_prohibidos) > max_tags_prohibidos:
+                elementos_prohibidos.popleft()
 
-            plato_cena = self.__selecciona_siguiente_plato(ids_usados, elementos_prohibidos)
-            ids_usados.add(plato_cena.get("_id"))
-            elementos_prohibidos.append(plato_cena.get("tags")[0])
-            
-            #for elem in plato_cena.get("tags"):
-            #    elementos_prohibidos.append((i + 1, elem))
-            
-            dia = {
-                "dia": i + 1,
-                "comida": plato_comida,
-                "cena": plato_cena
-            }
-            planificacion.get("dias").append(dia)   
+            plato_comida = self.__selecciona_siguiente_plato(recetas, ids_usados, elementos_prohibidos)
+            ids_usados.add(self.__identificador_receta(plato_comida))
+
+            tag_comida = self.__tag_principal(plato_comida)
+            if tag_comida is not None:
+                elementos_prohibidos.append(tag_comida)
+
+            plato_cena = self.__selecciona_siguiente_plato(recetas, ids_usados, elementos_prohibidos)
+            ids_usados.add(self.__identificador_receta(plato_cena))
+
+            tag_cena = self.__tag_principal(plato_cena)
+            if tag_cena is not None:
+                elementos_prohibidos.append(tag_cena)
+
+            planificacion["dias"].append(
+                {
+                    "dia": i + 1,
+                    "comida": plato_comida,
+                    "cena": plato_cena,
+                }
+            )
+
         return planificacion
