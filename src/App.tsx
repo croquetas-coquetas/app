@@ -8,8 +8,30 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import "./App.css";
+import {useState} from "react";
+import {fetchPlanification} from "@/lib/api.ts";
+import { toast } from "sonner"
+import {CalendarioPlanificacion} from "@/components/CalendarioPlanificacion.tsx";
+import {Planification} from "@/types/api.ts";
+import {LoaderCircle} from "lucide-react";
 
 function App() {
+
+  const [planification, setPlanification] = useState<Planification | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  function generarPlanificacion() {
+    setLoading(true);
+    fetchPlanification()
+        .then((data) => {
+          setPlanification(data);
+        })
+        .catch((error) => {
+          toast.error("Error al generar la planificación: " + error.message, { position: "top-center" });
+        })
+        .finally(() => setLoading(false));
+  }
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
@@ -28,10 +50,22 @@ function App() {
           </p>
         </CardContent>
         <CardFooter className="flex justify-center gap-4">
-          <Button>Get Started</Button>
-          <Button variant="outline">Learn More</Button>
+          <Button onClick={generarPlanificacion}>Generar planificación</Button>
         </CardFooter>
       </Card>
+
+      {
+        loading && (
+            <div className="flex flex-col items-center mt-6">
+              <p className="mt-4 text-muted-foreground">Generando planificación...</p>
+              <LoaderCircle className="animate-spin mt-2 text-primary" size={24} />
+            </div>
+          )
+      }
+
+      {
+        planification && <CalendarioPlanificacion planification={planification}/>
+      }
     </div>
   );
 }
