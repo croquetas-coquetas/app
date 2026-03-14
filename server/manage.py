@@ -2,10 +2,17 @@
 import os
 import sys
 
+from app import app
+
 
 if __name__ == "__main__":
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
-    from django.core.management import execute_from_command_line
+    # Compatibilidad básica con invocaciones antiguas como: python manage.py runserver
+    if len(sys.argv) > 1 and sys.argv[1] not in {"runserver", ""}:
+        print("Comando no soportado. Usa: python manage.py o python app.py")
+        raise SystemExit(2)
 
-    execute_from_command_line(sys.argv)
+    host = os.getenv("FLASK_HOST", "127.0.0.1")
+    port = int(os.getenv("FLASK_PORT", "8000"))
+    debug = os.getenv("FLASK_DEBUG", "1") == "1"
+    app.run(host=host, port=port, debug=debug)
 

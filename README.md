@@ -2,9 +2,9 @@
 
 Este repositorio contiene el código fuente de SmartCook.
 
-## API REST de planificación semanal con Django
+## API REST de planificación semanal con Flask
 
-El servidor Django dentro de `server/` expone una API JSON para obtener una planificación semanal completa de comidas y cenas.
+El servidor dentro de `server/` usa Flask y expone una API JSON para obtener una planificación semanal completa de comidas y cenas.
 
 ### Puesta en marcha en Windows PowerShell
 
@@ -14,8 +14,13 @@ python -m venv .venv
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 Set-Location .\server
-python manage.py migrate
-python manage.py runserver
+python manage.py
+```
+
+Si prefieres ejecutar Flask directamente:
+
+```powershell
+python app.py
 ```
 
 ### Probar la API
@@ -28,12 +33,12 @@ Invoke-RestMethod http://127.0.0.1:8000/api/planificacion/semanal/
 
 ```powershell
 Set-Location .\server
-python manage.py test
+python -m unittest discover -s . -p "tests.py"
 ```
 
-### Script de consola alternativo
+### Script de consola
 
-También puedes generar una planificación en JSON sin levantar Django:
+También puedes generar una planificación en JSON sin levantar Flask:
 
 ```powershell
 python .\server\planificacion.py

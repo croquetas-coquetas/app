@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from bson import ObjectId
+from dotenv import load_dotenv
 from pymongo import MongoClient
 from pymongo.collection import Collection
 from pymongo.errors import PyMongoError
@@ -33,6 +34,8 @@ class API_planificacion:
         umbral_dias: int = 1,
         rng: random.Random | None = None,
     ):
+        self.__carga_variables_entorno()
+
         self.__DIAS_TOTALES = dias_totales
         self.__COMIDAS_POR_DIA = comidas_por_dia
         self.__UMBRAL_DIAS = umbral_dias
@@ -52,27 +55,49 @@ class API_planificacion:
         self.__FUENTE_DATOS = "json"
         self.__conectar_mongodb_si_esta_configurado()
 
+    def __carga_variables_entorno(self) -> None:
+        candidatos = (
+            Path(__file__).resolve().parent / ".env",
+            Path(__file__).resolve().parent.parent / ".env",
+        )
+
+        for ruta in candidatos:
+            if ruta.exists():
+                load_dotenv(dotenv_path=ruta, override=False)
+
     def __conectar_mongodb_si_esta_configurado(self) -> None:
         if not self.__CONEXION:
             return
 
         try:
-            client = MongoClient(self.__CONEXION, serverSelectionTimeoutMS=2000)
+            timeout_ms = int(os.getenv("MONGODB_TIMEOUT_MS", "8000"))
+            client = MongoClient(self.__CONEXION, serverSelectionTimeoutMS=timeout_ms)
             client.admin.command("ping")
             self.__CLIENT = client
             self.__RECETAS = client[self.__DB_NAME][self.__COLLECTION_NAME]
             self.__FUENTE_DATOS = "mongodb"
-        except PyMongoError:
+        except (PyMongoError, ValueError):
             self.__CLIENT = None
             self.__RECETAS = None
             self.__FUENTE_DATOS = "json"
 
     def __carga_recetas(self) -> list[dict[str, Any]]:
-        if self.__RECETAS is not None:
+        if self.__CONEXION:
+            if self.__RECETAS is None:
+                raise PlanningError(
+                    "Se configuró MONGODB_URI, pero no se pudo conectar a MongoDB. "
+                    "Revisa URI, red y credenciales."
+                )
+
             try:
                 recetas = list(self.__RECETAS.find({}))
             except PyMongoError as exc:
                 raise PlanningError("No se pudieron cargar las recetas desde MongoDB.") from exc
+
+            if not recetas:
+                raise PlanningError(
+                    "MongoDB está conectado pero la colección de recetas está vacía."
+                )
         else:
             if not self.__RECIPES_PATH.exists():
                 raise PlanningError(
@@ -176,11 +201,6 @@ class API_planificacion:
             "generado_en": datetime.now(timezone.utc).isoformat(),
             "fuente_datos": self.__FUENTE_DATOS,
             "total_recetas_disponibles": len(recetas),
-            "restricciones": {
-                "dias_totales": self.__DIAS_TOTALES,
-                "comidas_por_dia": self.__COMIDAS_POR_DIA,
-                "umbral_dias": self.__UMBRAL_DIAS,
-            },
             "dias": [],
         }
 
