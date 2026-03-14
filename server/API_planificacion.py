@@ -204,7 +204,7 @@ class API_planificacion:
 
             planificacion["dias"].append(
                 {
-                    "dia": i + 1,
+                    "dia": datetime.now(timezone.utc).replace(day=datetime.now(timezone.utc).day + i),
                     "comida": plato_comida,
                     "cena": plato_cena,
                 }
