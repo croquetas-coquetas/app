@@ -8,9 +8,8 @@ on:
       - 'public/**'
       - 'index.html'
       - 'package.json'
-      - 'package-lock.json'
+      - 'bun.lock'
       - 'src/package.json'
-      - 'src/package-lock.json'
       - 'vite.config.ts'
       - 'tsconfig.json'
       - 'tsconfig.node.json'
@@ -24,9 +23,8 @@ on:
       - 'public/**'
       - 'index.html'
       - 'package.json'
-      - 'package-lock.json'
+      - 'bun.lock'
       - 'src/package.json'
-      - 'src/package-lock.json'
       - 'vite.config.ts'
       - 'tsconfig.json'
       - 'tsconfig.node.json'
@@ -49,8 +47,11 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: '24'
-          cache: npm
-          cache-dependency-path: package-lock.json
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
 
       - name: Set up Java
         uses: actions/setup-java@v5
@@ -63,17 +64,17 @@ jobs:
             android/gradle/wrapper/gradle-wrapper.properties
 
       - name: Install web dependencies
-        run: npm ci
+        run: bun install --frozen-lockfile
 
       - name: Run web tests
         if: ${{ hashFiles('src/**/*.test.ts', 'src/**/*.test.tsx', 'src/**/*.spec.ts', 'src/**/*.spec.tsx') != '' }}
-        run: npx vitest run
+        run: bunx vitest run
 
       - name: Build web app
-        run: npm run build
+        run: bun run build
 
       - name: Sync Capacitor Android project
-        run: npx cap sync android
+        run: bunx cap sync android
 
       - name: Make Gradle wrapper executable
         run: chmod +x android/gradlew
