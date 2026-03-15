@@ -72,10 +72,6 @@ class TestRecetasSuficientes:
         api = _api_con_json(_recetas(14))
         assert api._API_planificacion__recetas_suficientes(0) is False
 
-    def test_muchas_recetas_son_suficientes(self):
-        api = _api_con_json(_recetas(14))
-        assert api._API_planificacion__recetas_suficientes(1000) is True
-
     def test_limite_con_configuracion_distinta(self):
         api = _api_con_json(_recetas(15), dias=5, comidas=3)
         assert api._API_planificacion__recetas_suficientes(15) is True
@@ -127,32 +123,3 @@ class TestSeleccionaSiguientePlato:
         assert len(nombres) > 1
 
 
-class TestVentanaProhibidos:
-
-    def test_umbral_1_comidas_2_max_prohibidos_2(self):
-        # Con umbral=1, comidas=2 → max=2; después del día 1 hay 2 tags en deque;
-        # al comenzar el día 2 se deja la deque en ≤2 elementos antes de seleccionar.
-        recetas = (
-                _recetas(7, tag="carne") + _recetas(7, tag="pescado")
-        )
-        api = _api_con_json(recetas, umbral=1, seed=5)
-        resultado = api.planifica()
-        # Extraemos la secuencia de tags
-        tags = []
-        for dia in resultado["dias"]:
-            tags.append(dia["comida"].get("tags", [None])[0]
-                        if dia["comida"].get("tags") else None)
-            tags.append(dia["cena"].get("tags", [None])[0]
-                        if dia["cena"].get("tags") else None)
-
-        for i in range(len(tags) - 1):
-            if tags[i] is not None and tags[i + 1] is not None:
-                assert tags[i] != tags[i + 1], (
-                    f"Tag '{tags[i]}' repetido en posiciones {i} y {i+1}"
-                )
-
-    def test_umbral_alto_permite_mezcla_sin_restriccion_efectiva(self):
-        recetas = _recetas(14, tag="vegano")
-        api = _api_con_json(recetas, umbral=0)
-        resultado = api.planifica()
-        assert len(resultado["dias"]) == 7

@@ -36,9 +36,13 @@ export default defineConfig(async () => ({
     },
     proxy: {
         "/api": {
-        target: "http://localhost:8000",
+        target: "https://appapi-ej7h.onrender.com/api/planificacion/semanal/",
         changeOrigin: true,
       },
     },
+      test: {
+          environment: "jsdom",
+          setupFiles: ["@testing-library/jest-dom"],
+      },
   },
 }));

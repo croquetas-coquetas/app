@@ -11,7 +11,7 @@ import {
 import "./App.css";
 
 const STORAGE_KEY = "smartcook_planificacion";
-const API_URL = "/api/planificacion/semanal/";
+const API_URL = "https://appapi-ej7h.onrender.com/api/planificacion/semanal/";
 
 type AppState = "landing" | "generate" | "confirm-overwrite" | "loading" | "success" | "error";
 
@@ -84,7 +84,12 @@ function App() {
   const doGenerate = async () => {
     setAppState("loading");
     try {
-      const res = await fetch(API_URL);
+      const res = await fetch(API_URL, {
+        method: "GET",
+        headers: {
+          "Accept": "application/json",
+        },
+      });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         setErrorMsg(body.error ?? `Error ${res.status}`);
@@ -95,8 +100,9 @@ function App() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
       setPlanificacion(data);
       setAppState("success");
-    } catch {
-      setErrorMsg("No se pudo conectar con el servidor.");
+    } catch(err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setErrorMsg(`No se pudo conectar con el servidor: ${msg}`);
       setAppState("error");
     }
   };

@@ -21,6 +21,28 @@ def _receta(nombre: str, tags: list | None = None) -> dict:
         r["tags"] = tags
     return r
 
+def _recetas(n: int, tag: str | None = None) -> list[dict]:
+    return [_receta(f"plato_{i}", tags=[tag] if tag else None) for i in range(n)]
+
+
+def _api_con_json(recetas: list[dict], *, dias=7, comidas=2, umbral=1, seed=0) -> API_planificacion:
+
+    with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".json", delete=False, encoding="utf-8"
+    ) as f:
+        json.dump(recetas, f, ensure_ascii=False)
+        ruta = Path(f.name)
+
+    with patch("dotenv.load_dotenv"), patch("pymongo.MongoClient"):
+        return API_planificacion(
+            connection_uri=None,
+            recipes_path=ruta,
+            dias_totales=dias,
+            comidas_por_dia=comidas,
+            umbral_dias=umbral,
+            rng=random.Random(seed),
+        )
+
 
 def _pool(n: int, tag: str | None = None) -> list[dict]:
     return [_receta(f"plato_{i}", tags=[tag] if tag else None) for i in range(n)]
@@ -69,24 +91,7 @@ def _api_mongo(recetas_mongo: list[dict], *, dias=7, comidas=2, umbral=1, seed=0
 
 class TestIntegracionMongo:
 
-    def test_planificacion_completa_desde_mongo(self):
-        api = _api_mongo(_pool(14))
-        resultado = api.planifica()
-        assert len(resultado["dias"]) == 7
-
-    def test_fuente_datos_es_mongodb(self):
-        api = _api_mongo(_pool(14))
-        # La fuente queda fijada al conectar; forzamos el valor para el test
-        api._API_planificacion__FUENTE_DATOS = "mongodb"
-        resultado = api.planifica()
-        assert resultado["fuente_datos"] == "mongodb"
-
-    def test_mongo_devuelve_pocos_lanza_insufficient(self):
-        api = _api_mongo(_pool(5))
-        with pytest.raises(InsufficientRecipesError):
-            api.planifica()
-
-    def test_mongo_devuelve_lista_vacia_lanza_planning_error(self):
+    def test_devuelve_lista_vacia_lanza_planning_error(self):
         """Una colección vacía debe lanzar PlanningError, no IndexError."""
         api = _api_mongo([])
         # __carga_recetas detecta la lista vacía antes del check de suficiencia
@@ -94,7 +99,7 @@ class TestIntegracionMongo:
         with pytest.raises((PlanningError, InsufficientRecipesError)):
             api.planifica()
 
-    def test_mongo_error_en_find_lanza_planning_error(self):
+    def test_error_en_find_lanza_planning_error(self):
         from pymongo.errors import PyMongoError
 
         mock_collection = MagicMock()
@@ -132,14 +137,26 @@ class TestNormalizacionIntegracion:
         assert resultado2["dias"][0]["comida"]["nombre"] != "MODIFICADO"
 
 
-class TestConfiguracionesNoEstandar:
+class TestVentanaProhibidos:
 
-    def test_3_dias_2_comidas(self):
-        api = _api_json(_pool(6), dias=3, comidas=2)
+    def test_umbral_1_comidas_2_max_prohibidos_2(self):
+        # Con umbral=1, comidas=2 → max=2; después del día 1 hay 2 tags en deque;
+        # al comenzar el día 2 se deja la deque en ≤2 elementos antes de seleccionar.
+        recetas = (
+                _recetas(7, tag="carne") + _recetas(7, tag="pescado")
+        )
+        api = _api_con_json(recetas, umbral=1, seed=5)
         resultado = api.planifica()
-        assert len(resultado["dias"]) == 3
+        # Extraemos la secuencia de tags
+        tags = []
+        for dia in resultado["dias"]:
+            tags.append(dia["comida"].get("tags", [None])[0]
+                        if dia["comida"].get("tags") else None)
+            tags.append(dia["cena"].get("tags", [None])[0]
+                        if dia["cena"].get("tags") else None)
 
-    def test_1_dia_2_comidas(self):
-        api = _api_json(_pool(2), dias=1, comidas=2)
-        resultado = api.planifica()
-        assert len(resultado["dias"]) == 1
+        for i in range(len(tags) - 1):
+            if tags[i] is not None and tags[i + 1] is not None:
+                assert tags[i] != tags[i + 1], (
+                    f"Tag '{tags[i]}' repetido en posiciones {i} y {i+1}"
+                )

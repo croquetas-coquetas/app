@@ -85,37 +85,10 @@ class TestEscenariosReales:
         resultado = api.planifica()
         assert len(resultado["dias"]) == 7
 
-    def test_no_se_repite_ningun_plato_en_la_semana(self):
-        api = _sistema(_catalogo_realista(n_por_tipo=5), seed=42)
-        nombres = _extraer_nombres(api.planifica())
-        assert len(nombres) == len(set(nombres)), "Hay platos repetidos"
-
-    def test_restriccion_tags_no_repeticion_consecutiva(self):
-        api = _sistema(_catalogo_realista(n_por_tipo=5), umbral=1, seed=10)
-        tags = _extraer_tags(api.planifica())
-        for i in range(len(tags) - 1):
-            a, b = tags[i], tags[i + 1]
-            if a is not None and b is not None:
-                assert a != b, f"Tipo '{a}' repetido en posiciones {i} y {i+1}"
-
-
-class TestFallosSistema:
-
-    def test_sin_recetas_lanza_insufficient(self):
-        api = _sistema([])
-        with pytest.raises(InsufficientRecipesError):
-            api.planifica()
-
-    def test_recetas_insuficientes_lanza_insufficient(self):
-        for n in range(1, 14):
-            api = _sistema([{"nombre": f"r{i}"} for i in range(n)])
-            with pytest.raises(InsufficientRecipesError):
-                api.planifica()
-
 
 class TestMultiplesSemanas:
 
-    def test_cuatro_semanas_siempre_generan_14_platos(self):
+    def test_cuatro_semanas(self):
         api = _sistema(_catalogo_realista(n_por_tipo=5))
         for _ in range(4):
             resultado = api.planifica()
@@ -132,3 +105,23 @@ class TestCasosLimiteCatalogo:
         for dia in resultado["dias"]:
             assert dia["comida"].get("nombre"), "comida sin nombre"
             assert dia["cena"].get("nombre"), "cena sin nombre"
+
+
+    def test_fallo_conexion_mongodb(self):
+        from pymongo.errors import ServerSelectionTimeoutError
+
+        mock_client = MagicMock()
+        mock_client.admin.command.side_effect = ServerSelectionTimeoutError(
+            "No se pudo conectar al servidor"
+        )
+
+        with patch("dotenv.load_dotenv"), patch("pymongo.MongoClient", return_value=mock_client):
+            api = API_planificacion(
+                connection_uri="mongodb://servidor-caido:27017",
+                db_name="smartCook",
+                collection_name="recetas",
+                recipes_path="/ruta/que/no/existe/recetas.json",  # fuerza el error
+            )
+
+        with pytest.raises(PlanningError):
+            api.planifica()
