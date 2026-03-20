@@ -58,7 +58,7 @@ class API_planificacion:
         self.__RECIPES_PATH = Path(
             recipes_path
             or os.getenv("RECETAS_JSON_PATH")
-            or Path(__file__).resolve().parent.parent / "nuevo_recetas.json"
+            or Path(__file__).resolve().parent.parent / "recetas.json"
         )
 
         self.__CLIENT: MongoClient | None = None
@@ -153,16 +153,78 @@ class API_planificacion:
         return json.dumps(receta, ensure_ascii=False, sort_keys=True)
 
     def __tags(self, receta: dict[str, Any]) -> list[str]:
-        """Retorna el tag nutricional principal de la receta para cuotas."""
-        # Usar tag_nutricional_principal si existe (para el algoritmo de cuotas)
-        tag_principal = receta.get("tag_nutricional_principal")
-        if tag_principal:
-            return [tag_principal]
-        # Fallback: usar el primer tag que sea una cuota conocida
-        for tag in receta.get("tags") or []:
-            if tag in CUOTAS:
-                return [tag]
-        return []
+        """
+        Detecta TODOS los tags nutricionales de una receta.
+        Busca en nombre, categoría e ingredientes para identificar
+        múltiples grupos nutricionales (primario y secundarios).
+        
+        Ejemplo: "Berenjenas Rellenas de Carne" → ["carne", "verdura"]
+        """
+        tags_encontrados = set()
+        nombre = receta.get("nombre", "").lower()
+        categoria = receta.get("categoria", "").lower()
+        
+        # Palabras clave para detectar grupos nutricionales (múltiples por grupo)
+        PALABRAS_CLAVE = {
+            "verdura": ["berenjana", "berenjena", "espárrago", "espárragos", "lechuga", "tomate", 
+                       "zanahoria", "cebolla", "pimiento", "calabaza", "espinaca", "col", "brócoli",
+                       "coliflor", "champiñón", "seta", "patata", "papa", "guisante", "calabacín"],
+            "lácteo": ["queso", "leche", "yogur", "nata", "crema", "bechamel", "mantequilla", "helado"],
+            "cereal": ["arroz", "pasta", "pan", "harina", "risotto", "fideos", "harina"],
+            "legumbre": ["lenteja", "garbanza", "alubias", "judía", "alubia", "legumbre", "faba", "garbanzo"],
+            "fruto seco": ["nuez", "almendra", "cacahuete", "pistacho", "avellana", "piñón"],
+            "pescado": ["merluza", "bacalao", "salmón", "trucha", "dorada", "sardina", "anchoa", 
+                       "atún", "pez espada", "lubina", "gamba", "langostino", "camarón", "ostra", 
+                       "mejillón", "almeja", "navaja"],
+            "carne": ["pollo", "pavo", "ternera", "cerdo", "cordero", "jamón", "chorizo", "tocino",
+                     "panceta", "albóndiga", "jamon", "ternera"],
+            "huevo": ["huevo", "tortilla"],
+        }
+        
+        # 1. Buscar por nombre (máxima prioridad)
+        for grupo, palabras in PALABRAS_CLAVE.items():
+            for palabra in palabras:
+                if palabra in nombre:
+                    if grupo in CUOTAS:
+                        tags_encontrados.add(grupo)
+                    break
+        
+        # 2. Buscar en ingredientes (antes de mapear categoría para evitar falsos positivos)
+        ingredientes = receta.get("ingredientes", [])
+        ingredientes_str = " ".join([ing.get("nombre", "").lower() for ing in ingredientes])
+        
+        for grupo, palabras in PALABRAS_CLAVE.items():
+            for palabra in palabras:
+                if palabra in ingredientes_str:
+                    if grupo in CUOTAS:
+                        tags_encontrados.add(grupo)
+                    break
+        
+        # 3. Mapear por categoría (solo si no tenemos tags aún, o para mapeos seguros)
+        MAPEO_CATEGORIA = {
+            "pescado": "pescado",
+            "marisco": "pescado",
+            "carne": "carne",
+            "pollo": "carne",
+            "mexicano": "carne",
+            "huevos": "huevo",
+            "pasta": "cereal",
+            "arroz": "cereal",
+            "legumbre": "legumbre",
+            "guiso": "legumbre",
+            "sopa": "verdura",
+            "ensalada": "verdura",
+            "verdura": "verdura",
+            "postre": "lácteo",
+            "tapa": None,  # No mapear automáticamente, depender de ingredientes
+        }
+        
+        tag_categoria = MAPEO_CATEGORIA.get(categoria)
+        if tag_categoria and tag_categoria in CUOTAS:
+            tags_encontrados.add(tag_categoria)
+        
+        return sorted(list(tags_encontrados)) if tags_encontrados else []
+        
 
     def __selecciona_plato_con_cuotas(
         self,
@@ -211,17 +273,17 @@ class API_planificacion:
         # ahora filtramos según el estado de los grupos
         if urgentes:
             # hay grupos que necesitamos sí o sí, solo pasan recetas
-            # que tengan al menos un tag de esos grupos urgentes
+            # cuyo tag principal esté en los grupos urgentes
             candidatas = [
                 r for r in disponibles
-                if urgentes & set(self.__tags(r))
+                if self.__tags(r) and self.__tags(r)[0] in urgentes
             ]
         else:
-            # no hay urgencia, pero evitamos recetas cuyos TODOS los tags
-            # están bloqueados, si tiene aunque sea uno libre la dejamos pasar
+            # no hay urgencia, pero evitamos recetas cuyo tag principal
+            # esté bloqueado, si tiene uno libre la dejamos pasar
             candidatas = [
                 r for r in disponibles
-                if not set(self.__tags(r)).issubset(bloqueados)
+                if not (self.__tags(r) and self.__tags(r)[0] in bloqueados)
             ]
 
         # si los filtros anteriores dejaron el pool vacío, quitamos restricciones
@@ -230,18 +292,32 @@ class API_planificacion:
             candidatas = disponibles
 
         # puntuamos cada receta candidata según cuánta "deuda nutricional" cubre
-        # una receta que aporta a varios grupos con mucha deuda puntúa más
-        # por ejemplo la paella suma a carne + legumbre + verdura + cereal a la vez
+        # el scoring se basa en TODOS los tags para preferir recetas versátiles
+        # pero respetando que el tag principal no exceda su máximo
         def score(r: dict[str, Any]) -> float:
             total = 0.0
-            for tag in self.__tags(r):
-                if tag in CUOTAS:
-                    ya = conteo.get(tag, 0)
-                    pendiente = CUOTAS[tag]["min"] - ya
-                    # solo sumamos si aún falta, y normalizamos sobre el mínimo
-                    # así un grupo donde me falta el 80% pesa más que uno donde falta el 10%
+            tags = self.__tags(r)
+            
+            # el tag principal (primero) es obligatorio en el scoring
+            if tags:
+                tag_principal = tags[0]
+                if tag_principal in CUOTAS:
+                    ya = conteo.get(tag_principal, 0)
+                    pendiente = CUOTAS[tag_principal]["min"] - ya
                     if pendiente > 0:
-                        total += pendiente / CUOTAS[tag]["min"]
+                        total += pendiente / CUOTAS[tag_principal]["min"]
+                    # si ya llegó al máximo, penalizar bastante pero no prohibir
+                    elif ya >= CUOTAS[tag_principal]["max"]:
+                        total -= 0.5
+                
+                # los tags secundarios (resto) dan bonus si no exceden máximo
+                for tag in tags[1:]:
+                    if tag in CUOTAS:
+                        ya = conteo.get(tag, 0)
+                        pendiente = CUOTAS[tag]["min"] - ya
+                        if pendiente > 0 and ya < CUOTAS[tag]["max"]:
+                            total += (pendiente / CUOTAS[tag]["min"]) * 0.5  # bonus menor
+            
             return total
 
         # nos quedamos solo con las que tienen el score más alto
@@ -301,11 +377,21 @@ class API_planificacion:
                 # añadimos el plato elegido al historial reciente
                 ids_recientes.append(self.__identificador_receta(plato))
 
-                # actualizamos el conteo sumando todos los tags del plato
-                # la lasaña por ejemplo suma 1 a carne, 1 a lácteo y 1 a cereal
-                for tag in self.__tags(plato):
-                    if tag in conteo_ventana:
-                        conteo_ventana[tag] += 1
+                # actualizamos el conteo sumando SOLO el tag principal (el primero)
+                # esto mantiene las restricciones de cuotas originales
+                tags = self.__tags(plato)
+                if tags and tags[0] in conteo_ventana:
+                    conteo_ventana[tags[0]] += 1
+
+                # Actualizar los tags de la receta con los tags nutricionales detectados
+                tags_nutricionales = self.__tags(plato)
+                tags_originales = plato.get("tags", [])
+                # Añadir tags nutricionales al inicio si no están ya
+                tags_finales = list(tags_nutricionales)
+                for tag in tags_originales:
+                    if tag not in tags_finales:
+                        tags_finales.append(tag)
+                plato["tags"] = tags_finales
 
                 dia[turno] = plato
                 plato_k += 1
