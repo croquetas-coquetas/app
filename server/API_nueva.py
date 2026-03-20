@@ -58,7 +58,7 @@ class API_planificacion:
         self.__RECIPES_PATH = Path(
             recipes_path
             or os.getenv("RECETAS_JSON_PATH")
-            or Path(__file__).resolve().parent.parent / "recetas.json"
+            or Path(__file__).resolve().parent.parent / "nuevo_recetas.json"
         )
 
         self.__CLIENT: MongoClient | None = None
@@ -153,7 +153,16 @@ class API_planificacion:
         return json.dumps(receta, ensure_ascii=False, sort_keys=True)
 
     def __tags(self, receta: dict[str, Any]) -> list[str]:
-        return receta.get("tags") or []
+        """Retorna el tag nutricional principal de la receta para cuotas."""
+        # Usar tag_nutricional_principal si existe (para el algoritmo de cuotas)
+        tag_principal = receta.get("tag_nutricional_principal")
+        if tag_principal:
+            return [tag_principal]
+        # Fallback: usar el primer tag que sea una cuota conocida
+        for tag in receta.get("tags") or []:
+            if tag in CUOTAS:
+                return [tag]
+        return []
 
     def __selecciona_plato_con_cuotas(
         self,
