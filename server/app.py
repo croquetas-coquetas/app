@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 
 #from API_planificacion import API_planificacion, InsufficientRecipesError, PlanningError
 from API_nueva import API_planificacion, InsufficientRecipesError, PlanningError
@@ -8,10 +8,15 @@ from API_nueva import API_planificacion, InsufficientRecipesError, PlanningError
 def create_app() -> Flask:
     app = Flask(__name__)
 
-    @app.get("/api/planificacion/semanal/")
+    @app.route("/api/planificacion/semanal/", methods=["GET", "POST"])
     def weekly_planning():
+        dias_previos = None
+        if request.method == "POST" and request.is_json:
+            body = request.get_json(silent=True) or {}
+            dias_previos = body.get("dias_previos") or None
+
         try:
-            planificacion = API_planificacion().planifica()
+            planificacion = API_planificacion().planifica(dias_previos=dias_previos)
         except InsufficientRecipesError as exc:
             return jsonify({"error": str(exc)}), 400
         except PlanningError as exc:

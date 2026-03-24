@@ -3,7 +3,7 @@ import os
 import random
 from collections import deque
 from copy import deepcopy
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -269,10 +269,18 @@ class API_planificacion:
         # entre las mejores elegimos al azar para que no salga siempre lo mismo
         return deepcopy(self.__RNG.choice(candidatas_top))
 
-    def planifica(self) -> dict[str, Any]:
+    def planifica(self, dias_previos: list[dict[str, Any]] | None = None) -> dict[str, Any]:
         """
         Genera la planificación semanal teniendo en cuenta las restricciones
         nutricionales por tags y sin repetir plato en los últimos 14 días.
+
+        Si se proporcionan días previos, los usa para inicializar el historial
+        de platos recientes y el conteo de tags, y los incluye en el resultado
+        (recortando a un máximo de 14 días).
+
+        Args:
+            dias_previos: lista opcional de días generados previamente, cada uno
+                          con claves 'comida' y 'cena' conteniendo los platos.
 
         Returns:
             dict[str, Any]: mapa con la planificación semanal completa y serializable a JSON.
@@ -285,14 +293,27 @@ class API_planificacion:
                 "No hay suficientes recetas para planificar el menú semanal."
             )
 
-        # guardamos los ids de los últimos 28 platos elegidos (14 días x 2 platos)
-        # cuando se llena y añadimos uno nuevo, el más antiguo sale solo
-        # así conseguimos que un plato no se repita en 14 días sin lógica extra
         ids_recientes: deque[str] = deque(maxlen=self.__TOTAL_PLATOS * 2)
-
-        # contador de cuántos platos de cada grupo llevamos en la semana actual
-        # empieza todo a 0 y va creciendo conforme elegimos platos
         conteo_ventana: dict[str, int] = {g: 0 for g in CUOTAS}
+        # ventana deslizante de los últimos 7 días para mantener conteo_ventana
+        ventana_dias: deque[dict[str, Any]] = deque(maxlen=self.__DIAS_TOTALES)
+
+        if dias_previos:
+            # cargamos los identificadores de los platos previos para evitar repetirlos
+            for dia in dias_previos:
+                for turno in ("comida", "cena"):
+                    plato = dia.get(turno)
+                    if plato is not None:
+                        ids_recientes.append(self.__identificador_receta(plato))
+
+            # llenamos la ventana con los últimos 7 días previos y acumulamos sus tags
+            for dia in dias_previos[-self.__DIAS_TOTALES:]:
+                ventana_dias.append(dia)
+                for turno in ("comida", "cena"):
+                    plato = dia.get(turno)
+                    if plato is not None:
+                        for tag in self.__tags_nutricionales(plato):
+                            conteo_ventana[tag] += 1
 
         planificacion: dict[str, Any] = {
             "generado_en": datetime.now(timezone.utc).isoformat(),
@@ -301,14 +322,19 @@ class API_planificacion:
             "dias": [],
         }
 
-        # plato_k es el número de plato que vamos a elegir ahora, del 1 al 14
-        # lo necesitamos para saber cuántos platos quedan y calcular urgencias
         plato_k = 1
         for i in range(self.__DIAS_TOTALES):
+            # si la ventana ya tiene 7 días, el más antiguo sale y restamos sus tags
+            if len(ventana_dias) == self.__DIAS_TOTALES:
+                dia_expulsado = ventana_dias[0]  # será expulsado al hacer append
+                for turno in ("comida", "cena"):
+                    plato = dia_expulsado.get(turno)
+                    if plato is not None:
+                        for tag in self.__tags_nutricionales(plato):
+                            conteo_ventana[tag] -= 1
+
             dia: dict[str, Any] = {
-                "dia": datetime.now(timezone.utc).replace(
-                    day=datetime.now(timezone.utc).day + i
-                ),
+                "dia": (datetime.now(timezone.utc) + timedelta(days=i)).isoformat(),
             }
 
             for turno in ("comida", "cena"):
@@ -316,16 +342,23 @@ class API_planificacion:
                     recetas, ids_recientes, conteo_ventana, plato_k
                 )
 
-                # añadimos el plato elegido al historial reciente
                 ids_recientes.append(self.__identificador_receta(plato))
 
-                # actualizamos el conteo sumando 1 por cada tag nutricional del plato
                 for tag in self.__tags_nutricionales(plato):
                     conteo_ventana[tag] += 1
 
                 dia[turno] = plato
                 plato_k += 1
 
+            # añadimos el nuevo día a la ventana (expulsa el más antiguo si maxlen)
+            ventana_dias.append(dia)
             planificacion["dias"].append(dia)
+
+        if dias_previos:
+            todos_los_dias = list(dias_previos) + planificacion["dias"]
+            max_dias = self.__DIAS_TOTALES * 2
+            if len(todos_los_dias) > max_dias:
+                todos_los_dias = todos_los_dias[-max_dias:]
+            planificacion["dias"] = todos_los_dias
 
         return planificacion

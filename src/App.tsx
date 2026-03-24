@@ -10,7 +10,8 @@ import {
 } from "@/components/ui/card";
 import "./App.css";
 
-const STORAGE_KEY = "smartcook_planificacion";
+const STORAGE_PREFIX = "smartcook_plan_";
+const STORAGE_META = `${STORAGE_PREFIX}meta`;
 const API_URL = "https://appapi-ej7h.onrender.com/api/planificacion/semanal/";
 
 type AppState = "landing" | "generate" | "confirm-overwrite" | "loading" | "success" | "error";
@@ -26,6 +27,13 @@ interface DiaPlanning {
   dia: string;
   comida: Receta;
   cena: Receta;
+}
+
+interface PlanMeta {
+  generado_en?: string;
+  fuente_datos?: string;
+  total_recetas_disponibles?: number;
+  total_dias: number;
 }
 
 interface Planificacion {
@@ -46,13 +54,53 @@ function formatFecha(iso?: string) {
   }
 }
 
+/** Guarda la planificación recibida del backend (ya viene con previos + nuevos, max 14 días) */
+function guardarPlanificacion(data: Planificacion & { fuente_datos?: string; total_recetas_disponibles?: number }) {
+  // Limpiar todas las claves antiguas de planificación
+  const keysToRemove: string[] = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key?.startsWith(STORAGE_PREFIX)) keysToRemove.push(key);
+  }
+  keysToRemove.forEach((k) => localStorage.removeItem(k));
+
+  // Escribir los días tal como vienen del backend
+  data.dias.forEach((dia, i) => {
+    localStorage.setItem(`${STORAGE_PREFIX}dia_${i}`, JSON.stringify(dia));
+  });
+
+  // Actualizar meta
+  const meta: PlanMeta = {
+    generado_en: data.generado_en,
+    fuente_datos: data.fuente_datos,
+    total_recetas_disponibles: data.total_recetas_disponibles,
+    total_dias: data.dias.length,
+  };
+  localStorage.setItem(STORAGE_META, JSON.stringify(meta));
+}
+
+/** Reconstruye la planificación completa desde las claves individuales */
+function cargarPlanificacion(): Planificacion | null {
+  const rawMeta = localStorage.getItem(STORAGE_META);
+  if (!rawMeta) return null;
+  const meta: PlanMeta = JSON.parse(rawMeta);
+
+  const dias: DiaPlanning[] = [];
+  for (let i = 0; i < meta.total_dias; i++) {
+    const rawDia = localStorage.getItem(`${STORAGE_PREFIX}dia_${i}`);
+    if (!rawDia) break;
+    dias.push(JSON.parse(rawDia));
+  }
+  if (dias.length === 0) return null;
+
+  return { generado_en: meta.generado_en, dias };
+}
+
 /** Devuelve la planificación guardada si fue generada hoy, o null si no existe / es de otro día */
 function getPlanificacionHoy(): Planificacion | null {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    const data: Planificacion = JSON.parse(raw);
-    if (!data.generado_en) return null;
+    const data = cargarPlanificacion();
+    if (!data?.generado_en) return null;
     const generado = new Date(data.generado_en);
     const hoy = new Date();
     const mismodia =
@@ -84,11 +132,23 @@ function App() {
   const doGenerate = async () => {
     setAppState("loading");
     try {
+      // Cargar días previos y quedarnos solo con los que ya han pasado (antes de hoy)
+      const planGuardado = cargarPlanificacion();
+      const hoy = new Date();
+      hoy.setHours(0, 0, 0, 0);
+      const diasPrevios = (planGuardado?.dias ?? []).filter((dia) => {
+        const fechaDia = new Date(dia.dia);
+        fechaDia.setHours(0, 0, 0, 0);
+        return fechaDia < hoy;
+      });
+
       const res = await fetch(API_URL, {
-        method: "GET",
+        method: "POST",
         headers: {
+          "Content-Type": "application/json",
           "Accept": "application/json",
         },
+        body: JSON.stringify({ dias_previos: diasPrevios }),
       });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
@@ -97,7 +157,7 @@ function App() {
         return;
       }
       const data: Planificacion = await res.json();
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      guardarPlanificacion(data);
       setPlanificacion(data);
       setAppState("success");
     } catch(err) {
