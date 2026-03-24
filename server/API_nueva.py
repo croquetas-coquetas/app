@@ -171,22 +171,28 @@ class API_planificacion:
         # vamos a clasificar cada grupo nutricional en uno de tres estados:
         # urgente  → si no elegimos de este grupo ahora, no llegaremos al mínimo
         # bloqueado → ya llegamos al máximo, no podemos poner más
-        # libre    → ni urgente ni bloqueado, podemos elegir o no
+        # crítico  → cerca del máximo (> 70% del rango disponible)
+        # libre    → ni urgente ni bloqueado
         urgentes: set[str] = set()
         bloqueados: set[str] = set()
+        criticos: set[str] = set()
 
         for grupo, cuota in CUOTAS.items():
             ya_tengo = conteo.get(grupo, 0)
-            pendiente = cuota["min"] - ya_tengo
+            pendiente_min = cuota["min"] - ya_tengo
+            exceso = ya_tengo - cuota["max"]
 
             # si me faltan tantos platos de este grupo como platos me quedan
             # es imposible cubrirlo si no elijo uno ahora mismo
-            if pendiente > 0 and pendiente >= platos_restantes:
+            if pendiente_min > 0 and pendiente_min >= platos_restantes:
                 urgentes.add(grupo)
 
             # si ya llegué al tope no quiero más de este grupo
             if ya_tengo >= cuota["max"]:
                 bloqueados.add(grupo)
+            # si estoy muy cerca del máximo, es crítico
+            elif ya_tengo > 0.7 * cuota["max"]:
+                criticos.add(grupo)
 
         # quitamos del pool las recetas que hemos puesto en los últimos 14 días
         # para no repetir plato tan pronto
@@ -208,26 +214,52 @@ class API_planificacion:
                 if any(t in urgentes for t in self.__tags_nutricionales(r))
             ]
         else:
-            # sin urgencia: descartamos recetas cuyos TODOS los tags están bloqueados
-            # si tiene aunque sea un tag libre, pasa
+            # sin urgencia: descartamos recetas que excederían máximos
+            # primero: rechazar recetas cualquier tag bloqueado
             candidatas = [
                 r for r in disponibles
-                if not self.__tags_nutricionales(r)
-                or not all(t in bloqueados for t in self.__tags_nutricionales(r))
+                if not any(t in bloqueados for t in self.__tags_nutricionales(r))
             ]
+            
+            # si quedan pocas, permitir críticos pero no bloqueados
+            if not candidatas or len(candidatas) < len(disponibles) / 3:
+                candidatas = [
+                    r for r in disponibles
+                    if not self.__tags_nutricionales(r)
+                    or not all(t in bloqueados for t in self.__tags_nutricionales(r))
+                ]
 
-        # si los filtros dejaron el pool vacío, quitamos restricciones
+        # si los filtros dejaron el pool vacío, quitamos restricciones de bloqueados
+        # pero mantenemos disponibilidad
         if not candidatas:
             candidatas = disponibles
 
-        # puntuamos cada receta según cuánta "deuda nutricional" cubre
+        # puntuamos cada receta de forma más sofisticada
         def score(r: dict[str, Any]) -> float:
-            total = 0.0
+            # Bonus: cuánta "deuda" de mínimos cubre
+            bonus_minimos = 0.0
             for tag in self.__tags_nutricionales(r):
                 ya = conteo.get(tag, 0)
-                pendiente = CUOTAS[tag]["min"] - ya
-                if pendiente > 0:
-                    total += pendiente / CUOTAS[tag]["min"]
+                cuota = CUOTAS[tag]
+                pendiente_min = cuota["min"] - ya
+                if pendiente_min > 0:
+                    bonus_minimos += pendiente_min / cuota["min"]
+            
+            # Penalización: riesgo de exceder máximos
+            penalidad_maximos = 0.0
+            for tag in self.__tags_nutricionales(r):
+                ya = conteo.get(tag, 0)
+                cuota = CUOTAS[tag]
+                # Si ya estamos en max, castigo muy alto
+                if ya >= cuota["max"]:
+                    penalidad_maximos += 10.0
+                # Si estamos cerca del max, castigo proporcional
+                elif ya >= 0.7 * cuota["max"]:
+                    riesgo = (ya - 0.7 * cuota["max"]) / (0.3 * cuota["max"])
+                    penalidad_maximos += 5.0 * riesgo
+            
+            # Puntuación final: bonus (queremos esto) - penalidad (no queremos esto)
+            total = bonus_minimos - penalidad_maximos
             return total
 
         # nos quedamos solo con las que tienen el score más alto

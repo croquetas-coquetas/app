@@ -8991,5 +8991,345 @@
       "Sirve en boles con una generosa cucharada de crème fraîche que no debes remover (el contraste blanco sobre rojo es parte del plato), eneldo fresco picado en abundancia y pimienta negra recién molida."
     ],
     "grupo_principal": "verdura"
+  },
+  {
+    "_id": { "$oid": "69c1b0af16c05d73692ca749" },
+    "nombre": "Hummus tradicional con crudités de zanahoria",
+    "tags": ["legumbre", "fruto seco", "verdura"],
+    "ingredientes": [
+      { "nombre": "Garbanzos", "cantidad": 400 },
+      { "nombre": "Tahini", "cantidad": 60 },
+      { "nombre": "Zanahoria", "cantidad": 300 },
+      { "nombre": "Limón", "cantidad": 40 },
+      { "nombre": "Ajo", "cantidad": 10 },
+      { "nombre": "Aceite de oliva virgen extra", "cantidad": 50 }
+    ],
+    "pasos": [
+      "Tritura los garbanzos cocidos con el tahini, el zumo de limón, el ajo y el aceite hasta obtener una crema fina.",
+      "Corta las zanahorias en bastones (crudités).",
+      "Sirve el hummus en un bol con un chorrito de aceite y las zanahorias al lado para dipear."
+    ],
+    "grupo_principal": "legumbre"
+  },
+  {
+    "_id": { "$oid": "69c1b0af16c05d73692ca750" },
+    "nombre": "Poke Bowl de salmón y edamame",
+    "tags": ["pescado", "cereal", "legumbre", "verdura"],
+    "ingredientes": [
+      { "nombre": "Salmón fresco", "cantidad": 200 },
+      { "nombre": "Arroz blanco", "cantidad": 150 },
+      { "nombre": "Edamame", "cantidad": 100 },
+      { "nombre": "Pepino", "cantidad": 100 },
+      { "nombre": "Aguacate", "cantidad": 100 },
+      { "nombre": "Salsa de soja", "cantidad": 30 }
+    ],
+    "pasos": [
+      "Cuece el arroz y déjalo enfriar.",
+      "Corta el salmón en dados y marínalo en soja.",
+      "Monta el bowl con el arroz de base y añade el resto de ingredientes por secciones."
+    ],
+    "grupo_principal": "pescado"
+  },
+  {
+    "_id": { "$oid": "69c1b0af16c05d73692ca751" },
+    "nombre": "Ensalada César con pollo a la plancha",
+    "tags": ["verdura", "carne", "lácteo", "cereal"],
+    "ingredientes": [
+      { "nombre": "Lechuga", "cantidad": 300 },
+      { "nombre": "Pechuga de pollo", "cantidad": 200 },
+      { "nombre": "Queso parmesano", "cantidad": 50 },
+      { "nombre": "Pan de molde", "cantidad": 60 },
+      { "nombre": "Salsa de soja", "cantidad": 10 }
+    ],
+    "pasos": [
+      "Trocea la lechuga y colócala de base.",
+      "Cocina el pollo a la plancha y córtalo en tiras.",
+      "Tuesta el pan cortado en dados para hacer croutons.",
+      "Mezcla todo y añade las lascas de parmesano."
+    ],
+    "grupo_principal": "verdura"
+  },
+  {
+    "_id": { "$oid": "69c1b0af16c05d73692ca752" },
+    "nombre": "Falafel de garbanzos con salsa de yogur",
+    "tags": ["legumbre", "lácteo", "cereal"],
+    "ingredientes": [
+      { "nombre": "Garbanzos", "cantidad": 300 },
+      { "nombre": "Yogur griego", "cantidad": 125 },
+      { "nombre": "Pan de pita", "cantidad": 100 },
+      { "nombre": "Cebolla", "cantidad": 50 },
+      { "nombre": "Ajo", "cantidad": 10 },
+      { "nombre": "Harina de trigo", "cantidad": 30 }
+    ],
+    "pasos": [
+      "Tritura los garbanzos (remojados, no cocidos) con ajo y cebolla.",
+      "Forma bolas, pásalas por harina y fríelas.",
+      "Sirve con la salsa de yogur y el pan de pita caliente."
+    ],
+    "grupo_principal": "legumbre"
+  },
+  {
+    "_id": { "$oid": "69c1b0af16c05d73692ca753" },
+    "nombre": "Fusilli con pesto de pistachos y calabacín",
+    "tags": ["cereal", "fruto seco", "verdura", "lácteo"],
+    "ingredientes": [
+      { "nombre": "Pasta espagueti", "cantidad": 200 },
+      { "nombre": "Pistachos", "cantidad": 60 },
+      { "nombre": "Calabacín", "cantidad": 200 },
+      { "nombre": "Queso parmesano", "cantidad": 40 },
+      { "nombre": "Aceite de oliva virgen extra", "cantidad": 40 }
+    ],
+    "pasos": [
+      "Cuece la pasta. Tritura los pistachos con aceite y parmesano para el pesto.",
+      "Saltea el calabacín en láminas finas.",
+      "Mezcla la pasta con el pesto y el calabacín."
+    ],
+    "grupo_principal": "cereal"
+  },
+  {
+    "_id": { "$oid": "69c1b0af16c05d73692ca754" },
+    "nombre": "Crema de calabaza con pipas de calabaza",
+    "tags": ["verdura", "fruto seco"],
+    "ingredientes": [
+      { "nombre": "Calabaza", "cantidad": 600 },
+      { "nombre": "Pipas de calabaza", "cantidad": 40 },
+      { "nombre": "Cebolla", "cantidad": 100 },
+      { "nombre": "Caldo de verduras", "cantidad": 400 }
+    ],
+    "pasos": [
+      "Cuece la calabaza y la cebolla en el caldo.",
+      "Tritura hasta obtener una crema fina.",
+      "Sirve con las pipas de calabaza tostadas por encima para el aporte de grasa saludable."
+    ],
+    "grupo_principal": "verdura"
+  },
+  {
+    "_id": { "$oid": "69c1b0af16c05d73692ca755" },
+    "nombre": "Salmorejo cordobés con huevo y jamón",
+    "tags": ["verdura", "cereal", "carne", "huevo"],
+    "ingredientes": [
+      { "nombre": "Tomate", "cantidad": 800 },
+      { "nombre": "Pan de pueblo", "cantidad": 150 },
+      { "nombre": "Aceite de oliva virgen extra", "cantidad": 100 },
+      { "nombre": "Huevo", "cantidad": 60 },
+      { "nombre": "Jamón serrano", "cantidad": 50 }
+    ],
+    "pasos": [
+      "Tritura los tomates con el pan y el aceite hasta emulsionar.",
+      "Cuece el huevo y picalo.",
+      "Sirve el salmorejo muy frío con el huevo y el jamón por encima."
+    ],
+    "grupo_principal": "verdura"
+  },
+  {
+    "_id": { "$oid": "69c1b0af16c05d73692ca756" },
+    "nombre": "Salteado de ternera con brócoli y arroz",
+    "tags": ["carne", "verdura", "cereal"],
+    "ingredientes": [
+      { "nombre": "Filete de ternera", "cantidad": 300 },
+      { "nombre": "Brócoli", "cantidad": 300 },
+      { "nombre": "Arroz blanco", "cantidad": 150 },
+      { "nombre": "Salsa de soja", "cantidad": 30 }
+    ],
+    "pasos": [
+      "Cuece el arroz. Saltea el brócoli al dente.",
+      "Añade la ternera en tiras a fuego fuerte. Integra todo con salsa de soja."
+    ],
+    "grupo_principal": "carne"
+  },
+  {
+    "_id": { "$oid": "69c1b0af16c05d73692ca757" },
+    "nombre": "Canelones de espinacas y ricotta",
+    "tags": ["verdura", "lácteo", "cereal"],
+    "ingredientes": [
+      { "nombre": "Espinacas", "cantidad": 400 },
+      { "nombre": "Queso ricotta", "cantidad": 250 },
+      { "nombre": "Pasta lasaña", "cantidad": 100 },
+      { "nombre": "Leche entera", "cantidad": 200 },
+      { "nombre": "Harina de trigo", "cantidad": 20 }
+    ],
+    "pasos": [
+      "Saltea las espinacas y mézclalas con la ricotta.",
+      "Rellena los canelones. Cubre con una bechamel ligera y hornea."
+    ],
+    "grupo_principal": "verdura"
+  },
+  {
+    "_id": { "$oid": "69c1b0af16c05d73692ca758" },
+    "nombre": "Curry de garbanzos y espinacas",
+    "tags": ["legumbre", "verdura"],
+    "ingredientes": [
+      { "nombre": "Garbanzos", "cantidad": 400 },
+      { "nombre": "Espinacas", "cantidad": 200 },
+      { "nombre": "Leche de coco", "cantidad": 200 },
+      { "nombre": "Curry en polvo", "cantidad": 10 }
+    ],
+    "pasos": [
+      "Sofríe los garbanzos con el curry. Añade la leche de coco y deja reducir.",
+      "Incorpora las espinacas al final hasta que mengüen."
+    ],
+    "grupo_principal": "legumbre"
+  },
+  {
+    "_id": { "$oid": "69d2c1af16c05d73692ca801" },
+    "nombre": "Lentejas con arroz y sofrito de verduras",
+    "tags": ["legumbre", "cereal", "verdura"],
+    "ingredientes": [
+      { "nombre": "Lenteja pardina", "cantidad": 400 },
+      { "nombre": "Arroz bomba", "cantidad": 150 },
+      { "nombre": "Zanahoria", "cantidad": 200 },
+      { "nombre": "Puerro", "cantidad": 150 },
+      { "nombre": "Caldo de verduras", "cantidad": 1000 }
+    ],
+    "pasos": [
+      "Sofríe el puerro y la zanahoria picados.",
+      "Añade las lentejas y el caldo. Cuece 20 minutos.",
+      "Incorpora el arroz y cuece 15 minutos más hasta que ambos estén tiernos."
+    ],
+    "grupo_principal": "legumbre"
+  },
+  {
+    "_id": { "$oid": "69d2c1af16c05d73692ca802" },
+    "nombre": "Salmón con costra de pistacho y puré de guisantes",
+    "tags": ["pescado", "fruto seco", "legumbre"],
+    "ingredientes": [
+      { "nombre": "Salmón fresco", "cantidad": 600 },
+      { "nombre": "Pistachos", "cantidad": 80 },
+      { "nombre": "Guisantes", "cantidad": 300 },
+      { "nombre": "Mantequilla", "cantidad": 30 }
+    ],
+    "pasos": [
+      "Tritura los pistachos y cubre el salmón. Hornea 12 minutos.",
+      "Cuece los guisantes y tritúralos con mantequilla para crear una base cremosa."
+    ],
+    "grupo_principal": "pescado"
+  },
+  {
+    "_id": { "$oid": "69d2c1af16c05d73692ca803" },
+    "nombre": "Tacos de pollo con aguacate y cebolla morada",
+    "tags": ["carne", "cereal", "verdura"],
+    "ingredientes": [
+      { "nombre": "Pechuga de pollo", "cantidad": 500 },
+      { "nombre": "Tortilla de trigo", "cantidad": 200 },
+      { "nombre": "Aguacate", "cantidad": 200 },
+      { "nombre": "Cebolla morada", "cantidad": 100 }
+    ],
+    "pasos": [
+      "Saltea el pollo en tiras con especias.",
+      "Calienta las tortillas y rellena con el pollo, láminas de aguacate y cebolla en juliana."
+    ],
+    "grupo_principal": "carne"
+  },
+  {
+    "_id": { "$oid": "69d2c1af16c05d73692ca804" },
+    "nombre": "Rigatoni con salsa de nueces y espinacas",
+    "tags": ["cereal", "fruto seco", "verdura"],
+    "ingredientes": [
+      { "nombre": "Rigatoni", "cantidad": 400 },
+      { "nombre": "Nueces", "cantidad": 80 },
+      { "nombre": "Espinacas", "cantidad": 300 },
+      { "nombre": "Leche entera", "cantidad": 200 }
+    ],
+    "pasos": [
+      "Tritura las nueces con leche para la salsa.",
+      "Saltea las espinacas, añade la salsa y mezcla con la pasta cocida."
+    ],
+    "grupo_principal": "cereal"
+  },
+  {
+    "_id": { "$oid": "69d2c1af16c05d73692ca805" },
+    "nombre": "Huevos al plato con jamón y guisantes",
+    "tags": ["huevo", "carne", "legumbre"],
+    "ingredientes": [
+      { "nombre": "Huevo", "cantidad": 240 },
+      { "nombre": "Jamón serrano", "cantidad": 150 },
+      { "nombre": "Guisantes", "cantidad": 300 },
+      { "nombre": "Tomate frito", "cantidad": 100 }
+    ],
+    "pasos": [
+      "En una cazuela de barro, pon una base de tomate y guisantes.",
+      "Añade el jamón y casca los huevos encima. Hornea hasta que cuajen."
+    ],
+    "grupo_principal": "huevo"
+  },
+  {
+    "_id": { "$oid": "69d2c1af16c05d73692ca806" },
+    "nombre": "Arroz con conejo y alcachofas",
+    "tags": ["cereal", "carne", "verdura"],
+    "ingredientes": [
+      { "nombre": "Arroz bomba", "cantidad": 400 },
+      { "nombre": "Conejo", "cantidad": 800 },
+      { "nombre": "Alcachofa", "cantidad": 300 },
+      { "nombre": "Caldo de carne", "cantidad": 1000 }
+    ],
+    "pasos": [
+      "Dora el conejo y las alcachofas limpias.",
+      "Añade el arroz, sofríe y cubre con el caldo caliente hasta que se absorba."
+    ],
+    "grupo_principal": "cereal"
+  },
+  {
+    "_id": { "$oid": "69d2c1af16c05d73692ca807" },
+    "nombre": "Ternera salteada con cacahuetes y pimientos",
+    "tags": ["carne", "fruto seco", "verdura"],
+    "ingredientes": [
+      { "nombre": "Filete de ternera", "cantidad": 500 },
+      { "nombre": "Cacahuetes", "cantidad": 80 },
+      { "nombre": "Pimiento rojo", "cantidad": 200 },
+      { "nombre": "Pimiento verde", "cantidad": 150 }
+    ],
+    "pasos": [
+      "Saltea la ternera en tiras a fuego muy alto.",
+      "Añade los pimientos y, al final, los cacahuetes para que mantengan el crujiente."
+    ],
+    "grupo_principal": "carne"
+  },
+  {
+    "_id": { "$oid": "69d2c1af16c05d73692ca808" },
+    "nombre": "Pez espada con pisto de verduras",
+    "tags": ["pescado", "verdura"],
+    "ingredientes": [
+      { "nombre": "Pez espada", "cantidad": 600 },
+      { "nombre": "Berenjena", "cantidad": 200 },
+      { "nombre": "Calabacín", "cantidad": 200 },
+      { "nombre": "Tomate", "cantidad": 200 }
+    ],
+    "pasos": [
+      "Cocina el pisto pochando las verduras lentamente.",
+      "Haz el pez espada a la plancha y sírvelo cubierto por el pisto."
+    ],
+    "grupo_principal": "pescado"
+  },
+  {
+    "_id": { "$oid": "69d2c1af16c05d73692ca809" },
+    "nombre": "Lasaña de berenjena, calabacín y queso feta",
+    "tags": ["cereal", "verdura", "lácteo"],
+    "ingredientes": [
+      { "nombre": "Pasta lasaña", "cantidad": 250 },
+      { "nombre": "Berenjena", "cantidad": 300 },
+      { "nombre": "Calabacín", "cantidad": 300 },
+      { "nombre": "Queso feta", "cantidad": 150 }
+    ],
+    "pasos": [
+      "Monta capas de pasta con láminas de verduras asadas y queso feta desmenuzado.",
+      "Hornea 25 minutos hasta que la pasta esté lista y el queso dorado."
+    ],
+    "grupo_principal": "verdura"
+  },
+  {
+    "_id": { "$oid": "69d2c1af16c05d73692ca810" },
+    "nombre": "Bowl de quinoa con tofu, almendras y brócoli",
+    "tags": ["cereal", "legumbre", "fruto seco", "verdura"],
+    "ingredientes": [
+      { "nombre": "Quinoa", "cantidad": 300 },
+      { "nombre": "Tofu", "cantidad": 300 },
+      { "nombre": "Almendras", "cantidad": 60 },
+      { "nombre": "Brócoli", "cantidad": 200 }
+    ],
+    "pasos": [
+      "Cuece la quinoa y el brócoli al vapor.",
+      "Saltea el tofu en dados con las almendras y mezcla todo en un bowl."
+    ],
+    "grupo_principal": "legumbre"
   }
 ]

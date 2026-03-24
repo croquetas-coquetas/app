@@ -1882,5 +1882,29 @@
     "nombre": "Arroz bomba",
     "categoria": "cereal",
     "unidad": "g"
+  },
+  {
+    "id": 315,
+    "nombre": "Pipas de calabaza",
+    "categoria": "fruto_seco",
+    "unidad": "g"
+  },
+  {
+    "id": 316,
+    "nombre": "Harina de garbanzo",
+    "categoria": "legumbre",
+    "unidad": "g"
+  },
+  {
+    "id": 317,
+    "nombre": "Pistachos",
+    "categoria": "fruto_seco",
+    "unidad": "g"
+  },
+  {
+    "id": 318,
+    "nombre": "Caracoles",
+    "categoria": "carne",
+    "unidad": "g"
   }
 ]
