@@ -171,9 +171,13 @@ class TestSeleccionPlaticonCuotas:
         if tags: assert "carne" not in tags
 
     def test_scoring_segun_deuda_nutricional(self):
-        recetas = [_receta("salmón_con_almendras", tags=["pescado", "fruto seco"]), _receta("solo_pasta", tags=["cereal"])]
+        recetas = [
+            _receta("plato_versatil", tags=["verdura", "pescado"]), 
+            _receta("solo_pasta", tags=["cereal"]) # Sumará score de 1.0
+        ]
         elegidos = [self._m(recetas, deque(maxlen=14), {g: 0 for g in CUOTAS}, 1)["nombre"] for _ in range(10)]
-        assert elegidos.count("salmón_con_almendras") >= 5
+        
+        assert elegidos.count("plato_versatil") == 10
 
     def test_fallback_si_filters_vacios(self):
         recetas = [_receta(f"p{i}") for i in range(5)]
