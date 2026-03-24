@@ -19,7 +19,6 @@ interface Receta {
   nombre?: string;
   name?: string;
   titulo?: string;
-  ingredientes?: { nombre: string; cantidad: number; unidad: string }[];
   [key: string]: unknown;
 }
 
@@ -50,28 +49,6 @@ function formatFechaGenerado(iso?: string) {
   } catch {
     return iso;
   }
-}
-
-function formatUnidad(unidad: string): string {
-  if (!unidad) return 'g';
-  const mappings: { [key: string]: string } = {
-    'gramos': 'g',
-    'mililitros': 'ml',
-    'litros': 'l',
-    'unidad': '',
-    'unidades': '',
-    'cucharada': 'c/s',
-    'cucharadas': 'c/s',
-    'taza': 'taza',
-    'tazas': 'tazas',
-    'pizca': 'pizca',
-    'hoja': 'hoja',
-    'hojas': 'hojas',
-    'g': 'g',
-    'ml': 'ml',
-    'l': 'l',
-  };
-  return mappings[unidad.toLowerCase()] || 'g';
 }
 
 function isToday(iso: string) {
@@ -141,8 +118,6 @@ function DayModal({ dia, onClose }: DayModalProps) {
     month: "long",
   });
   const today = isToday(dia.dia);
-  const [showComidaIngredients, setShowComidaIngredients] = useState(false);
-  const [showCenaIngredients, setShowCenaIngredients] = useState(false);
 
   return (
       // Faux backdrop — contributes layout height so the iframe doesn't collapse
@@ -221,23 +196,6 @@ function DayModal({ dia, onClose }: DayModalProps) {
               🥗 Comida
             </p>
             <p style={{ fontSize: 15, margin: 0, fontWeight: 500 }}>{nombreReceta(dia.comida)}</p>
-            <Button
-              variant="outline"
-              size="sm"
-              className="mt-2"
-              onClick={() => setShowComidaIngredients(!showComidaIngredients)}
-            >
-              {showComidaIngredients ? 'Ocultar ingredientes' : 'Ver ingredientes'}
-            </Button>
-            {showComidaIngredients && dia.comida.ingredientes && (
-              <ul className="mt-2 text-xs text-muted-foreground list-disc list-inside">
-                {(dia.comida.ingredientes as any[]).map((ing, idx) => (
-                  <li key={idx}>
-                    {ing.cantidad || 0} {formatUnidad(ing.unidad || '')} {formatUnidad(ing.unidad || '') ? 'de' : ''} {ing.nombre || 'Ingrediente desconocido'}
-                  </li>
-                ))}
-              </ul>
-            )}
           </div>
 
           {/* Cena */}
@@ -250,23 +208,6 @@ function DayModal({ dia, onClose }: DayModalProps) {
               🌙 Cena
             </p>
             <p style={{ fontSize: 15, margin: 0, fontWeight: 500 }}>{nombreReceta(dia.cena)}</p>
-            <Button
-              variant="outline"
-              size="sm"
-              className="mt-2"
-              onClick={() => setShowCenaIngredients(!showCenaIngredients)}
-            >
-              {showCenaIngredients ? 'Ocultar ingredientes' : 'Ver ingredientes'}
-            </Button>
-            {showCenaIngredients && dia.cena.ingredientes && (
-              <ul className="mt-2 text-xs text-muted-foreground list-disc list-inside">
-                {(dia.cena.ingredientes as any[]).map((ing, idx) => (
-                  <li key={idx}>
-                    {ing.cantidad || 0} {formatUnidad(ing.unidad || '')} {formatUnidad(ing.unidad || '') ? 'de' : ''} {ing.nombre || 'Ingrediente desconocido'}
-                  </li>
-                ))}
-              </ul>
-            )}
           </div>
 
           <Button
