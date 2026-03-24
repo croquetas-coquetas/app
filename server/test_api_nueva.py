@@ -94,36 +94,19 @@ class TestNormalizacionYConversion:
         assert isinstance(receta["_id"], ObjectId)
         assert isinstance(normalizada["_id"], str)
 
-class TestDeteccionTags:
+class TestTagsNutricionales:
     def setup_method(self):
         self.api = _api_bare()
-        self._tags = self.api._API_planificacion__tags
+        self._tags = self.api._API_planificacion__tags_nutricionales
 
-    def test_detecta_por_nombre_prioridad_maxima(self):
-        assert "verdura" in self._tags(_receta("Pasta Berenjenas", categoria="carnes", ingredientes=[{"nombre": "pollo"}]))
+    def test_extrae_tags_validos(self):
+        assert self._tags(_receta("A", tags=["verdura", "carne"])) == ["verdura", "carne"]
 
-    def test_detecta_por_ingredientes(self):
-        assert "pescado" in self._tags(_receta("Plato X", ingredientes=[{"nombre": "merluza"}, {"nombre": "espinaca"}]))
-
-    def test_detecta_por_categoria_mapeo(self):
-        assert "cereal" in self._tags(_receta("Plato", categoria="pasta"))
-
-    def test_multiples_tags_en_receta(self):
-        tags = self._tags(_receta("Salmón con Almendras", ingredientes=[{"nombre": "merluza"}]))
-        assert "pescado" in tags and "fruto seco" in tags
+    def test_ignora_tags_fuera_de_cuotas(self):
+        assert self._tags(_receta("A", tags=["verdura", "inventado"])) == ["verdura"]
 
     def test_sin_tags_retorna_lista_vacia(self):
-        assert self._tags(_receta("Plato genérico")) == []
-
-    def test_tags_ordenados_alfabeticamente(self):
-        tags = self._tags(_receta("Carne con Pescado", ingredientes=[{"nombre": "atún"}]))
-        assert tags == sorted(tags)
-
-    def test_detecta_variantes_de_nombres(self):
-        assert "verdura" in self._tags(_receta("Berenjanas Rellenas"))
-
-    def test_ingredientes_caso_insensible(self):
-        assert "pescado" in self._tags(_receta("Plato", ingredientes=[{"nombre": "MERLUZA"}]))
+        assert self._tags(_receta("A")) == []
 
 class TestSuficienciaRecetas:
     def test_exactamente_en_limite_es_suficiente(self):
@@ -163,20 +146,6 @@ class TestIdentificadorReceta:
 
     def test_usa_json_como_ultimo_recurso(self):
         assert "ingredientes" in self._id({"ingredientes": ["a", "b"]})
-    def test_prefiere_underscore_id(self):
-        # En la API real, _id tiene prioridad sobre id
-        assert self._id({"_id": "oid_val", "id": "id_val", "nombre": "test"}) == "oid_val"
-
-    def test_prefiere_id_si_no_existe_underscore_id(self):
-        assert self._id({"id": "id_val", "nombre": "test"}) == "id_val"
-    def test_prefiere_underscore_id_si_no_existe_id(self):
-        assert self._id({"_id": "oid_val", "nombre": "test"}) == "oid_val"
-
-    def test_usa_nombre_como_fallback(self):
-        assert self._id({"nombre": "nombre_val"}) == "nombre_val"
-
-    def test_usa_json_como_ultimo_recurso(self):
-        assert "ingredientes" in self._id({"ingredientes": ["a", "b"]})
 
 class TestSeleccionPlaticonCuotas:
     def setup_method(self):
@@ -184,25 +153,25 @@ class TestSeleccionPlaticonCuotas:
         self._m = self.api._API_planificacion__selecciona_plato_con_cuotas
 
     def test_excluye_recetas_recientes(self):
-        recetas = [_receta("p0", categoria="pasta"), _receta("p1", categoria="arroz"), _receta("p2", categoria="carne")]
+        recetas = [_receta("p0", tags=["cereal"]), _receta("p1", tags=["cereal"]), _receta("p2", tags=["carne"])]
         assert self._m(recetas, deque(["p0", "p1"], maxlen=14), {g: 0 for g in CUOTAS}, 1)["nombre"] == "p2"
 
     def test_prioriza_grupos_urgentes(self):
-        recetas = [_receta("pollo", categoria="carne"), _receta("pasta", categoria="pasta"), _receta("ensalada", categoria="ensalada")]
+        recetas = [_receta("pollo", tags=["carne"]), _receta("pasta", tags=["cereal"]), _receta("ensalada", tags=["verdura"])]
         conteo = {g: 0 for g in CUOTAS}
         conteo.update({"carne": 1, "cereal": 3, "verdura": 7})
         plato = self._m(recetas, deque(maxlen=14), conteo, 13)
-        assert self.api._API_planificacion__tags(plato)[0] == "carne" or plato["nombre"] == "pollo"
+        assert "carne" in self.api._API_planificacion__tags_nutricionales(plato)
 
     def test_evita_grupos_bloqueados(self):
-        recetas = [_receta("pollo", categoria="carne"), _receta("salmón", categoria="pescado"), _receta("lenteja", categoria="legumbre")]
+        recetas = [_receta("pollo", tags=["carne"]), _receta("salmón", tags=["pescado"]), _receta("lenteja", tags=["legumbre"])]
         conteo = {g: 0 for g in CUOTAS}
         conteo["carne"] = CUOTAS["carne"]["max"]
-        tags = self.api._API_planificacion__tags(self._m(recetas, deque(maxlen=14), conteo, 1))
-        if tags: assert tags[0] != "carne"
+        tags = self.api._API_planificacion__tags_nutricionales(self._m(recetas, deque(maxlen=14), conteo, 1))
+        if tags: assert "carne" not in tags
 
     def test_scoring_segun_deuda_nutricional(self):
-        recetas = [_receta("salmón_con_almendras", categoria="pescado"), _receta("solo_pasta", categoria="pasta")]
+        recetas = [_receta("salmón_con_almendras", tags=["pescado", "fruto seco"]), _receta("solo_pasta", tags=["cereal"])]
         elegidos = [self._m(recetas, deque(maxlen=14), {g: 0 for g in CUOTAS}, 1)["nombre"] for _ in range(10)]
         assert elegidos.count("salmón_con_almendras") >= 5
 
@@ -211,7 +180,7 @@ class TestSeleccionPlaticonCuotas:
         assert self._m(recetas, deque([r["nombre"] for r in recetas], maxlen=15), {g: 0 for g in CUOTAS}, 1) in recetas
 
     def test_selecciona_aleatoriamente_entre_mejores(self):
-        recetas = _recetas(10, categoria="pasta")
+        recetas = _recetas(10, tag="cereal")
         assert len({self._m(recetas, deque(maxlen=14), {g: 0 for g in CUOTAS}, 1)["nombre"] for _ in range(20)}) > 1
 
 class TestPlanificacionCompleta:
@@ -232,41 +201,30 @@ class TestPlanificacionCompleta:
         assert len(nombres) == 14 and len(set(nombres)) == 14
 
     def test_respeta_cuotas_minimas_y_maximas(self):
-        # Creamos recetas para TODOS los grupos de la cuota
-        recetas = _recetas(30, categoria="pasta")  # Cereal
-        recetas += [_receta(f"pollo_{i}", categoria="carne") for i in range(5)]
-        recetas += [_receta(f"salmón_{i}", categoria="pescado") for i in range(5)]
-        recetas += [_receta(f"verdura_{i}", categoria="ensalada") for i in range(5)]
-        recetas += [_receta(f"queso_{i}", categoria="postre") for i in range(5)]  # Lácteo
-        recetas += [_receta(f"lenteja_{i}", categoria="legumbre") for i in range(5)]
-        recetas += [_receta(f"nueces_{i}", ingredientes=[{"nombre": "nuez"}]) for i in range(5)]  # Fruto seco
-        recetas += [_receta(f"tortilla_{i}", categoria="huevos") for i in range(5)]  # Huevo
+        recetas = [_receta(f"mixto_A_{i}", tags=["verdura", "carne"]) for i in range(5)]
+        recetas += [_receta(f"mixto_B_{i}", tags=["pescado", "verdura"]) for i in range(5)]
+        recetas += [_receta(f"mixto_C_{i}", tags=["lácteo", "cereal"]) for i in range(5)]
+        recetas += [_receta(f"mixto_D_{i}", tags=["legumbre", "huevo"]) for i in range(5)]
+        recetas += [_receta(f"mixto_E_{i}", tags=["fruto seco", "cereal"]) for i in range(5)]
         
         plan = _api_con_json(recetas, dias=7, comidas=2).planifica()
         conteo = {g: 0 for g in CUOTAS}
         for dia in plan["dias"]:
             for turno in ("comida", "cena"):
-                tags = dia[turno].get("tags", [])
-                if tags and tags[0] in CUOTAS: conteo[tags[0]] += 1
+                for tag in dia[turno].get("tags", []):
+                    if tag in CUOTAS: conteo[tag] += 1
         
         for grupo, cuota in CUOTAS.items():
             assert cuota["min"] <= conteo.get(grupo, 0) <= cuota["max"]
 
-    def test_añade_tags_a_platos(self):
-        # Pasamos 15 recetas genéricas + 2 específicas para llegar al mínimo de 14
-        recetas = _recetas(15) + [_receta("Pasta", categoria="pasta"), _receta("Pollo", categoria="carne")]
-        plan = _api_con_json(recetas).planifica()
-        for dia in plan["dias"]:
-            for turno in ("comida", "cena"):
-                assert isinstance(dia[turno].get("tags"), list)
     def test_reproducibilidad_con_seed(self):
-        recetas = _recetas(30) + [_receta(f"pollo_{i}", categoria="carne") for i in range(5)] + [_receta(f"salmón_{i}", categoria="pescado") for i in range(5)]
+        recetas = [_receta(f"p_{i}", tags=["carne"]) for i in range(15)]
         plan1 = _api_con_json(recetas, seed=42).planifica()
         plan2 = _api_con_json(recetas, seed=42).planifica()
         assert [d["comida"]["nombre"] for d in plan1["dias"]] == [d["comida"]["nombre"] for d in plan2["dias"]]
 
     def test_diferentes_seeds_producen_diferentes_resultados(self):
-        recetas = _recetas(30) + [_receta(f"pollo_{i}", categoria="carne") for i in range(5)] + [_receta(f"salmón_{i}", categoria="pescado") for i in range(5)]
+        recetas = [_receta(f"p_{i}", tags=["carne"]) for i in range(15)]
         plan1 = _api_con_json(recetas, seed=42).planifica()
         plan2 = _api_con_json(recetas, seed=999).planifica()
         assert [d["comida"]["nombre"] for d in plan1["dias"]] != [d["comida"]["nombre"] for d in plan2["dias"]]
