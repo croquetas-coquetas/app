@@ -1876,5 +1876,11 @@
     "categoria": "verdura",
     "unidad": "g",
     "id": 313
+  },
+  {
+    "id": 314,
+    "nombre": "Arroz bomba",
+    "categoria": "cereal",
+    "unidad": "g"
   }
 ]

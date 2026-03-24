@@ -18,7 +18,7 @@ from API_nueva import API_planificacion, CUOTAS
 # ──────────────────────────────────────────────────────────────────────
 
 # Ruta al JSON de recetas exportado de MongoDB
-RUTA_RECETAS = r"C:\Users\Álvaro\OneDrive\Documentos\CARRERA UCM\4_CUARTO\Segundo-Cuatri_4o\GPS\Proyecto\smartCook.recetas.json"
+RUTA_RECETAS = r"smartCook.recetas.json"
 
 # Cuántas ejecuciones (seeds) quieres probar
 NUM_RUNS = 10000
@@ -204,10 +204,6 @@ def main():
         rango = range(min(vals), max(vals) + 1)
         barra = " ".join(f"{v}:{c.get(v,0)}" for v in rango)
         print(f"  {g:12s}: {barra}")
-
-
-if __name__ == "__main__":
-    main()
 
 
 if __name__ == "__main__":
