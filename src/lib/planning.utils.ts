@@ -1,8 +1,4 @@
-import { Planificacion, Receta } from "@/types/planning";
-
-export function nombreReceta(r: Receta) {
-  return r?.nombre ?? r?.name ?? r?.titulo ?? "-";
-}
+import { Planificacion } from "@/types/planning";
 
 export function formatFechaGenerado(iso?: string) {
   if (!iso) return "-";
