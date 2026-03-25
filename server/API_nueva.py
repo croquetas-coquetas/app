@@ -58,7 +58,7 @@ class API_planificacion:
         self.__RECIPES_PATH = Path(
             recipes_path
             or os.getenv("RECETAS_JSON_PATH")
-            or Path(__file__).resolve().parent.parent / "recetas.json"
+            or Path(__file__).resolve().parent / "datasets" / "smartCook.recetas.json"
         )
 
         self.__CLIENT: MongoClient | None = None

@@ -4,7 +4,7 @@ from collections import deque
 from API_nueva import API_planificacion, CUOTAS
 
 api = API_planificacion(
-    recipes_path="smartCook.recetas.json",
+    recipes_path="datasets/smartCook.recetas.json",
 )
 
 
