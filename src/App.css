@@ -155,3 +155,186 @@
     @apply bg-background text-foreground;
   }
 }
+
+.day-view-root {
+  min-height: 100dvh;
+  width: 100%;
+  overflow: hidden;
+}
+
+.calendar-enter {
+  animation: calendarFadeIn 220ms ease-out;
+}
+
+.day-detail-screen {
+  min-height: 100dvh;
+  width: 100%;
+  max-width: 100%;
+  padding: 1rem 1rem 1.25rem;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.day-detail-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding-top: max(env(safe-area-inset-top), 0.25rem);
+  background: color-mix(in oklab, var(--background) 94%, transparent);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.day-detail-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.day-detail-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.day-detail-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+.day-detail-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  background: var(--color-secondary, #f1f1f1);
+  border-radius: 12px;
+  padding: 0.25rem;
+}
+
+.day-detail-tab {
+  border: none;
+  border-radius: 10px;
+  padding: 0.6rem 0.5rem;
+  background: transparent;
+  color: var(--color-muted-foreground, #7a7a7a);
+  font-size: 0.87rem;
+  font-weight: 600;
+  transition: background-color 170ms ease, color 170ms ease, transform 150ms ease;
+}
+
+.day-detail-tab.active {
+  background: var(--color-background, #fff);
+  color: var(--color-foreground, #111);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.day-detail-card {
+  border: 1px solid var(--color-border, #e6e6e6);
+  border-radius: 14px;
+  background: var(--color-card, #fff);
+  padding: 1rem;
+}
+
+.day-detail-section-label {
+  margin: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-muted-foreground, #7a7a7a);
+  font-weight: 600;
+}
+
+.day-detail-recipe-name {
+  margin: 0.4rem 0 1rem;
+  font-size: 1.2rem;
+  line-height: 1.25;
+}
+
+.day-detail-ingredients-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.day-detail-ingredients-list {
+  margin: 0;
+  padding-left: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.day-detail-ingredient-item {
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.day-detail-empty {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--color-muted-foreground, #7a7a7a);
+}
+
+.day-detail-enter {
+  animation: dayScreenSlideIn 260ms ease-out;
+}
+
+.day-detail-content-enter {
+  animation: dayContentFadeIn 220ms 80ms ease-out both;
+}
+
+@keyframes dayScreenSlideIn {
+  from {
+    transform: translateX(14px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes dayContentFadeIn {
+  from {
+    transform: translateY(8px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes calendarFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .calendar-enter,
+  .day-detail-enter,
+  .day-detail-content-enter {
+    animation: none;
+  }
+
+  .day-detail-tab {
+    transition: none;
+  }
+}

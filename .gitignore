@@ -73,6 +73,7 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+gen/
 node_modules
 dist
 dist-ssr
