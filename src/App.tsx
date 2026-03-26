@@ -32,7 +32,8 @@ function App() {
     } else {
       void doGenerate();
     }
-  };hcutf
+  };
+
   const handleDaySelect = (dia: DiaPlanning) => {
     setSelectedDia(dia);
     setActiveMealTab("comida");
