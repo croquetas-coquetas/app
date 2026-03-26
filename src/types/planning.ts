@@ -7,18 +7,17 @@ export type AppState =
   | "error";
 
 export interface Ingrediente {
-  nombre?: string;
-  cantidad?: number;
+  nombre: string;
+  cantidad: number;
   unidad?: string;
-  [key: string]: unknown;
 }
 
 export interface Receta {
-  nombre?: string;
-  name?: string;
-  titulo?: string;
-  ingredientes?: Ingrediente[];
-  [key: string]: unknown;
+  nombre: string;
+  grupo_principal: string;
+  ingredientes: Ingrediente[];
+  pasos: string[];
+  tags: string[];
 }
 
 export interface DiaPlanning {

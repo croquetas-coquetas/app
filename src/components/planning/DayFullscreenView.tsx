@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { DiaPlanning, Ingrediente, MealTab } from "@/types/planning";
-import { formatUnidad, isToday, nombreReceta } from "@/lib/planning.utils";
+import { formatUnidad, isToday } from "@/lib/planning.utils";
 
 interface DayFullscreenViewProps {
   dia: DiaPlanning;
@@ -55,7 +56,22 @@ export function DayFullscreenView({ dia, activeTab, onTabChange, onBack }: DayFu
 
       <article className="day-detail-card day-detail-content-enter">
         <p className="day-detail-section-label">{activeTab === "comida" ? "Comida" : "Cena"}</p>
-        <h3 className="day-detail-recipe-name">{nombreReceta(recetaActiva)}</h3>
+        <h3 className="day-detail-recipe-name">{recetaActiva.nombre}</h3>
+
+        <div className="day-detail-tags-wrap">
+          <p className="day-detail-section-label">Tags</p>
+          {recetaActiva.tags && recetaActiva.tags.length > 0 ? (
+            <div className="day-detail-tags-list" aria-label="Etiquetas de la receta">
+              {recetaActiva.tags.map((tag, idx) => (
+                <Badge key={`${tag}-${idx}`} variant="secondary">
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          ) : (
+            <p className="day-detail-empty">No hay tags para esta receta.</p>
+          )}
+        </div>
 
         <div className="day-detail-ingredients-wrap">
           <p className="day-detail-section-label">Ingredientes</p>
@@ -72,6 +88,24 @@ export function DayFullscreenView({ dia, activeTab, onTabChange, onBack }: DayFu
             </ul>
           ) : (
             <p className="day-detail-empty">No hay ingredientes disponibles para esta receta.</p>
+          )}
+        </div>
+
+        <div className="day-detail-steps-wrap">
+          <p className="day-detail-section-label">Pasos</p>
+          {recetaActiva.pasos && recetaActiva.pasos.length > 0 ? (
+            <ol className="day-detail-steps-list">
+              {recetaActiva.pasos.map((paso, idx) => (
+                <li key={`${idx}-${paso}`} className="day-detail-step-item p-1">
+                  <Badge variant="outline" className="day-detail-step-badge mr-2">
+                    Paso {idx + 1}
+                  </Badge>
+                  {paso}
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <p className="day-detail-empty">No hay pasos disponibles para esta receta.</p>
           )}
         </div>
       </article>

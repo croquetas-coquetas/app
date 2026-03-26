@@ -261,10 +261,24 @@
   line-height: 1.25;
 }
 
+.day-detail-tags-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.9rem;
+}
+
+.day-detail-tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
 .day-detail-ingredients-wrap {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  margin-bottom: 0.9rem;
 }
 
 .day-detail-ingredients-list {
@@ -284,6 +298,25 @@
   margin: 0;
   font-size: 0.9rem;
   color: var(--color-muted-foreground, #7a7a7a);
+}
+
+.day-detail-steps-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.day-detail-steps-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.day-detail-step-item {
+  font-size: 0.9rem;
+  line-height: 1.45;
 }
 
 .day-detail-enter {

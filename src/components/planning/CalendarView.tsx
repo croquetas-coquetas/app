@@ -5,7 +5,6 @@ import {
   buildCalendarGrid,
   formatFechaGenerado,
   getDayKey,
-  nombreReceta,
 } from "@/lib/planning.utils";
 import { DiaPlanning, Planificacion } from "@/types/planning";
 
@@ -215,7 +214,7 @@ export function CalendarView({ planificacion, onRegenerate, onDaySelect }: Calen
                 style={{
                   fontSize: 12,
                   fontWeight: isTodayCell ? 700 : 400,
-                  color: isTodayCell ? "hsl(var(--primary))" : "var(--color-text-primary, #000)",
+                  color: "var(--color-text-primary, #000)",
                   marginBottom: 3,
                   lineHeight: 1.2,
                 }}
@@ -236,7 +235,7 @@ export function CalendarView({ planificacion, onRegenerate, onDaySelect }: Calen
                       maxWidth: "100%",
                     }}
                   >
-                    🥗 {nombreReceta(planDia.comida)}
+                    🥗 {planDia.comida.nombre}
                   </div>
                   <div
                     style={{
@@ -249,7 +248,7 @@ export function CalendarView({ planificacion, onRegenerate, onDaySelect }: Calen
                       maxWidth: "100%",
                     }}
                   >
-                    🌙 {nombreReceta(planDia.cena)}
+                    🌙 {planDia.cena.nombre}
                   </div>
                 </div>
               )}
