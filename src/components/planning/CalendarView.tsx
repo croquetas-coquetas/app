@@ -1,11 +1,8 @@
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { MONTHS, WEEKDAYS } from "@/lib/planning.constants";
-import {
-  buildCalendarGrid,
-  formatFechaGenerado,
-  getDayKey,
-} from "@/lib/planning.utils";
+import { MONTHS } from "@/lib/planning.constants";
+import { cn } from "@/lib/utils";
+import { formatFechaGenerado, getDayKey, isToday } from "@/lib/planning.utils";
 import { DiaPlanning, Planificacion } from "@/types/planning";
 
 interface CalendarViewProps {
@@ -15,247 +12,181 @@ interface CalendarViewProps {
 }
 
 export function CalendarView({ planificacion, onRegenerate, onDaySelect }: CalendarViewProps) {
-  const today = new Date();
-  const [viewYear, setViewYear] = useState(today.getFullYear());
-  const [viewMonth, setViewMonth] = useState(today.getMonth());
+  const hoy = new Date();
+  const [viewDate, setViewDate] = useState(() => new Date(hoy.getFullYear(), hoy.getMonth(), 1));
+  const listRef = useRef<HTMLDivElement | null>(null);
+  const todayRef = useRef<HTMLButtonElement | null>(null);
 
-  const planMap = new Map<string, DiaPlanning>();
-  for (const dia of planificacion.dias) {
-    planMap.set(getDayKey(dia.dia), dia);
-  }
+  const viewYear = viewDate.getFullYear();
+  const viewMonth = viewDate.getMonth();
 
-  const grid = buildCalendarGrid(viewYear, viewMonth);
+  const planMap = useMemo(() => {
+    const map = new Map<string, DiaPlanning>();
+    for (const dia of planificacion.dias) {
+      map.set(getDayKey(dia.dia), dia);
+    }
+    return map;
+  }, [planificacion.dias]);
+
+  const diasDelMes = useMemo(() => {
+    const cantidadDias = new Date(viewYear, viewMonth + 1, 0).getDate();
+    const dias: Array<{ date: Date; key: string; planDia?: DiaPlanning }> = [];
+    for (let day = 1; day <= cantidadDias; day++) {
+      const date = new Date(viewYear, viewMonth, day);
+      const key = getDayKey(date.toISOString());
+      dias.push({date, key, planDia: planMap.get(key)});
+    }
+    return dias;
+  }, [planMap, viewMonth, viewYear]);
+
+  useEffect(() => {
+    const container = listRef.current;
+    const item = todayRef.current;
+    if (!container) return;
+
+    if (item) {
+      const top = item.offsetTop - container.clientHeight / 2 + item.clientHeight / 2;
+      container.scrollTo({top: Math.max(0, top), behavior: "smooth"});
+      return;
+    }
+
+    container.scrollTo({top: 0, behavior: "smooth"});
+  }, [viewMonth, viewYear]);
 
   const prevMonth = () => {
-    if (viewMonth === 0) {
-      setViewMonth(11);
-      setViewYear((y) => y - 1);
-    } else {
-      setViewMonth((m) => m - 1);
-    }
+    setViewDate((current) => {
+      const prev = new Date(current);
+      prev.setMonth(prev.getMonth() - 1);
+      return new Date(prev.getFullYear(), prev.getMonth(), 1);
+    });
   };
 
   const nextMonth = () => {
-    if (viewMonth === 11) {
-      setViewMonth(0);
-      setViewYear((y) => y + 1);
-    } else {
-      setViewMonth((m) => m + 1);
-    }
-  };
-
-  const goToday = () => {
-    setViewYear(today.getFullYear());
-    setViewMonth(today.getMonth());
+    setViewDate((current) => {
+      const next = new Date(current);
+      next.setMonth(next.getMonth() + 1);
+      return new Date(next.getFullYear(), next.getMonth(), 1);
+    });
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto calendar-enter" style={{ boxSizing: "border-box", padding: "0 2px" }}>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: "1.25rem",
-          flexWrap: "wrap",
-          gap: "0.5rem",
-        }}
-      >
-        <div>
-          <h2 className="text-2xl font-bold text-primary" style={{ margin: 0 }}>
-            Menú de la semana
-          </h2>
-          <p style={{ fontSize: 12, color: "var(--color-text-secondary, #888)", marginTop: 2 }}>
-            Generado el {formatFechaGenerado(planificacion.generado_en)}
-          </p>
-        </div>
-        <Button variant="outline" size="sm" onClick={onRegenerate}>
-          ↺ Regenerar
-        </Button>
-      </div>
-
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: "0.75rem",
-          flexWrap: "wrap",
-          gap: "0.5rem",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <button
-            onClick={prevMonth}
-            style={{
-              background: "none",
-              border: "0.5px solid var(--color-border-tertiary)",
-              borderRadius: 8,
-              padding: "4px 10px",
-              cursor: "pointer",
-              fontSize: 16,
-              color: "var(--color-text-primary, #000)",
-            }}
-          >
-            ‹
-          </button>
-          <span style={{ fontSize: 15, fontWeight: 500, minWidth: 130, textAlign: "center" }}>
-            {MONTHS[viewMonth]} {viewYear}
-          </span>
-          <button
-            onClick={nextMonth}
-            style={{
-              background: "none",
-              border: "0.5px solid var(--color-border-tertiary)",
-              borderRadius: 8,
-              padding: "4px 10px",
-              cursor: "pointer",
-              fontSize: 16,
-              color: "var(--color-text-primary, #000)",
-            }}
-          >
-            ›
-          </button>
-        </div>
-        <button
-          onClick={goToday}
-          style={{
-            background: "none",
-            border: "0.5px solid var(--color-border-tertiary)",
-            borderRadius: 8,
-            padding: "4px 10px",
-            cursor: "pointer",
-            fontSize: 13,
-            color: "var(--color-text-secondary, #888)",
-          }}
-        >
-          Hoy
-        </button>
-      </div>
-
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(7, minmax(0, 1fr))",
-          gap: "3px",
-          width: "100%",
-          boxSizing: "border-box",
-        }}
-      >
-        {WEEKDAYS.map((wd) => (
-          <div
-            key={wd}
-            style={{
-              textAlign: "center",
-              fontSize: 11,
-              fontWeight: 600,
-              letterSpacing: "0.06em",
-              color: "var(--color-text-secondary, #888)",
-              padding: "6px 0",
-              textTransform: "uppercase",
-            }}
-          >
-            {wd}
+      <section
+          className="w-full max-w-3xl mx-auto calendar-enter rounded-2xl border border-border bg-background overflow-hidden">
+        <div className="px-5 pt-7 pb-5 flex items-start justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold tracking-[0.2em] text-muted-foreground uppercase">Planificacion
+              mensual</p>
+            <h2 className="text-2xl font-bold text-foreground mt-1.5 text-balance">
+              Menú del mes
+            </h2>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Generado el {formatFechaGenerado(planificacion.generado_en)}
+            </p>
           </div>
-        ))}
+          <Button variant="outline" size="sm" onClick={onRegenerate} className="shrink-0">
+            ↺ Regenerar
+          </Button>
+        </div>
 
-        {grid.map((day, idx) => {
-          if (day === null) {
-            return <div key={`empty-${idx}`} />;
-          }
+        <div className="px-4 pb-3">
+          <div className="flex items-center justify-between rounded-xl border border-border bg-muted/30 px-2 py-2">
+            <Button variant="ghost" size="icon-sm" onClick={prevMonth} aria-label="Mes anterior">
+              ←
+            </Button>
+            <p className="text-sm font-semibold text-foreground">
+              {MONTHS[viewMonth]} {viewYear}
+            </p>
+            <Button variant="ghost" size="icon-sm" onClick={nextMonth} aria-label="Mes siguiente">
+              →
+            </Button>
+          </div>
+        </div>
 
-          const key = `${viewYear}-${String(viewMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-          const planDia = planMap.get(key);
-          const isTodayCell =
-            day === today.getDate() &&
-            viewMonth === today.getMonth() &&
-            viewYear === today.getFullYear();
-          const hasMenu = !!planDia;
+        <div ref={listRef}
+             className="flex max-h-[70dvh] flex-col gap-px overflow-y-auto border-t border-border bg-background">
+          {diasDelMes.map(({date, key, planDia}) => {
+            const numeroDia = date.getDate();
+            const dayShort = date.toLocaleDateString("es-ES", {weekday: "short"}).replace(".", "");
+            const dayName = date.toLocaleDateString("es-ES", {weekday: "long"});
+            const fechaIso = date.toISOString();
+            const diaActual = isToday(fechaIso);
+            const tieneMenu = !!planDia;
 
-          return (
-            <button
-              key={key}
-              type="button"
-              onClick={() => planDia && onDaySelect(planDia)}
-              style={{
-                borderRadius: 8,
-                border: isTodayCell
-                  ? "2px solid #828282"
-                  : "0.5px solid var(--color-border-tertiary)",
-                background: isTodayCell
-                  ? "var(--color-background-secondary, #f5f5f5)"
-                  : hasMenu
-                    ? "var(--color-background-secondary, #f5f5f5)"
-                    : "var(--color-background-primary, #fcfcfc)",
-                padding: "4px 4px 6px",
-                minHeight: 60,
-                cursor: hasMenu ? "pointer" : "default",
-                transition: "box-shadow 0.15s, transform 0.1s",
-                boxSizing: "border-box",
-                overflow: "hidden",
-                minWidth: 0,
-                textAlign: "left",
-                opacity: hasMenu ? 1 : 0.65,
-              }}
-              disabled={!hasMenu}
-              aria-label={hasMenu ? `Ver detalle del dia ${day}` : `Dia ${day} sin menu`}
-              onMouseEnter={(e) => {
-                if (hasMenu) {
-                  e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.10)";
-                  e.currentTarget.style.transform = "translateY(-1px)";
-                }
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.boxShadow = "none";
-                e.currentTarget.style.transform = "none";
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 12,
-                  fontWeight: isTodayCell ? 700 : 400,
-                  color: "var(--color-text-primary, #000)",
-                  marginBottom: 3,
-                  lineHeight: 1.2,
-                }}
-              >
-                {day}
-              </div>
+            return (
+                <button
+                    key={key}
+                    type="button"
+                    ref={diaActual ? todayRef : null}
+                    onClick={() => planDia && onDaySelect(planDia)}
+                    disabled={!tieneMenu}
+                    aria-label={tieneMenu ? `Ver detalle del ${dayName}` : `${dayName} sin menu asignado`}
+                >
+                  <div className={cn(
+                      "flex gap-4 px-5 py-4 items-stretch text-left transition-colors active:scale-[0.99]",
+                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 bg-background",
+                      diaActual && "border-3",
+                      !tieneMenu && "cursor-default opacity-75 hover:bg-background active:scale-100"
+                  )}>
 
-              {hasMenu && planDia && (
-                <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                  <div
-                    style={{
-                      fontSize: 9,
-                      lineHeight: 1.3,
-                      color: "var(--color-text-secondary, #888)",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                      maxWidth: "100%",
-                    }}
+                    <div className="flex flex-col items-center justify-center w-14 shrink-0">
+                <span
+                    className={cn(
+                        "text-4xl font-black tabular-nums leading-none",
+                        diaActual ? "text-primary" : "text-foreground/80"
+                    )}
+                >
+                  {numeroDia}
+                </span>
+                      <span
+                          className={cn(
+                              "text-[9px] font-bold uppercase tracking-widest mt-1",
+                              diaActual ? "text-primary" : "text-muted-foreground"
+                          )}
+                      >
+                  {dayShort}
+                </span>
+                    </div>
+
+                    <div className={cn("w-px self-stretch rounded-full", diaActual ? "bg-primary/30" : "bg-border")}/>
+
+                    <div className="flex flex-col gap-2.5 flex-1 justify-center min-w-0">
+                      <div className="flex items-center gap-2">
+                  <span
+                      className={cn(
+                          "text-xs font-semibold uppercase tracking-widest",
+                          diaActual ? "text-green-600" : "text-muted-foreground"
+                      )}
                   >
-                    🥗 {planDia.comida.nombre}
+                    {dayName}
+                  </span>
+                        {diaActual && (
+                            <span
+                                className="text-[9px] border border-green-600 text-green-600 px-1.5 rounded-full font-bold uppercase tracking-widest">
+                      Hoy
+                    </span>
+                        )}
+                      </div>
+
+                      <div className="flex flex-col gap-0.5 min-w-0">
+                        <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-orange-400">Comida</span>
+                        <span className="text-sm font-semibold text-foreground leading-tight truncate">
+                    {tieneMenu && planDia ? planDia.comida.nombre : "Sin comida planificada"}
+                  </span>
+                      </div>
+
+                      <div className="flex flex-col gap-0.5 min-w-0">
+                        <span
+                            className="text-[9px] font-bold uppercase tracking-[0.18em] text-blue-400">Cena</span>
+                        <span className="text-sm font-medium text-foreground/80 leading-tight truncate">
+                    {tieneMenu && planDia ? planDia.cena.nombre : "Sin cena planificada"}
+                  </span>
+                      </div>
+                    </div>
                   </div>
-                  <div
-                    style={{
-                      fontSize: 9,
-                      lineHeight: 1.3,
-                      color: "var(--color-text-secondary, #888)",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                      maxWidth: "100%",
-                    }}
-                  >
-                    🌙 {planDia.cena.nombre}
-                  </div>
-                </div>
-              )}
-            </button>
-          );
-        })}
-      </div>
-    </div>
+                </button>
+            );
+          })}
+        </div>
+      </section>
   );
 }
