@@ -18,13 +18,13 @@ from API_nueva import API_planificacion, CUOTAS
 # ──────────────────────────────────────────────────────────────────────
 
 # Ruta al JSON de recetas exportado de MongoDB
-RUTA_RECETAS = r"smartCook.recetas.json"
+RUTA_RECETAS = r"../datasets/smartCook.recetas.json"
 
 # Cuántas ejecuciones (seeds) quieres probar
-NUM_RUNS = 10000
+NUM_RUNS = 100
 
 # Seed inicial (se probarán seeds desde SEED_INICIO hasta SEED_INICIO + NUM_RUNS - 1)
-SEED_INICIO = 0
+SEED_INICIO = 20000
 
 # ¿Mostrar detalle de cada seed? (False para solo mostrar fallos y resumen)
 VERBOSE = True
