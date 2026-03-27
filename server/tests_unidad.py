@@ -5,6 +5,7 @@ from collections import deque
 from copy import deepcopy
 from pathlib import Path
 from unittest.mock import patch, MagicMock
+from datetime import date, datetime, timezone, timedelta
 
 import pytest
 
@@ -121,5 +122,65 @@ class TestSeleccionaSiguientePlato:
         recetas = _recetas(10)
         nombres = {self._m(recetas, set(), deque())["nombre"] for _ in range(30)}
         assert len(nombres) > 1
+
+
+class TestRegeneracionYMemoria:
+    def test_regenera_mitad_de_semana(self):
+        recetas = (
+            [_receta(f"A{i}", ["A"]) for i in range(5)] +
+            [_receta(f"B{i}", ["B"]) for i in range(5)] +
+            [_receta(f"C{i}", ["C"]) for i in range(5)] +
+            [_receta(f"D{i}", ["D"]) for i in range(5)]
+        )
+        api = _api_con_json(recetas, dias=4, seed=42)
+        historial = [
+            {"comida": _receta("hist_A0", ["A"]), "cena": _receta("hist_B0", ["B"])},
+            {"comida": _receta("hist_C0", ["C"]), "cena": _receta("hist_D0", ["D"])},
+            {"comida": _receta("hist_A1", ["A"]), "cena": _receta("hist_B1", ["B"])},
+        ]
+        plan = api.planifica()
+        plan["dias"] = historial + plan["dias"]
+        assert len(plan["dias"]) == 7
+        ids = [api._API_planificacion__identificador_receta(d["comida"]) for d in plan["dias"]] + [api._API_planificacion__identificador_receta(d["cena"]) for d in plan["dias"]]
+        assert len(set(ids)) == len(ids)
+        self._verifica_cuotas(plan["dias"], api)
+
+    def test_planificacion_semana_siguiente_ventanas_deslizantes(self):
+        recetas = (
+            [_receta(f"A{i}", ["A"]) for i in range(5)] +
+            [_receta(f"B{i}", ["B"]) for i in range(5)] +
+            [_receta(f"C{i}", ["C"]) for i in range(5)] +
+            [_receta(f"D{i}", ["D"]) for i in range(5)]
+        )
+        api = _api_con_json(recetas, dias=4, seed=42)
+        historial = [
+            {"comida": _receta("hist_A0", ["A"]), "cena": _receta("hist_B0", ["B"])},
+            {"comida": _receta("hist_C0", ["C"]), "cena": _receta("hist_D0", ["D"])},
+            {"comida": _receta("hist_A1", ["A"]), "cena": _receta("hist_B1", ["B"])},
+            {"comida": _receta("hist_C1", ["C"]), "cena": _receta("hist_D1", ["D"])},
+            {"comida": _receta("hist_A2", ["A"]), "cena": _receta("hist_B2", ["B"])},
+            {"comida": _receta("hist_C2", ["C"]), "cena": _receta("hist_D2", ["D"])},
+            {"comida": _receta("hist_A3", ["A"]), "cena": _receta("hist_B3", ["B"])},
+        ]
+        plan = api.planifica()
+        plan["dias"] = historial + plan["dias"]
+        assert len(plan["dias"]) == 11
+        ids = [api._API_planificacion__identificador_receta(d["comida"]) for d in plan["dias"]] + [api._API_planificacion__identificador_receta(d["cena"]) for d in plan["dias"]]
+        assert len(set(ids)) == len(ids)
+        for i in range(5):
+            ventana = plan["dias"][i:i+7]
+            self._verifica_cuotas(ventana, api)
+
+    def _verifica_cuotas(self, dias, api):
+        from collections import Counter
+        tags = []
+        for d in dias:
+            for comida in ["comida", "cena"]:
+                tag = api._API_planificacion__tag_principal(d[comida])
+                if tag:
+                    tags.append(tag)
+        counts = Counter(tags)
+        for tag, count in counts.items():
+            assert 1 <= count <= 4
 
 
