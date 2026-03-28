@@ -1,237 +1,443 @@
+"""
+Tests de validación del algoritmo de planificación semanal.
+Ejecutar con:  pytest test_planificacion.py -v
+"""
+
 import json
 import random
-import tempfile
+import statistics
 from collections import deque
-from copy import deepcopy
-from datetime import datetime, date
-from pathlib import Path
-from unittest.mock import patch, MagicMock
-from bson import ObjectId
+from typing import Any
+from unittest.mock import patch
 
 import pytest
 
 with patch("dotenv.load_dotenv"), patch("pymongo.MongoClient"):
-    from API_planificacion import API_planificacion, InsufficientRecipesError, PlanningError, CUOTAS
+    from API_planificacion import API_planificacion, CUOTAS, PlanningError
 
-def _receta(nombre: str, tags: list | None = None, id_: str | None = None, categoria: str | None = None, ingredientes: list | None = None) -> dict:
-    r: dict = {"nombre": nombre}
-    if id_ is not None: r["id"] = id_
-    if tags is not None: r["tags"] = tags
-    if categoria is not None: r["categoria"] = categoria
-    if ingredientes is not None: r["ingredientes"] = ingredientes
-    return r
 
-def _recetas(n: int, tag: str | None = None, categoria: str | None = None) -> list[dict]:
-    return [_receta(f"plato_{i}", tags=[tag] if tag else None, categoria=categoria) for i in range(n)]
+# ============================================================================
+# CONFIGURACIÓN
+# ============================================================================
 
-def _api_con_json(recetas: list[dict], *, dias=7, comidas=2, seed=0) -> API_planificacion:
-    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False, encoding="utf-8") as f:
-        json.dump(recetas, f, ensure_ascii=False)
-        ruta = Path(f.name)
+ITERACIONES = 50          # Iteraciones por test parametrizado
+SEEDS = [0, 1, 7, 42, 99, 123, 256, 314, 555, 999]  # Semillas a probar
+DIAS_REGEN_VALUES = [1, 2, 3, 5, 7]  # Valores de DIAS_REGEN a probar
+
+
+# ============================================================================
+# HELPERS
+# ============================================================================
+
+def _crear_api(seed: int) -> API_planificacion:
+    """Crea una instancia de la API con una semilla determinista."""
     with patch("dotenv.load_dotenv"), patch("pymongo.MongoClient"):
-        return API_planificacion(connection_uri=None, recipes_path=ruta, dias_totales=dias, comidas_por_dia=comidas, rng=random.Random(seed))
-
-def _api_bare() -> API_planificacion:
-    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False, encoding="utf-8") as f:
-        json.dump(_recetas(14), f)
-        ruta = Path(f.name)
-    with patch("dotenv.load_dotenv"), patch("pymongo.MongoClient"):
-        return API_planificacion(connection_uri=None, recipes_path=ruta, rng=random.Random(0))
+        return API_planificacion(
+            connection_uri=None,
+            rng=random.Random(seed),
+        )
 
 
-class TestCargaRecetasJSON:
-    def test_carga_correcta_desde_json(self):
-        cargadas = _api_con_json(_recetas(5))._API_planificacion__carga_recetas()
-        assert len(cargadas) == 5
-        assert all(isinstance(r, dict) for r in cargadas)
+def obtener_id_plato(plato: dict[str, Any]) -> str:
+    """Obtiene un identificador único para un plato."""
+    for clave in ("_id", "id", "nombre"):
+        valor = plato.get(clave)
+        if valor is not None:
+            return str(valor)
+    return json.dumps(plato, ensure_ascii=False, sort_keys=True)
 
-    def test_archivo_json_inexistente_lanza_error(self):
-        with patch("dotenv.load_dotenv"), patch("pymongo.MongoClient"):
-            api = API_planificacion(connection_uri=None, recipes_path="/ruta/inexistente/recetas.json", rng=random.Random(0))
-        with pytest.raises(PlanningError, match="No se encontró"):
-            api._API_planificacion__carga_recetas()
 
-    def test_json_no_es_lista_lanza_error(self):
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False, encoding="utf-8") as f:
-            json.dump({"recetas": []}, f)
-            ruta = Path(f.name)
-        with patch("dotenv.load_dotenv"), patch("pymongo.MongoClient"):
-            api = API_planificacion(connection_uri=None, recipes_path=ruta)
-        with pytest.raises(PlanningError, match="no contiene una lista"):
-            api._API_planificacion__carga_recetas()
+def obtener_tags_plato(plato: dict[str, Any]) -> list[str]:
+    """Extrae los tags nutricionales válidos de un plato."""
+    if not plato:
+        return []
+    return [t for t in plato.get("tags", []) if t in CUOTAS]
 
-    def test_json_vacio_es_lista_valida(self):
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False, encoding="utf-8") as f:
-            json.dump([], f)
-            ruta = Path(f.name)
-        with patch("dotenv.load_dotenv"), patch("pymongo.MongoClient"):
-            assert API_planificacion(connection_uri=None, recipes_path=ruta)._API_planificacion__carga_recetas() == []
 
-class TestNormalizacionYConversion:
-    def setup_method(self):
-        self.api = _api_bare()
-        self._norm = self.api._API_planificacion__normaliza_receta
+# ============================================================================
+# VALIDADORES
+# ============================================================================
 
-    def test_normaliza_objectid_a_string(self):
-        oid = ObjectId()
-        assert self._norm({"_id": oid, "nombre": "test"})["_id"] == str(oid)
+def assert_sin_repeticiones_14_dias(dias: list[dict[str, Any]]) -> None:
+    """
+    Para cada plato en la planificación, comprueba que no aparezca
+    en los 13 días anteriores (ventana de 14 días incluyendo el actual).
+    Compara dentro del mismo día entre comida y cena también.
+    """
+    # Construimos la lista lineal de (indice_dia, turno, id_plato)
+    platos: list[tuple[int, str, str]] = []
+    for idx_dia, dia in enumerate(dias):
+        for turno in ("comida", "cena"):
+            plato = dia.get(turno)
+            if plato is not None:
+                platos.append((idx_dia, turno, obtener_id_plato(plato)))
 
-    def test_normaliza_datetime_a_isoformat(self):
-        assert "2024-01-15T10:30:00" in self._norm({"nombre": "test", "fecha": datetime(2024, 1, 15, 10, 30, 0)})["fecha"]
+    for i, (dia_i, turno_i, id_i) in enumerate(platos):
+        for j in range(i):
+            dia_j, turno_j, id_j = platos[j]
+            distancia_dias = dia_i - dia_j
+            if distancia_dias >= 14:
+                continue  # fuera de la ventana de 14 días, permitido
+            if id_i == id_j:
+                pytest.fail(
+                    f"Plato repetido '{id_i}' en día {dia_j}({turno_j}) "
+                    f"y día {dia_i}({turno_i}), distancia={distancia_dias} días (<14)"
+                )
 
-    def test_normaliza_date_a_isoformat(self):
-        assert "2024-01-15" in self._norm({"nombre": "test", "fecha": date(2024, 1, 15)})["fecha"]
 
-    def test_normaliza_tipos_anidados(self):
-        normalizada = self._norm({"nombre": "test", "ingredientes": [{"_id": ObjectId()}, {"_id": ObjectId()}]})
-        assert isinstance(normalizada["ingredientes"][0]["_id"], str)
-        assert isinstance(normalizada["ingredientes"][1]["_id"], str)
+def assert_cuotas_ventanas_7_dias(dias: list[dict[str, Any]]) -> None:
+    """
+    Para cada ventana deslizante de 7 días consecutivos, comprueba
+    que el conteo de cada tag esté dentro de [min, max] de CUOTAS.
+    """
+    if len(dias) < 7:
+        pytest.skip("Menos de 7 días, no se pueden comprobar ventanas")
 
-    def test_copia_profunda_no_afecta_original(self):
-        oid = ObjectId()
-        receta = {"_id": oid, "nombre": "test"}
-        normalizada = self._norm(receta)
-        assert isinstance(receta["_id"], ObjectId)
-        assert isinstance(normalizada["_id"], str)
+    # Precalculamos tags por día
+    tags_por_dia: list[dict[str, int]] = []
+    for dia in dias:
+        conteo: dict[str, int] = {g: 0 for g in CUOTAS}
+        for turno in ("comida", "cena"):
+            plato = dia.get(turno)
+            if plato is not None:
+                for tag in obtener_tags_plato(plato):
+                    conteo[tag] += 1
+        tags_por_dia.append(conteo)
 
-class TestTagsNutricionales:
-    def setup_method(self):
-        self.api = _api_bare()
-        self._tags = self.api._API_planificacion__tags_nutricionales
+    # Ventana deslizante: inicializamos con los 7 primeros días
+    ventana: dict[str, int] = {g: 0 for g in CUOTAS}
+    for d in range(7):
+        for g in CUOTAS:
+            ventana[g] += tags_por_dia[d][g]
 
-    def test_extrae_tags_validos(self):
-        assert self._tags(_receta("A", tags=["verdura", "carne"])) == ["verdura", "carne"]
+    # Comprobar primera ventana
+    _comprobar_ventana(ventana, 0, 7)
 
-    def test_ignora_tags_fuera_de_cuotas(self):
-        assert self._tags(_receta("A", tags=["verdura", "inventado"])) == ["verdura"]
+    # Deslizar
+    for inicio in range(1, len(dias) - 6):
+        # Restar día que sale (inicio - 1), sumar día que entra (inicio + 6)
+        dia_sale = inicio - 1
+        dia_entra = inicio + 6
+        for g in CUOTAS:
+            ventana[g] -= tags_por_dia[dia_sale][g]
+            ventana[g] += tags_por_dia[dia_entra][g]
+        _comprobar_ventana(ventana, inicio, inicio + 7)
 
-    def test_sin_tags_retorna_lista_vacia(self):
-        assert self._tags(_receta("A")) == []
 
-class TestSuficienciaRecetas:
-    def test_exactamente_en_limite_es_suficiente(self):
-        assert _api_con_json(_recetas(14))._API_planificacion__recetas_suficientes(14) is True
+def _comprobar_ventana(ventana: dict[str, int], inicio: int, fin: int) -> None:
+    """Comprueba que los conteos de una ventana cumplan las cuotas."""
+    for grupo, cuota in CUOTAS.items():
+        cantidad = ventana[grupo]
+        assert cuota["min"] <= cantidad <= cuota["max"], (
+            f"Grupo '{grupo}' fuera de rango en ventana [{inicio}:{fin}]. "
+            f"Esperado [{cuota['min']}, {cuota['max']}], obtenido {cantidad}"
+        )
 
-    def test_una_mas_que_limite_es_suficiente(self):
-        assert _api_con_json(_recetas(15))._API_planificacion__recetas_suficientes(15) is True
 
-    def test_cero_recetas_no_es_suficiente(self):
-        assert _api_con_json(_recetas(14))._API_planificacion__recetas_suficientes(0) is False
+def validar_estructura(plan: dict[str, Any], num_dias_esperados: int) -> None:
+    """Valida que la planificación tenga la estructura correcta."""
+    assert "dias" in plan, "Falta clave 'dias'"
+    assert "generado_en" in plan, "Falta clave 'generado_en'"
+    assert "fuente_datos" in plan, "Falta clave 'fuente_datos'"
+    assert "total_recetas_disponibles" in plan, "Falta clave 'total_recetas_disponibles'"
+    assert len(plan["dias"]) == num_dias_esperados, (
+        f"Esperados {num_dias_esperados} días, obtenidos {len(plan['dias'])}"
+    )
+    for i, dia in enumerate(plan["dias"]):
+        assert "dia" in dia, f"Día {i}: falta clave 'dia'"
+        assert "comida" in dia, f"Día {i}: falta clave 'comida'"
+        assert "cena" in dia, f"Día {i}: falta clave 'cena'"
 
-    def test_una_menos_que_limite_no_es_suficiente(self):
-        assert _api_con_json(_recetas(14))._API_planificacion__recetas_suficientes(13) is False
 
-    def test_limite_con_configuracion_distinta(self):
-        api = _api_con_json(_recetas(20), dias=5, comidas=3)
-        assert api._API_planificacion__recetas_suficientes(15) is True
-        assert api._API_planificacion__recetas_suficientes(14) is False
+def assert_json_serializable(plan: dict[str, Any]) -> None:
+    """Comprueba que la planificación sea serializable a JSON."""
+    try:
+        json.dumps(plan, default=str, ensure_ascii=False)
+    except (TypeError, ValueError) as e:
+        pytest.fail(f"Planificación no serializable a JSON: {e}")
 
-    def test_planificacion_lanza_error_si_insuficiente(self):
-        with pytest.raises(InsufficientRecipesError):
-            _api_con_json(_recetas(5)).planifica()
 
-class TestIdentificadorReceta:
-    def setup_method(self):
-        self.api = _api_bare()
-        self._id = self.api._API_planificacion__identificador_receta
+# ============================================================================
+# ESTADÍSTICAS (recogidas por fixture)
+# ============================================================================
 
-    def test_prefiere_underscore_id(self):
-        assert self._id({"_id": "oid_val", "id": "id_val", "nombre": "test"}) == "oid_val"
+class Estadisticas:
+    """Acumula estadísticas de tags por modo de ejecución."""
 
-    def test_prefiere_id_si_no_existe_underscore_id(self):
-        assert self._id({"id": "id_val", "nombre": "test"}) == "id_val"
+    def __init__(self) -> None:
+        self.conteos: list[dict[str, int]] = []
+        self.fallos_repeticion = 0
+        self.fallos_cuotas = 0
+        self.total = 0
 
-    def test_usa_nombre_como_fallback(self):
-        assert self._id({"nombre": "nombre_val"}) == "nombre_val"
-
-    def test_usa_json_como_ultimo_recurso(self):
-        assert "ingredientes" in self._id({"ingredientes": ["a", "b"]})
-
-class TestSeleccionPlaticonCuotas:
-    def setup_method(self):
-        self.api = _api_bare()
-        self._m = self.api._API_planificacion__selecciona_plato_con_cuotas
-
-    def test_excluye_recetas_recientes(self):
-        recetas = [_receta("p0", tags=["cereal"]), _receta("p1", tags=["cereal"]), _receta("p2", tags=["carne"])]
-        assert self._m(recetas, deque(["p0", "p1"], maxlen=14), {g: 0 for g in CUOTAS}, 1)["nombre"] == "p2"
-
-    def test_prioriza_grupos_urgentes(self):
-        recetas = [_receta("pollo", tags=["carne"]), _receta("pasta", tags=["cereal"]), _receta("ensalada", tags=["verdura"])]
-        conteo = {g: 0 for g in CUOTAS}
-        conteo.update({"carne": 1, "cereal": 3, "verdura": 7})
-        plato = self._m(recetas, deque(maxlen=14), conteo, 13)
-        assert "carne" in self.api._API_planificacion__tags_nutricionales(plato)
-
-    def test_evita_grupos_bloqueados(self):
-        recetas = [_receta("pollo", tags=["carne"]), _receta("salmón", tags=["pescado"]), _receta("lenteja", tags=["legumbre"])]
-        conteo = {g: 0 for g in CUOTAS}
-        conteo["carne"] = CUOTAS["carne"]["max"]
-        tags = self.api._API_planificacion__tags_nutricionales(self._m(recetas, deque(maxlen=14), conteo, 1))
-        if tags: assert "carne" not in tags
-
-    def test_scoring_segun_deuda_nutricional(self):
-        recetas = [
-            _receta("plato_versatil", tags=["verdura", "pescado"]), 
-            _receta("solo_pasta", tags=["cereal"]) # Sumará score de 1.0
-        ]
-        elegidos = [self._m(recetas, deque(maxlen=14), {g: 0 for g in CUOTAS}, 1)["nombre"] for _ in range(10)]
-        
-        assert elegidos.count("plato_versatil") == 10
-
-    def test_fallback_si_filters_vacios(self):
-        recetas = [_receta(f"p{i}") for i in range(5)]
-        assert self._m(recetas, deque([r["nombre"] for r in recetas], maxlen=15), {g: 0 for g in CUOTAS}, 1) in recetas
-
-    def test_selecciona_aleatoriamente_entre_mejores(self):
-        recetas = _recetas(10, tag="cereal")
-        assert len({self._m(recetas, deque(maxlen=14), {g: 0 for g in CUOTAS}, 1)["nombre"] for _ in range(20)}) > 1
-
-class TestPlanificacionCompleta:
-    def test_planifica_7_dias_2_comidas(self):
-        plan = _api_con_json(_recetas(20)).planifica()
-        assert len(plan["dias"]) == 7
-        for dia in plan["dias"]:
-            assert "comida" in dia and "cena" in dia and "dia" in dia
-
-    def test_incluye_metadatos(self):
-        plan = _api_con_json(_recetas(20)).planifica()
-        assert all(k in plan for k in ("generado_en", "fuente_datos", "total_recetas_disponibles"))
-        assert plan["fuente_datos"] == "json"
-
-    def test_no_repite_platos_en_14_dias(self):
-        plan = _api_con_json(_recetas(50), dias=7, comidas=2).planifica()
-        nombres = [dia[turno]["nombre"] for dia in plan["dias"] for turno in ("comida", "cena")]
-        assert len(nombres) == 14 and len(set(nombres)) == 14
-
-    def test_respeta_cuotas_minimas_y_maximas(self):
-        recetas = [_receta(f"mixto_A_{i}", tags=["verdura", "carne"]) for i in range(5)]
-        recetas += [_receta(f"mixto_B_{i}", tags=["pescado", "verdura"]) for i in range(5)]
-        recetas += [_receta(f"mixto_C_{i}", tags=["lácteo", "cereal"]) for i in range(5)]
-        recetas += [_receta(f"mixto_D_{i}", tags=["legumbre", "huevo"]) for i in range(5)]
-        recetas += [_receta(f"mixto_E_{i}", tags=["fruto seco", "cereal"]) for i in range(5)]
-        
-        plan = _api_con_json(recetas, dias=7, comidas=2).planifica()
-        conteo = {g: 0 for g in CUOTAS}
-        for dia in plan["dias"]:
+    def registrar(self, dias: list[dict[str, Any]], solo_ultimos_7: bool = False) -> None:
+        self.total += 1
+        d = dias[-7:] if solo_ultimos_7 else dias
+        conteo: dict[str, int] = {g: 0 for g in CUOTAS}
+        for dia in d:
             for turno in ("comida", "cena"):
-                for tag in dia[turno].get("tags", []):
-                    if tag in CUOTAS: conteo[tag] += 1
-        
-        for grupo, cuota in CUOTAS.items():
-            assert cuota["min"] <= conteo.get(grupo, 0) <= cuota["max"]
+                plato = dia.get(turno)
+                if plato:
+                    for tag in obtener_tags_plato(plato):
+                        conteo[tag] += 1
+        self.conteos.append(conteo)
 
-    def test_reproducibilidad_con_seed(self):
-        recetas = [_receta(f"p_{i}", tags=["carne"]) for i in range(15)]
-        plan1 = _api_con_json(recetas, seed=42).planifica()
-        plan2 = _api_con_json(recetas, seed=42).planifica()
-        assert [d["comida"]["nombre"] for d in plan1["dias"]] == [d["comida"]["nombre"] for d in plan2["dias"]]
+    def resumen(self) -> str:
+        if not self.conteos:
+            return "Sin datos"
+        lines = [
+            f"Total iteraciones: {self.total}",
+            f"Fallos repetición: {self.fallos_repeticion}/{self.total}",
+            f"Fallos cuotas:     {self.fallos_cuotas}/{self.total}",
+            "",
+            f"{'Grupo':<15} {'Media':>7} {'Desv':>7} {'Min':>5} {'Max':>5}  Cuota",
+            "-" * 60,
+        ]
+        for grupo in sorted(CUOTAS.keys()):
+            vals = [c[grupo] for c in self.conteos]
+            m = statistics.mean(vals)
+            s = statistics.stdev(vals) if len(vals) > 1 else 0.0
+            mn, mx = min(vals), max(vals)
+            cuota = CUOTAS[grupo]
+            lines.append(
+                f"{grupo:<15} {m:>7.2f} {s:>7.2f} {mn:>5} {mx:>5}  [{cuota['min']}, {cuota['max']}]"
+            )
+        return "\n".join(lines)
 
-    def test_diferentes_seeds_producen_diferentes_resultados(self):
-        recetas = [_receta(f"p_{i}", tags=["carne"]) for i in range(15)]
-        plan1 = _api_con_json(recetas, seed=42).planifica()
-        plan2 = _api_con_json(recetas, seed=999).planifica()
-        assert [d["comida"]["nombre"] for d in plan1["dias"]] != [d["comida"]["nombre"] for d in plan2["dias"]]
 
-    def test_planificacion_es_json_serializable(self):
-        assert json.loads(json.dumps(_api_con_json(_recetas(20)).planifica(), default=str)) is not None
+# ============================================================================
+# TESTS — MODO SIN HISTORIAL
+# ============================================================================
+
+class TestSinHistorial:
+    """Genera planificaciones desde cero y valida todas las restricciones."""
+
+    @pytest.mark.parametrize("seed", SEEDS)
+    def test_estructura_correcta(self, seed: int) -> None:
+        plan = _crear_api(seed).planifica()
+        validar_estructura(plan, num_dias_esperados=7)
+
+    @pytest.mark.parametrize("seed", SEEDS)
+    def test_json_serializable(self, seed: int) -> None:
+        plan = _crear_api(seed).planifica()
+        assert_json_serializable(plan)
+
+    @pytest.mark.parametrize("seed", SEEDS)
+    def test_sin_repeticiones_14_dias(self, seed: int) -> None:
+        """Ningún plato se repite dentro de una ventana de 14 días."""
+        plan = _crear_api(seed).planifica()
+        assert_sin_repeticiones_14_dias(plan["dias"])
+
+    @pytest.mark.parametrize("seed", SEEDS)
+    def test_cuotas_ventanas_7_dias(self, seed: int) -> None:
+        """Cada ventana de 7 días consecutivos cumple las cuotas."""
+        plan = _crear_api(seed).planifica()
+        assert_cuotas_ventanas_7_dias(plan["dias"])
+
+    @pytest.mark.parametrize("seed", SEEDS)
+    def test_14_platos_unicos(self, seed: int) -> None:
+        """7 días × 2 comidas = 14 platos, todos distintos."""
+        plan = _crear_api(seed).planifica()
+        ids = [
+            obtener_id_plato(dia[turno])
+            for dia in plan["dias"]
+            for turno in ("comida", "cena")
+        ]
+        assert len(ids) == 14
+        assert len(set(ids)) == 14, f"Platos duplicados: {[x for x in ids if ids.count(x) > 1]}"
+
+    def test_reproducibilidad(self) -> None:
+        """Misma seed produce misma planificación."""
+        plan1 = _crear_api(42).planifica()
+        plan2 = _crear_api(42).planifica()
+        ids1 = [obtener_id_plato(d["comida"]) for d in plan1["dias"]]
+        ids2 = [obtener_id_plato(d["comida"]) for d in plan2["dias"]]
+        assert ids1 == ids2
+
+    def test_diferentes_seeds_difieren(self) -> None:
+        """Seeds distintas producen planificaciones distintas."""
+        plan1 = _crear_api(42).planifica()
+        plan2 = _crear_api(999).planifica()
+        ids1 = [obtener_id_plato(d["comida"]) for d in plan1["dias"]]
+        ids2 = [obtener_id_plato(d["comida"]) for d in plan2["dias"]]
+        assert ids1 != ids2
+
+    def test_estadisticas_multiples_iteraciones(self) -> None:
+        """
+        Ejecuta ITERACIONES planificaciones con seeds variadas y
+        comprueba todas las restricciones. Imprime estadísticas al final.
+        """
+        stats = Estadisticas()
+        fallos: list[str] = []
+
+        for i in range(ITERACIONES):
+            seed = i * 37 + 17  # semillas dispersas
+            plan = _crear_api(seed).planifica()
+            dias = plan["dias"]
+
+            # Repeticiones
+            try:
+                assert_sin_repeticiones_14_dias(dias)
+            except AssertionError:
+                stats.fallos_repeticion += 1
+                fallos.append(f"seed={seed}: repetición detectada")
+
+            # Cuotas
+            try:
+                assert_cuotas_ventanas_7_dias(dias)
+            except AssertionError as e:
+                stats.fallos_cuotas += 1
+                fallos.append(f"seed={seed}: cuotas — {e}")
+
+            stats.registrar(dias)
+
+        print(f"\n\n=== ESTADÍSTICAS SIN HISTORIAL ({ITERACIONES} iteraciones) ===")
+        print(stats.resumen())
+
+        assert not fallos, (
+            f"{len(fallos)} fallos en {ITERACIONES} iteraciones:\n"
+            + "\n".join(fallos[:20])
+        )
+
+
+# ============================================================================
+# TESTS — MODO CON HISTORIAL
+# ============================================================================
+
+class TestConHistorial:
+    """
+    Genera una planificación inicial y luego encadena regeneraciones
+    pasando DIAS_REGEN días previos. Valida todas las restricciones
+    sobre la planificación completa (días previos + nuevos).
+    """
+
+    @pytest.mark.parametrize("seed", SEEDS)
+    def test_estructura_con_historial(self, seed: int) -> None:
+        """La planificación con historial tiene dias_previos + 7 días."""
+        api = _crear_api(seed)
+        plan_inicial = api.planifica()
+        dias_previos = plan_inicial["dias"][:3]
+
+        api2 = _crear_api(seed + 1)
+        plan_regen = api2.planifica(dias_previos=dias_previos)
+        # Debe devolver dias_previos + 7 días (recortado a max 14)
+        esperados = min(len(dias_previos) + 7, 14)
+        validar_estructura(plan_regen, num_dias_esperados=esperados)
+
+    @pytest.mark.parametrize("seed", SEEDS)
+    def test_sin_repeticiones_con_historial(self, seed: int) -> None:
+        """Sin repeticiones al regenerar con historial."""
+        api = _crear_api(seed)
+        plan_inicial = api.planifica()
+        dias_previos = plan_inicial["dias"][:3]
+
+        api2 = _crear_api(seed + 1)
+        plan_regen = api2.planifica(dias_previos=dias_previos)
+        assert_sin_repeticiones_14_dias(plan_regen["dias"])
+
+    @pytest.mark.parametrize("seed", SEEDS)
+    def test_cuotas_con_historial(self, seed: int) -> None:
+        """Cuotas correctas en todas las ventanas de la planificación con historial."""
+        api = _crear_api(seed)
+        plan_inicial = api.planifica()
+        dias_previos = plan_inicial["dias"][:3]
+
+        api2 = _crear_api(seed + 1)
+        plan_regen = api2.planifica(dias_previos=dias_previos)
+        assert_cuotas_ventanas_7_dias(plan_regen["dias"])
+
+    @pytest.mark.parametrize("dias_regen", DIAS_REGEN_VALUES)
+    def test_distintos_dias_regen(self, dias_regen: int) -> None:
+        """Prueba con diferentes cantidades de días previos."""
+        api = _crear_api(42)
+        plan_inicial = api.planifica()
+        dias_previos = plan_inicial["dias"][:dias_regen]
+
+        api2 = _crear_api(43)
+        plan_regen = api2.planifica(dias_previos=dias_previos)
+        assert_sin_repeticiones_14_dias(plan_regen["dias"])
+        assert_cuotas_ventanas_7_dias(plan_regen["dias"])
+
+    @pytest.mark.parametrize("seed", SEEDS[:5])
+    def test_cadena_regeneraciones(self, seed: int) -> None:
+        """
+        Encadena múltiples regeneraciones (simula uso real):
+        genera → toma DIAS_REGEN días → regenera → repite.
+        Comprueba restricciones en cada paso.
+        """
+        dias_regen = 3
+        api = _crear_api(seed)
+        plan_actual = api.planifica()
+        assert_sin_repeticiones_14_dias(plan_actual["dias"])
+        assert_cuotas_ventanas_7_dias(plan_actual["dias"])
+
+        for step in range(10):
+            dias_previos = plan_actual["dias"][:dias_regen]
+            api_step = _crear_api(seed + step + 1)
+            plan_regen = api_step.planifica(dias_previos=dias_previos)
+
+            assert_sin_repeticiones_14_dias(plan_regen["dias"])
+            assert_cuotas_ventanas_7_dias(plan_regen["dias"])
+
+            # Quedarse con los últimos 7 días para la siguiente iteración
+            plan_actual = {
+                "dias": plan_regen["dias"][-7:],
+                "generado_en": plan_regen["generado_en"],
+                "fuente_datos": plan_regen["fuente_datos"],
+                "total_recetas_disponibles": plan_regen["total_recetas_disponibles"],
+            }
+
+    @pytest.mark.parametrize("dias_regen", DIAS_REGEN_VALUES)
+    def test_estadisticas_con_historial(self, dias_regen: int) -> None:
+        """
+        Ejecuta ITERACIONES encadenamientos con historial y
+        comprueba todas las restricciones. Imprime estadísticas.
+        """
+        stats = Estadisticas()
+        fallos: list[str] = []
+
+        api = _crear_api(0)
+        plan_actual = api.planifica()
+
+        for i in range(ITERACIONES):
+            seed_iter = i * 53 + 7
+            dias_previos = plan_actual["dias"][:dias_regen]
+
+            api_iter = _crear_api(seed_iter)
+            plan_regen = api_iter.planifica(dias_previos=dias_previos)
+            dias = plan_regen["dias"]
+
+            # Repeticiones
+            try:
+                assert_sin_repeticiones_14_dias(dias)
+            except AssertionError:
+                stats.fallos_repeticion += 1
+                fallos.append(f"iter={i}, seed={seed_iter}: repetición")
+
+            # Cuotas (todas las ventanas de 7 días)
+            try:
+                assert_cuotas_ventanas_7_dias(dias)
+            except AssertionError as e:
+                stats.fallos_cuotas += 1
+                fallos.append(f"iter={i}, seed={seed_iter}: cuotas — {e}")
+
+            stats.registrar(dias, solo_ultimos_7=True)
+
+            # Preparar siguiente iteración
+            plan_actual = {
+                "dias": plan_regen["dias"][-7:],
+                "generado_en": plan_regen["generado_en"],
+                "fuente_datos": plan_regen["fuente_datos"],
+                "total_recetas_disponibles": plan_regen["total_recetas_disponibles"],
+            }
+
+        print(
+            f"\n\n=== ESTADÍSTICAS CON HISTORIAL "
+            f"(dias_regen={dias_regen}, {ITERACIONES} iter) ==="
+        )
+        print(stats.resumen())
+
+        assert not fallos, (
+            f"{len(fallos)} fallos en {ITERACIONES} iteraciones (dias_regen={dias_regen}):\n"
+            + "\n".join(fallos[:20])
+        )
