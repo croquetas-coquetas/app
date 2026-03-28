@@ -8,7 +8,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 with patch("dotenv.load_dotenv"), patch("pymongo.MongoClient"):
-    from API_planificacion import (
+    from app.server.API_planificacion import (
         API_planificacion,
         InsufficientRecipesError,
         PlanningError,

@@ -3,7 +3,7 @@ import os
 from flask import Flask, jsonify, request
 
 #from API_planificacion import API_planificacion, InsufficientRecipesError, PlanningError
-from API_nueva import API_planificacion, InsufficientRecipesError, PlanningError
+from API_planificacion import API_planificacion, InsufficientRecipesError, PlanningError
 
 def create_app() -> Flask:
     app = Flask(__name__)

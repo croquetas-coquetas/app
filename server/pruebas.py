@@ -1,4 +1,4 @@
-from API_nueva import API_planificacion, InsufficientRecipesError, PlanningError
+from API_planificacion import API_planificacion, InsufficientRecipesError, PlanningError
 
 # Uso simple
 api = API_planificacion()

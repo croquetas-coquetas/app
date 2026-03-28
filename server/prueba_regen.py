@@ -17,15 +17,15 @@ from typing import Any
 if sys.stdout.encoding != 'utf-8':
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
-from API_nueva import API_planificacion, CUOTAS, PlanningError
+from API_planificacion import API_planificacion, CUOTAS, PlanningError
 
 
 # ============================================================================
 # CONFIGURACIÓN GLOBAL
 # ============================================================================
 
-ITERACIONES = 100  # Número de iteraciones para cada modo de prueba
-DIAS_REGEN = 6    # Días anteriores a pasar al algoritmo en modo con historial
+ITERACIONES = 1000  # Número de iteraciones para cada modo de prueba
+DIAS_REGEN = 1    # Días anteriores a pasar al algoritmo en modo con historial
 REGEN_MODE = "con_historial"  # Opciones: "sin_historial", "con_historial", "ambos"
 
 

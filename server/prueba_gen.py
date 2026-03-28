@@ -11,7 +11,7 @@ import json
 import random
 import statistics
 from collections import Counter
-from API_nueva import API_planificacion, CUOTAS
+from API_planificacion import API_planificacion, CUOTAS
 
 # ──────────────────────────────────────────────────────────────────────
 # CONFIGURACIÓN  ←  modifica estos valores a tu gusto

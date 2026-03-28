@@ -11,7 +11,7 @@ from bson import ObjectId
 import pytest
 
 with patch("dotenv.load_dotenv"), patch("pymongo.MongoClient"):
-    from API_nueva import API_planificacion, InsufficientRecipesError, PlanningError, CUOTAS
+    from API_planificacion import API_planificacion, InsufficientRecipesError, PlanningError, CUOTAS
 
 def _receta(nombre: str, tags: list | None = None, id_: str | None = None, categoria: str | None = None, ingredientes: list | None = None) -> dict:
     r: dict = {"nombre": nombre}
