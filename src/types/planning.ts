@@ -10,6 +10,7 @@ export interface Ingrediente {
   nombre: string;
   cantidad: number;
   unidad?: string;
+  categoria?: string;
 }
 
 export interface Receta {

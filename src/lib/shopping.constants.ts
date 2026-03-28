@@ -1,0 +1,1 @@
+export const SHOPPING_KEY = "smartcook_lista_compra";
