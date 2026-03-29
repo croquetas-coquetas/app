@@ -1,10 +1,18 @@
 export type AppState =
-  | "empty"
+  | "landing"
+  | "generate"
   | "confirm-overwrite"
   | "loading"
   | "success"
   | "day-detail"
   | "error";
+
+export interface PlanMeta {
+  generado_en: string;
+  fuente_datos: string;
+  total_recetas_disponibles: number;
+  total_dias: number;
+}
 
 export interface Ingrediente {
   nombre: string;
