@@ -4,6 +4,7 @@ import { MONTHS } from "@/lib/planning.constants";
 import { cn } from "@/lib/utils";
 import { formatFechaGenerado, getDayKey, isToday } from "@/lib/planning.utils";
 import { DiaPlanning, Planificacion } from "@/types/planning";
+import {generarListaCompra} from "@/lib/generarLista.ts";
 
 interface CalendarViewProps {
   planificacion: Planificacion;
@@ -69,6 +70,14 @@ export function CalendarView({ planificacion, onRegenerate, onDaySelect }: Calen
     });
   };
 
+  const handleGenerarLista = () => {
+    try {
+      generarListaCompra();
+    } catch (err) {
+      console.error("Error al generar la lista de la compra:", err);
+    }
+  };
+
   return (
       <section
           className="w-full max-w-3xl mx-auto calendar-enter rounded-2xl border border-border bg-background overflow-hidden">
@@ -85,6 +94,9 @@ export function CalendarView({ planificacion, onRegenerate, onDaySelect }: Calen
           </div>
           <Button variant="outline" size="sm" onClick={onRegenerate} className="shrink-0">
             ↺ Regenerar
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleGenerarLista}>
+            🛒 Generar la lista de la compra
           </Button>
         </div>
 
