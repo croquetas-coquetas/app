@@ -1,10 +1,44 @@
 import { API_URL } from "@/lib/planning.constants";
-import { Planificacion } from "@/types/planning";
+import { Planificacion, DiaPlanning } from "@/types/planning";
 
-export async function fetchPlanificacionSemanal() {
+function cleanDiaPlanning(dia: DiaPlanning): DiaPlanning {
+  return {
+    dia: dia.dia,
+    comida: {
+      nombre: dia.comida.nombre,
+      grupo_principal: dia.comida.grupo_principal,
+      ingredientes: dia.comida.ingredientes,
+      pasos: dia.comida.pasos,
+      tags: dia.comida.tags,
+    },
+    cena: {
+      nombre: dia.cena.nombre,
+      grupo_principal: dia.cena.grupo_principal,
+      ingredientes: dia.cena.ingredientes,
+      pasos: dia.cena.pasos,
+      tags: dia.cena.tags,
+    },
+  };
+}
+
+export async function fetchPlanificacionSemanal(diasPrevios?: DiaPlanning[] | null) {
+  if (!diasPrevios || !Array.isArray(diasPrevios) || diasPrevios.length === 0) {
+    // Nueva planificación: GET sin argumentos
+    return fetch(API_URL, {
+      method: "GET",
+      headers: { Accept: "application/json" },
+    });
+  }
+
+  // Regenerar planificación: POST con días previos limpios
+  const diasLimpios = diasPrevios.map(cleanDiaPlanning);
   return fetch(API_URL, {
-    method: "GET",
-    headers: { Accept: "application/json" },
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ dias_previos: diasLimpios }),
   });
 }
 

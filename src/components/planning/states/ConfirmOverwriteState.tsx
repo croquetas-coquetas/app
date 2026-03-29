@@ -27,7 +27,7 @@ export function ConfirmOverwriteState({
         <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-yellow-500/10 text-2xl">
           ⚠
         </div>
-        <CardTitle className="text-xl font-bold">Ya tienes una planificación guardada</CardTitle>
+        <CardTitle className="text-xl font-bold">Ya tienes una planificación de hoy</CardTitle>
         <CardDescription>
           Generada el {formatFechaGenerado(planificacionExistente.generado_en)}. Si continúas se sobreescribirá.
         </CardDescription>

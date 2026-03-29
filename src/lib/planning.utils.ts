@@ -77,3 +77,18 @@ export function isPlanificacion(data: unknown): data is Planificacion {
   return Array.isArray((data as Planificacion).dias);
 }
 
+export function getDiasPrevios(plan: Planificacion | null): import("@/types/planning").DiaPlanning[] {
+  if (!plan) return [];
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+  return plan.dias.filter((d) => {
+    try {
+      const fecha = new Date(d.dia);
+      fecha.setHours(0, 0, 0, 0);
+      return fecha < hoy;
+    } catch {
+      return false;
+    }
+  });
+}
+
