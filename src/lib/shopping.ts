@@ -1,13 +1,10 @@
-import { STORAGE_KEY } from "@/lib/planning.constants";
-import { Planificacion, Ingrediente } from "@/types/planning";
-import { ItemCompra, ListaCompra } from "@/types/shopping";
-import { isPlanificacion } from "@/lib/planning.utils";
-import { saveListaCompra } from "@/lib/shopping.storage";
+import { Ingrediente } from "@/types/planning";
+import { ItemCompra } from "@/types/shopping";
 import ingredientesData from "../../ingredientes.json";
 
 // ─── Mapa de categorías ──────────────────────────────────────────────────────
 
-const CATEGORIA_ORDEN = [
+export const CATEGORIA_ORDEN = [
     "verdura",
     "fruta",
     "carne",
@@ -44,33 +41,6 @@ export class PlanificacionNoEncontradaError extends ShoppingError {
     }
 }
 
-// ─── Lectura de localStorage ─────────────────────────────────────────────────
-
-function cargarPlanificacion(): Planificacion {
-    const raw = localStorage.getItem(STORAGE_KEY);
-
-    if (!raw) {
-        throw new PlanificacionNoEncontradaError();
-    }
-
-    let parsed: unknown;
-    try {
-        parsed = JSON.parse(raw);
-    } catch {
-        throw new ShoppingError(
-            "La planificación guardada está corrupta y no se pudo leer."
-        );
-    }
-
-    if (!isPlanificacion(parsed)) {
-        throw new ShoppingError(
-            "Los datos guardados no tienen el formato esperado de planificación."
-        );
-    }
-
-    return parsed;
-}
-
 // ─── Acumulación de ingredientes ─────────────────────────────────────────────
 
 /**
@@ -81,7 +51,7 @@ function claveIngrediente(nombre: string): string {
     return nombre.trim().toLowerCase();
 }
 
-function acumularIngredientes(ingredientes: Ingrediente[], acumulado: Map<string, ItemCompra>): void {
+export function acumularIngredientes(ingredientes: Ingrediente[], acumulado: Map<string, ItemCompra>): void {
     for (const ing of ingredientes) {
         const clave = claveIngrediente(ing.nombre);
         const categoria = categoriaMap.get(clave) || "otros";
@@ -98,37 +68,4 @@ function acumularIngredientes(ingredientes: Ingrediente[], acumulado: Map<string
             });
         }
     }
-}
-
-// ─── Generación de la lista ───────────────────────────────────────────────────
-
-export function generarListaCompra(): ListaCompra {
-    const planificacion = cargarPlanificacion();
-
-    const acumulado = new Map<string, ItemCompra>();
-
-    for (const dia of planificacion.dias) {
-        acumularIngredientes(dia.comida.ingredientes ?? [], acumulado);
-        acumularIngredientes(dia.cena.ingredientes ?? [], acumulado);
-    }
-
-    const items = Array.from(acumulado.values()).sort((a, b) => {
-        const catA = CATEGORIA_ORDEN.indexOf(a.categoria || "otros");
-        const catB = CATEGORIA_ORDEN.indexOf(b.categoria || "otros");
-        if (catA !== catB) {
-            return catA - catB;
-        }
-        return a.nombre.localeCompare(b.nombre, "es");
-    });
-
-    const lista: ListaCompra = {
-        generado_en: new Date().toISOString(),
-        planificacion_generada_en: planificacion.generado_en,
-        total_items: items.length,
-        items,
-    };
-
-    saveListaCompra(lista);
-
-    return lista;
 }

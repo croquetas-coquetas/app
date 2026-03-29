@@ -15,7 +15,7 @@ import {
 import { getSavedPlanificacion, savePlanificacion } from "@/lib/planning.storage";
 import { AppState, DiaPlanning, MealTab, Planificacion } from "@/types/planning";
 import {Button} from "@/components/ui/button.tsx";
-import {generarListaCompra} from "@/lib/shopping.ts";
+import {generarListaCompra} from "@/lib/generarLista.ts";
 
 function App() {
   const saved = getSavedPlanificacion();

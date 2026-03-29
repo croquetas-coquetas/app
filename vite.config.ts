@@ -40,9 +40,10 @@ export default defineConfig(async () => ({
         changeOrigin: true,
       },
     },
-      test: {
-          environment: "jsdom",
-          setupFiles: ["@testing-library/jest-dom"],
-      },
+  },
+  test: {
+      globals: true,
+      environment: "jsdom",
+      setupFiles: ["@testing-library/jest-dom"],
   },
 }));
