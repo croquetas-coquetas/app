@@ -21,6 +21,8 @@ import {
 } from "@/lib/planning.storage";
 import { getDiasPrevios } from "@/lib/planning.utils";
 import { AppState, DiaPlanning, MealTab, Planificacion } from "@/types/planning";
+import {Button} from "@/components/ui/button.tsx";
+import {generarListaCompra} from "@/lib/generarLista.ts";
 
 function App() {
   const [appState, setAppState] = useState<AppState>("landing");
@@ -133,6 +135,10 @@ function App() {
         />
       )}
 
+      <Button variant="outline" size="sm" onClick={generarListaCompra}>
+        Generar lista de la compra
+      </Button>
+
       {appState === "error" && (
         <ErrorState
           errorMsg={errorMsg}
@@ -140,6 +146,9 @@ function App() {
           onRetry={() => void doGenerate()}
         />
       )}
+
+
+
     </div>
   );
 }
