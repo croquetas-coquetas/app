@@ -1,9 +1,9 @@
 import { SHOPPING_KEY } from "@/lib/shopping.constants";
 import { ListaCompra } from "@/types/shopping";
 import { isListaCompra } from "@/lib/shopping.utils";
-import {LEGACY_STORAGE_KEY} from "@/lib/planning.constants.ts";
-import {Planificacion} from "@/types/planning.ts";
-import {PlanificacionNoEncontradaError, ShoppingError} from "@/lib/shopping.ts";
+import {STORAGE_META} from "@/lib/planning.constants.ts";
+import {DiaPlanning, Planificacion, PlanMeta} from "@/types/planning.ts";
+import {PlanificacionNoEncontradaError, ShoppingError, MetaNoEncontradaError} from "@/lib/shopping.ts";
 import {isPlanificacion} from "@/lib/planning.utils.ts";
 
 export function getSavedListaCompra(): ListaCompra | null {
@@ -29,26 +29,36 @@ export function clearListaCompra(): void {
 // ─── Lectura de localStorage ─────────────────────────────────────────────────
 
 export function cargarPlanificacion(): Planificacion {
-    const raw = localStorage.getItem(LEGACY_STORAGE_KEY);
+    // lee cuantos dias hay en total para escoger los 7 ultimos
+    const meta = localStorage.getItem(STORAGE_META);
+    if(!meta) {
+        throw new MetaNoEncontradaError();
+    }
+    const meta_parsed:PlanMeta = JSON.parse(meta);
+    let num_dias = meta_parsed.total_dias;
 
-    if (!raw) {
-        throw new PlanificacionNoEncontradaError();
+    // planificacion vacia donde se van a meter los dias parseados
+    let planificacion: Planificacion = { generado_en: meta_parsed.generado_en, dias: [] };
+
+    // por cada dia parsear y meter en el objeto planificacion
+    for (let i = num_dias - 7; i < num_dias; i++) {
+        // clave del dia
+        let dia:string = "smartcook_plan_dia_" + i;
+
+        const dia_raw = localStorage.getItem(dia);
+        if (!dia_raw) {
+            throw new PlanificacionNoEncontradaError();
+        }
+
+        let dia_parsed:DiaPlanning = JSON.parse(dia_raw);
+        planificacion.dias.push(dia_parsed);
     }
 
-    let parsed: unknown;
-    try {
-        parsed = JSON.parse(raw);
-    } catch {
-        throw new ShoppingError(
-            "La planificación guardada está corrupta y no se pudo leer."
-        );
-    }
-
-    if (!isPlanificacion(parsed)) {
+    if (!isPlanificacion(planificacion)) {
         throw new ShoppingError(
             "Los datos guardados no tienen el formato esperado de planificación."
         );
     }
 
-    return parsed;
+    return planificacion;
 }

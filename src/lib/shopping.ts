@@ -41,6 +41,15 @@ export class PlanificacionNoEncontradaError extends ShoppingError {
     }
 }
 
+export class MetaNoEncontradaError extends ShoppingError {
+    constructor() {
+        super(
+            "No se encontró la información meta de SmartCook"
+        );
+        this.name = "MetaNoEncontradaError";
+    }
+}
+
 // ─── Acumulación de ingredientes ─────────────────────────────────────────────
 
 /**
