@@ -24,6 +24,20 @@ def create_app() -> Flask:
 
         return jsonify(planificacion), 200
 
+    @app.get("/api/recetas/<recipe_id>/ingredientes/")
+    def get_recipe_ingredients(recipe_id):
+        try:
+            api = API_planificacion()
+            recetas = api._API_planificacion__carga_recetas()
+            
+            for receta in recetas:
+                if str(receta.get("id")) == str(recipe_id):
+                    return jsonify({"ingredientes": receta.get("ingredientes", [])}), 200
+            
+            return jsonify({"error": "Receta no encontrada"}), 404
+        except Exception as exc:
+            return jsonify({"error": str(exc)}), 503
+
     @app.get("/health")
     def health():
         return jsonify({"status": "ok"}), 200
