@@ -14,7 +14,7 @@ export function LandingState({ onGetStarted }: LandingStateProps) {
           Planifica tu menú semanal de forma inteligente. Comidas equilibradas con un solo clic.
         </p>
       </div>
-      <Button size="lg" className="px-10 py-6 text-base" onClick={onGetStarted}>
+      <Button size="lg" className="h-12 w-full max-w-xs rounded-xl px-8 text-base font-semibold shadow-sm" onClick={onGetStarted}>
         Get Started
       </Button>
     </div>

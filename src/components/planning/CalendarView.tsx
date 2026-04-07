@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { CheckCircle2, RotateCcw, ShoppingCart } from "lucide-react";
 import { MONTHS } from "@/lib/planning.constants";
 import { cn } from "@/lib/utils";
 import { formatFechaGenerado, getDayKey, isToday } from "@/lib/planning.utils";
@@ -15,6 +16,8 @@ interface CalendarViewProps {
 export function CalendarView({ planificacion, onRegenerate, onDaySelect }: CalendarViewProps) {
   const hoy = new Date();
   const [viewDate, setViewDate] = useState(() => new Date(hoy.getFullYear(), hoy.getMonth(), 1));
+  const [successDialogOpen, setSuccessDialogOpen] = useState(false);
+  const [listaItemsCount, setListaItemsCount] = useState<number | null>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
   const todayRef = useRef<HTMLButtonElement | null>(null);
 
@@ -72,7 +75,9 @@ export function CalendarView({ planificacion, onRegenerate, onDaySelect }: Calen
 
   const handleGenerarLista = () => {
     try {
-      generarListaCompra();
+      const lista = generarListaCompra();
+      setListaItemsCount(lista.total_items);
+      setSuccessDialogOpen(true);
     } catch (err) {
       console.error("Error al generar la lista de la compra:", err);
     }
@@ -81,7 +86,7 @@ export function CalendarView({ planificacion, onRegenerate, onDaySelect }: Calen
   return (
       <section
           className="w-full max-w-3xl mx-auto calendar-enter rounded-2xl border border-border bg-background overflow-hidden">
-        <div className="px-5 pt-7 pb-5 flex items-start justify-between gap-3">
+        <div className="px-5 pt-7 pb-5">
           <div>
             <p className="text-xs font-semibold tracking-[0.2em] text-muted-foreground uppercase">Planificacion
               mensual</p>
@@ -91,14 +96,6 @@ export function CalendarView({ planificacion, onRegenerate, onDaySelect }: Calen
             <p className="text-xs text-muted-foreground mt-0.5">
               Generado el {formatFechaGenerado(planificacion.generado_en)}
             </p>
-          </div>
-          <div>
-            <Button variant="outline" size="sm" onClick={onRegenerate} className="shrink-0 mb-1 mr-1">
-              ↺ Regenerar
-            </Button>
-            <Button variant="outline" size="sm" onClick={handleGenerarLista}>
-              🛒 Generar la lista de la compra
-            </Button>
           </div>
         </div>
 
@@ -121,7 +118,7 @@ export function CalendarView({ planificacion, onRegenerate, onDaySelect }: Calen
         </div>
 
         <div ref={listRef}
-             className="flex max-h-[70dvh] flex-col gap-px overflow-y-auto border-t border-border bg-background">
+             className="flex max-h-[70dvh] flex-col gap-px overflow-y-auto border-t border-border bg-background pb-[calc(6.5rem+env(safe-area-inset-bottom))]">
           {diasDelMes.map(({date, key, planDia}) => {
             const numeroDia = date.getDate();
             const dayShort = date.toLocaleDateString("es-ES", {weekday: "short"}).replace(".", "");
@@ -205,6 +202,61 @@ export function CalendarView({ planificacion, onRegenerate, onDaySelect }: Calen
             );
           })}
         </div>
+
+        <div className="fixed left-1/2 bottom-[max(env(safe-area-inset-bottom),1rem)] z-40 w-[calc(100%-1.5rem)] max-w-md -translate-x-1/2">
+          <div className="rounded-2xl border border-border/80 bg-background/95 p-2 shadow-xl backdrop-blur supports-backdrop-filter:bg-background/85">
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                variant="outline"
+                onClick={onRegenerate}
+                className="h-11 rounded-xl border-border/80 px-4 font-semibold"
+              >
+                <RotateCcw className="size-4" />
+                Regenerar
+              </Button>
+              <Button
+                onClick={handleGenerarLista}
+                className="h-11 rounded-xl px-4 font-semibold shadow-sm"
+              >
+                <ShoppingCart className="size-4" />
+                Generar lista
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {successDialogOpen && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4"
+            onClick={() => setSuccessDialogOpen(false)}
+            role="presentation"
+          >
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-label="Lista de la compra generada"
+              className="w-full max-w-sm rounded-2xl border border-border bg-background p-5 shadow-xl animate-in fade-in zoom-in-95 duration-200"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="flex items-start gap-3">
+                <span className="mt-0.5 rounded-full bg-primary/10 p-1.5 text-primary">
+                  <CheckCircle2 className="size-5" />
+                </span>
+                <div>
+                  <h3 className="text-base font-semibold text-foreground">Lista generada correctamente</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Se han generado {listaItemsCount ?? 0} ingredientes para tu compra.
+                  </p>
+                </div>
+              </div>
+              <div className="mt-5 flex justify-end">
+                <Button size="sm" className="rounded-lg px-4" onClick={() => setSuccessDialogOpen(false)}>
+                  Entendido
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </section>
   );
 }

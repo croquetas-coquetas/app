@@ -24,7 +24,7 @@ export function DayFullscreenView({ dia, activeTab, onTabChange, onBack }: DayFu
   return (
     <section className="day-detail-screen day-detail-enter" aria-label="Detalle del dia seleccionado">
       <header className="day-detail-header">
-        <Button variant="outline" size="sm" onClick={onBack}>
+        <Button variant="outline" size="sm" onClick={onBack} className="rounded-full border-border/80 bg-background/95 px-4 shadow-sm backdrop-blur">
           ← Volver
         </Button>
         <div className="day-detail-title-wrap">

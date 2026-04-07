@@ -38,10 +38,12 @@ export function ConfirmOverwriteState({
         </p>
       </CardContent>
       <CardFooter className="flex justify-center gap-3">
-        <Button variant="outline" onClick={onShowExisting}>
+        <Button variant="outline" onClick={onShowExisting} className="rounded-xl px-4 text-base font-semibold shadow-sm">
           Ver la existente
         </Button>
-        <Button onClick={onGenerateNew}>Generar nueva</Button>
+        <Button onClick={onGenerateNew} className="rounded-xl px-4 text-base font-semibold shadow-sm">
+          Generar nueva
+        </Button>
       </CardFooter>
     </Card>
   );
