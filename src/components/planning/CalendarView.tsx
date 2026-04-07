@@ -92,12 +92,14 @@ export function CalendarView({ planificacion, onRegenerate, onDaySelect }: Calen
               Generado el {formatFechaGenerado(planificacion.generado_en)}
             </p>
           </div>
-          <Button variant="outline" size="sm" onClick={onRegenerate} className="shrink-0">
-            ↺ Regenerar
-          </Button>
-          <Button variant="outline" size="sm" onClick={handleGenerarLista}>
-            🛒 Generar la lista de la compra
-          </Button>
+          <div>
+            <Button variant="outline" size="sm" onClick={onRegenerate} className="shrink-0 mb-1 mr-1">
+              ↺ Regenerar
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleGenerarLista}>
+              🛒 Generar la lista de la compra
+            </Button>
+          </div>
         </div>
 
         <div className="px-4 pb-3">
@@ -193,7 +195,7 @@ export function CalendarView({ planificacion, onRegenerate, onDaySelect }: Calen
                       <div className="flex flex-col gap-0.5 min-w-0">
                         <span
                             className="text-[9px] font-bold uppercase tracking-[0.18em] text-blue-400">Cena</span>
-                        <span className="text-sm font-medium text-foreground/80 leading-tight truncate">
+                        <span className="text-sm font-semibold text-foreground leading-tight truncate">
                     {tieneMenu && planDia ? planDia.cena.nombre : "Sin cena planificada"}
                   </span>
                       </div>
