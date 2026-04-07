@@ -96,7 +96,7 @@ export function DayFullscreenView({ dia, activeTab, onTabChange, onBack }: DayFu
           {recetaActiva.pasos && recetaActiva.pasos.length > 0 ? (
             <ol className="day-detail-steps-list">
               {recetaActiva.pasos.map((paso, idx) => (
-                <li key={`${idx}-${paso}`} className="day-detail-step-item p-1">
+                <li key={`paso-${idx}`} className="day-detail-step-item p-1">
                   <Badge variant="outline" className="day-detail-step-badge mr-2">
                     Paso {idx + 1}
                   </Badge>

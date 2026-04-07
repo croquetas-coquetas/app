@@ -1,22 +1,18 @@
 import { Ingrediente } from "@/types/planning";
 import { ItemCompra } from "@/types/shopping";
-import ingredientesData from "../../ingredientes.json";
+import ingredientesData from "../../server/datasets/ingredientes.json";
 
 // ─── Mapa de categorías ──────────────────────────────────────────────────────
 
 export const CATEGORIA_ORDEN = [
     "verdura",
-    "fruta",
-    "carne",
-    "pescado",
-    "lacteo",
+    "lácteo",
     "cereal",
     "legumbre",
-    "fruto_seco",
-    "condimento",
-    "hierba",
-    "dulce",
-    "bebida",
+    "fruto seco",
+    "pescado",
+    "huevo",
+    "carne"
 ];
 
 export const categoriaMap = new Map<string, string>();
