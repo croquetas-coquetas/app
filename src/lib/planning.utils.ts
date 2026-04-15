@@ -1,4 +1,7 @@
-import { Planificacion } from "@/types/planning";
+import { Ingrediente, Planificacion } from "@/types/planning";
+
+const CUCHARADA_A_ML = 15;
+const PIZCA_A_G = 1;
 
 export function formatFechaGenerado(iso?: string) {
   if (!iso) return "-";
@@ -34,6 +37,28 @@ export function formatUnidad(unidad: string): string {
     l: "l",
   };
   return mappings[unidad.toLowerCase()] || "g";
+}
+
+export function convertirIngredienteUnidad(ingrediente: Ingrediente): Ingrediente {
+  const unidad = (ingrediente.unidad || "").toLowerCase().trim();
+
+  if (unidad === "cucharada" || unidad === "cucharadas" || unidad === "c/s") {
+    return {
+      ...ingrediente,
+      cantidad: ingrediente.cantidad * CUCHARADA_A_ML,
+      unidad: "ml",
+    };
+  }
+
+  if (unidad === "pizca" || unidad === "pizcas") {
+    return {
+      ...ingrediente,
+      cantidad: ingrediente.cantidad * PIZCA_A_G,
+      unidad: "g",
+    };
+  }
+
+  return ingrediente;
 }
 
 export function isToday(iso: string) {

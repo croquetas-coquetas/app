@@ -17,13 +17,13 @@ const mockCargar = vi.mocked(cargarPlanificacion);
 // Funciones auxiliares
 // ---------------------------------------------------------------------------
 
-function makeIngrediente(nombre: string, cantidad: number, unidad = "g"):plan.Ingrediente {
+function makeIngrediente(nombre: string, cantidad: number, unidad = "g"): plan.Ingrediente {
   return { nombre: nombre, cantidad: cantidad, unidad: unidad, categoria: "" };
 }
 
 // el unico elemento importante para estos tests son los ingredientes presentes en cada receta
-function makeReceta(ingredientes: plan.Ingrediente[]):plan.Receta {
-  return { nombre: "", grupo_principal: "", ingredientes:ingredientes, pasos: [], tags: [] };
+function makeReceta(ingredientes: plan.Ingrediente[]): plan.Receta {
+  return { nombre: "", grupo_principal: "", ingredientes: ingredientes, pasos: [], tags: [] };
 }
 
 function makeDia(comidaIngredientes: plan.Ingrediente[] = [], cenaIngredientes: plan.Ingrediente[] = []): plan.DiaPlanning {
@@ -160,6 +160,42 @@ describe("generarListaCompra", () => {
       const leche = result.items.find((i) => i.nombre === "leche");
 
       expect(leche?.unidad).toBe("ml");
+    });
+
+    it("Convierte cucharadas a mililitros", () => {
+      mockCargar.mockReturnValue({
+        generado_en: "2025-01-01T00:00:00.000Z",
+        dias: [
+          makeDia(
+            [makeIngrediente("aceite", 2, "cucharadas")],
+            [makeIngrediente("aceite", 1, "cucharada")]
+          ),
+        ],
+      });
+
+      const result = generarListaCompra();
+      const aceite = result.items.find((i) => i.nombre === "aceite");
+
+      expect(aceite?.unidad).toBe("ml");
+      expect(aceite?.cantidad).toBe(45);
+    });
+
+    it("Convierte pizcas a gramos", () => {
+      mockCargar.mockReturnValue({
+        generado_en: "2025-01-01T00:00:00.000Z",
+        dias: [
+          makeDia(
+            [makeIngrediente("sal", 3, "pizcas")],
+            [makeIngrediente("sal", 2, "pizca")]
+          ),
+        ],
+      });
+
+      const result = generarListaCompra();
+      const sal = result.items.find((i) => i.nombre === "sal");
+
+      expect(sal?.unidad).toBe("g");
+      expect(sal?.cantidad).toBe(5);
     });
 
     it("Elimina espacios en blanco sobrantes", () => {
