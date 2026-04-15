@@ -2,6 +2,8 @@ import { STORAGE_PREFIX, STORAGE_META, LEGACY_STORAGE_KEY } from "@/lib/planning
 import { Planificacion, PlanMeta } from "@/types/planning";
 import { isPlanificacion, isToday } from "@/lib/planning.utils";
 
+const FIRST_TIME_KEY = "smartcook_first_time";
+
 function clearPlanKeys() {
   const toRemove: string[] = [];
   for (let i = 0; i < localStorage.length; i++) {
@@ -66,3 +68,10 @@ export function migrateLegacyStorage() {
   }
 }
 
+export function isFirstTime(): boolean {
+  return !localStorage.getItem(FIRST_TIME_KEY);
+}
+
+export function markAsNotFirstTime() {
+  localStorage.setItem(FIRST_TIME_KEY, "true");
+}
