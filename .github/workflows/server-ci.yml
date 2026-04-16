@@ -41,6 +41,6 @@ jobs:
         run: python -m compileall server
 
       - name: Run server tests
-        if: ${{ hashFiles('server/tests*.py') != '' }}
+        if: ${{ hashFiles('server/test*.py') != '' }}
         working-directory: server
-        run: pytest -q tests_unidad.py tests_integracion.py tests_sistema.py
+        run: pytest -q test_unidad.py test_integracion.py test_sistema.py
