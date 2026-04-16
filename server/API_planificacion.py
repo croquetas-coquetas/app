@@ -145,7 +145,11 @@ class API_planificacion:
         return total_recetas >= self.__DIAS_TOTALES * self.__COMIDAS_POR_DIA
 
     def __identificador_receta(self, receta: dict[str, Any]) -> str:
-        for clave in ("_id", "id", "nombre"):
+        # "nombre" se usa como clave primaria porque es el único campo que está
+        # garantizado tanto en las recetas del JSON/MongoDB como en los platos
+        # que llegan del frontend como dias_previos (donde _id e id no se envían).
+        # Todos los nombres son únicos en la base de datos de recetas.
+        for clave in ("nombre", "_id", "id"):
             valor = receta.get(clave)
             if valor is not None:
                 return str(valor)
