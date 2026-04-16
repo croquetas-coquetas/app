@@ -182,20 +182,26 @@ export function CalendarView({ planificacion, onRegenerate, onDaySelect }: Calen
                         )}
                       </div>
 
-                      <div className="flex flex-col gap-0.5 min-w-0">
-                        <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-orange-400">Comida</span>
-                        <span className="text-sm font-semibold text-foreground leading-tight truncate">
-                    {tieneMenu && planDia ? planDia.comida.nombre : "Sin comida planificada"}
-                  </span>
-                      </div>
+                      {tieneMenu && planDia ? (
+                          <>
+                            <div className="flex flex-col gap-0.5 min-w-0">
+                              <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-orange-400">Comida</span>
+                              <span className="text-sm font-semibold text-foreground leading-tight truncate">
+                                {planDia.comida.nombre}
+                              </span>
+                            </div>
 
-                      <div className="flex flex-col gap-0.5 min-w-0">
-                        <span
-                            className="text-[9px] font-bold uppercase tracking-[0.18em] text-blue-400">Cena</span>
-                        <span className="text-sm font-semibold text-foreground leading-tight truncate">
-                    {tieneMenu && planDia ? planDia.cena.nombre : "Sin cena planificada"}
-                  </span>
-                      </div>
+                            <div className="flex flex-col gap-0.5 min-w-0">
+                              <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-blue-400">Cena</span>
+                              <span className="text-sm font-semibold text-foreground leading-tight truncate">
+                                {planDia.cena.nombre}
+                              </span>
+                            </div>
+                          </>
+                      ) : (
+                          <span className="text-sm font-semibold text-muted-foreground/60">N/A</span>
+                      )}
+
                     </div>
                   </div>
                 </button>
