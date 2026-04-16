@@ -40,6 +40,7 @@ class API_planificacion:
         connection_uri: str | None = None,
         db_name: str | None = None,
         collection_name: str | None = None,
+        ingredients_path: str | None = None,
         recipes_path: str | Path | None = None,
         dias_totales: int = 7,
         comidas_por_dia: int = 2,
@@ -55,6 +56,7 @@ class API_planificacion:
         self.__CONEXION = connection_uri if connection_uri is not None else os.getenv("MONGODB_URI")
         self.__DB_NAME = db_name or os.getenv("MONGODB_DB", "smartCook")
         self.__COLLECTION_NAME = collection_name or os.getenv("MONGODB_COLLECTION", "recetas")
+        self.__INGREDIENTS_NAME = ingredients_path or os.getenv("MONGODB_INGREDIENTS", "ingredientes")
         self.__RECIPES_PATH = Path(
             recipes_path
             or os.getenv("RECETAS_JSON_PATH")
@@ -63,6 +65,7 @@ class API_planificacion:
 
         self.__CLIENT: MongoClient | None = None
         self.__RECETAS: Collection | None = None
+        self.__INGREDIENTES: Collection | None = None
         self.__FUENTE_DATOS = "json"
         self.__conectar_mongodb_si_esta_configurado()
 
@@ -86,6 +89,7 @@ class API_planificacion:
             client.admin.command("ping")
             self.__CLIENT = client
             self.__RECETAS = client[self.__DB_NAME][self.__COLLECTION_NAME]
+            self.__INGREDIENTES = client[self.__DB_NAME][self.__INGREDIENTS_NAME]
             self.__FUENTE_DATOS = "mongodb"
         except (PyMongoError, ValueError):
             self.__CLIENT = None
@@ -366,3 +370,24 @@ class API_planificacion:
             planificacion["dias"] = todos_los_dias
 
         return planificacion
+
+    def get_ingredientes(self) -> dict[str, str]:
+        mapa: dict[str, str] = {}
+        if self.__CONEXION:
+            if self.__INGREDIENTS_NAME is None:
+                raise PlanningError(
+                    "Se configuró MONGODB_URI, pero no se pudo conectar a MongoDB. "
+                    "Revisa URI, red y credenciales."
+                )
+
+
+            try:
+                for ing in self.__INGREDIENTES.find({}):
+                    nombre = ing.get("nombre")
+                    categoria = ing.get("categoria")
+                    if isinstance(nombre, str) and isinstance(categoria, str):
+                        mapa[nombre.lower()] = categoria.strip()
+                
+            except PyMongoError as exc:
+                raise PlanningError("No se pudieron cargar las recetas desde MongoDB.") from exc
+        return mapa
