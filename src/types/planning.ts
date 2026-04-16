@@ -1,11 +1,13 @@
 export type AppState =
+  | "initializing"
   | "landing"
   | "generate"
   | "confirm-overwrite"
   | "loading"
   | "success"
   | "day-detail"
-  | "error";
+  | "error"
+  | "no-plan-generated";
 
 export interface PlanMeta {
   generado_en: string;

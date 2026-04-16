@@ -1,17 +1,51 @@
 // @vitest-environment jsdom
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { render, screen, fireEvent, waitFor, cleanup } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, cleanup, act } from "@testing-library/react";
 import App from "./App";
+import { savePlanificacion } from "@/lib/planning.storage";
+import { STORAGE_META, STORAGE_PREFIX } from "@/lib/planning.constants";
 
+
+const FIRST_TIME_KEY = "smartcook_first_time";
+
+function installMemoryStorage() {
+    const store = new Map<string, string>();
+    const memoryStorage: Storage = {
+        get length() {
+            return store.size;
+        },
+        clear() {
+            store.clear();
+        },
+        getItem(key: string) {
+            return store.has(key) ? store.get(key)! : null;
+        },
+        key(index: number) {
+            return Array.from(store.keys())[index] ?? null;
+        },
+        removeItem(key: string) {
+            store.delete(key);
+        },
+        setItem(key: string, value: string) {
+            store.set(key, String(value));
+        },
+    };
+
+    Object.defineProperty(globalThis, "localStorage", {
+        configurable: true,
+        value: memoryStorage,
+    });
+}
+
+function clearTestStorage() {
+    localStorage.clear();
+}
 
 afterEach(() => {
     cleanup();
-    localStorage.clear();
+    clearTestStorage();
     vi.restoreAllMocks();
 });
-
-
-const STORAGE_KEY = "smartcook_planificacion";
 
 function makePlanificacion(fecha: Date) {
     return {
@@ -19,13 +53,37 @@ function makePlanificacion(fecha: Date) {
         dias: [
             {
                 dia: fecha.toISOString(),
-                comida: { nombre: "Paella valenciana" },
-                cena:   { nombre: "Ensalada mixta" },
+                comida: {
+                    nombre: "Paella valenciana",
+                    grupo_principal: "arroz",
+                    ingredientes: [],
+                    pasos: ["Preparar ingredientes"],
+                    tags: ["tradicional"],
+                },
+                cena: {
+                    nombre: "Ensalada mixta",
+                    grupo_principal: "verduras",
+                    ingredientes: [],
+                    pasos: ["Mezclar ingredientes"],
+                    tags: ["ligera"],
+                },
             },
             {
                 dia: new Date(fecha.getTime() + 86400000).toISOString(),
-                comida: { nombre: "Lentejas" },
-                cena:   { nombre: "Tortilla de patatas" },
+                comida: {
+                    nombre: "Lentejas",
+                    grupo_principal: "legumbres",
+                    ingredientes: [],
+                    pasos: ["Cocer lentejas"],
+                    tags: ["casera"],
+                },
+                cena: {
+                    nombre: "Tortilla de patatas",
+                    grupo_principal: "huevo",
+                    ingredientes: [],
+                    pasos: ["Freir patatas"],
+                    tags: ["clasica"],
+                },
             },
         ],
     };
@@ -33,8 +91,33 @@ function makePlanificacion(fecha: Date) {
 
 const planHoy  = () => makePlanificacion(new Date());
 
-function irAGenerate() {
+async function advanceInit() {
+    await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 550));
+    });
+}
+
+async function renderAsFirstTime() {
+    render(<App />);
+    expect(screen.getByText("Cargando...")).toBeTruthy();
+    await advanceInit();
+}
+
+async function irAGenerate() {
+    await renderAsFirstTime();
     fireEvent.click(screen.getByText("Get Started"));
+}
+
+function seedNoEsPrimeraVez() {
+    localStorage.setItem(FIRST_TIME_KEY, "true");
+}
+
+function seedPlanHoy() {
+    savePlanificacion(planHoy());
+}
+
+function clickGenerateButton() {
+    fireEvent.click(screen.getByRole("button", { name: /Generar planificación/i }));
 }
 
 
@@ -57,43 +140,59 @@ function mockFetchFallo() {
 
 describe("UNIDAD", () => {
 
-    it("Get Started lleva al estado generate", () => {
+    beforeEach(() => {
+        installMemoryStorage();
+        clearTestStorage();
+        Object.defineProperty(HTMLElement.prototype, "scrollTo", {
+            configurable: true,
+            value: vi.fn(),
+        });
+    });
+
+    it("muestra spinner inicial y luego landing en primera apertura", async () => {
         render(<App />);
+        expect(screen.getByText("Cargando...")).toBeTruthy();
+        await advanceInit();
+        expect(screen.getByText("Get Started")).toBeTruthy();
+    });
+
+    it("Get Started lleva al estado generate", async () => {
+        await renderAsFirstTime();
         fireEvent.click(screen.getByText("Get Started"));
-        expect(screen.getByText("Generar planificación")).toBeTruthy();
+        expect(screen.getByRole("heading", { name: /Generar planificación/i })).toBeTruthy();
     });
 
     it("muestra el mensaje de error del servidor cuando la API falla", async () => {
         mockFetchError("No hay suficientes recetas");
-        render(<App />);
+        await renderAsFirstTime();
         fireEvent.click(screen.getByText("Get Started"));
-        fireEvent.click(screen.getByText("Generar planificación"));
+        clickGenerateButton();
         await waitFor(() => expect(screen.getByText(/Algo salió mal/i)).toBeTruthy());
         expect(screen.getByText("No hay suficientes recetas")).toBeTruthy();
     });
 
     it("muestra error de red cuando no hay conexión", async () => {
         mockFetchFallo();
-        render(<App />);
+        await renderAsFirstTime();
         fireEvent.click(screen.getByText("Get Started"));
-        fireEvent.click(screen.getByText("Generar planificación"));
+        clickGenerateButton();
         await waitFor(() => expect(screen.getByText(/Algo salió mal/i)).toBeTruthy());
         expect(screen.getByText(/No se pudo conectar/i)).toBeTruthy();
     });
 
-    it("al generar sin plan previo pasa a loading", () => {
+    it("al generar sin plan previo pasa a loading", async () => {
         vi.stubGlobal("fetch", vi.fn(() => new Promise(() => {})));
-        render(<App />);
+        await renderAsFirstTime();
         fireEvent.click(screen.getByText("Get Started"));
-        fireEvent.click(screen.getByText("Generar planificación"));
+        clickGenerateButton();
         expect(screen.getByText(/Generando tu menú/i)).toBeTruthy();
     });
 
     it("al generar con plan previo de hoy pasa a confirm-overwrite", async () => {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(planHoy()));
-        render(<App />);
+        seedPlanHoy();
+        await renderAsFirstTime();
         fireEvent.click(screen.getByText("Get Started"));
-        fireEvent.click(screen.getByText("Generar planificación"));
+        clickGenerateButton();
         await waitFor(() =>
             expect(screen.getByText("¿Quieres ver la planificación existente o generar una nueva?")).toBeTruthy()
         );
@@ -103,62 +202,88 @@ describe("UNIDAD", () => {
 
 describe("INTEGRACION", () => {
 
-    afterEach(() => {
-        localStorage.clear();
-        vi.restoreAllMocks();
+    beforeEach(() => {
+        installMemoryStorage();
+        clearTestStorage();
+        Object.defineProperty(HTMLElement.prototype, "scrollTo", {
+            configurable: true,
+            value: vi.fn(),
+        });
     });
 
-    beforeEach(() => localStorage.clear());
-    afterEach(() => {
-        localStorage.clear();
-        vi.restoreAllMocks();
+    it("si no es primera apertura y no hay planificación, muestra popup para generar", async () => {
+        seedNoEsPrimeraVez();
+        render(<App />);
+        await advanceInit();
+        expect(screen.getByText("No hay semana generada")).toBeTruthy();
+        expect(screen.getByText("Menú del mes")).toBeTruthy();
     });
 
-    it("devuelve null si localStorage está vacío", () => {
+    it("si no es primera apertura y hay planificación, entra directo al calendario", async () => {
+        seedNoEsPrimeraVez();
+        seedPlanHoy();
+        render(<App />);
+        await advanceInit();
+        expect(screen.getByText("Menú del mes")).toBeTruthy();
+        expect(screen.getByText("Paella valenciana")).toBeTruthy();
+        expect(screen.queryByText("Get Started")).toBeNull();
+    });
+
+    it("al generar con localStorage vacío no muestra advertencia de planificación existente", async () => {
         vi.stubGlobal("fetch", vi.fn(() => new Promise(() => {
         })));
-        render(<App/>);
-        irAGenerate();
-        fireEvent.click(screen.getByText("Generar planificación"));
+        await irAGenerate();
+        clickGenerateButton();
         expect(screen.queryByText(/Ya tienes una planificación de hoy/i)).toBeNull();
     });
 
-    it("devuelve la planificación si fue generada", () => {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(planHoy()));
-        render(<App/>);
-        irAGenerate();
-        fireEvent.click(screen.getByText("Generar planificación"));
+    it("al generar con planificación de hoy guardada muestra confirm-overwrite", async () => {
+        seedPlanHoy();
+        await irAGenerate();
+        clickGenerateButton();
         expect(screen.getByText(/Ya tienes una planificación de hoy/i)).toBeTruthy();
     });
 
     it("guarda la planificación en localStorage tras éxito", async () => {
         const plan = planHoy();
         mockFetchOk(plan);
-        render(<App />);
+        await renderAsFirstTime();
         fireEvent.click(screen.getByText("Get Started"));
-        fireEvent.click(screen.getByText("Generar planificación"));
-        await waitFor(() => screen.getByText(/Menú de la semana/i));
-        const guardado = JSON.parse(localStorage.getItem(STORAGE_KEY)!);
-        expect(guardado.generado_en).toBe(plan.generado_en);
+        clickGenerateButton();
+        await waitFor(() => screen.getByText(/Menú del mes/i));
+        expect(localStorage.getItem(STORAGE_META)).toBeTruthy();
+        expect(localStorage.getItem(`${STORAGE_PREFIX}dia_0`)).toBeTruthy();
+        const meta = JSON.parse(localStorage.getItem(STORAGE_META)!);
+        expect(meta.generado_en).toBe(plan.generado_en);
+        expect(localStorage.getItem(FIRST_TIME_KEY)).toBe("true");
     });
 
 });
 
 describe("SISTEMA", () => {
 
+    beforeEach(() => {
+        installMemoryStorage();
+        clearTestStorage();
+        Object.defineProperty(HTMLElement.prototype, "scrollTo", {
+            configurable: true,
+            value: vi.fn(),
+        });
+    });
+
     it("flujo completo: landing → generate → loading → éxito", async () => {
         mockFetchOk(planHoy());
         render(<App />);
+        expect(screen.getByText("Cargando...")).toBeTruthy();
+        await advanceInit();
         expect(screen.getByText("SmartCook")).toBeTruthy();
-        expect(screen.getByText("Your intelligent cooking assistant")).toBeTruthy();
         fireEvent.click(screen.getByText("Get Started"));
-        expect(screen.getByText("Generar planificación")).toBeTruthy();
-        fireEvent.click(screen.getByText("Generar planificación"));
+        expect(screen.getByRole("heading", { name: /Generar planificación/i })).toBeTruthy();
+        clickGenerateButton();
         expect(screen.getByText(/Generando tu menú/i)).toBeTruthy();
-        await waitFor(() => expect(screen.getByText(/Menú de la semana/i)).toBeTruthy());
+        await waitFor(() => expect(screen.getByText(/Menú del mes/i)).toBeTruthy());
         expect(screen.getByText("Paella valenciana")).toBeTruthy();
-        expect(screen.getByText("↺ Regenerar")).toBeTruthy();
-        expect(screen.getByText("Inicio")).toBeTruthy();
+        expect(screen.getByText("Regenerar")).toBeTruthy();
     });
 
     it("flujo completo: landing → generate → error → reintentar → éxito", async () => {
@@ -166,28 +291,40 @@ describe("SISTEMA", () => {
             .mockResolvedValueOnce({ ok: false, status: 503, json: () => Promise.resolve({ error: "Servidor caído" }) })
             .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(planHoy()) })
         );
-        render(<App />);
+        await renderAsFirstTime();
         fireEvent.click(screen.getByText("Get Started"));
-        fireEvent.click(screen.getByText("Generar planificación"));
+        clickGenerateButton();
         await waitFor(() => screen.getByText("Servidor caído"));
         fireEvent.click(screen.getByText("Reintentar"));
-        await waitFor(() => expect(screen.getByText(/Menú de la semana/i)).toBeTruthy());
+        await waitFor(() => expect(screen.getByText(/Menú del mes/i)).toBeTruthy());
         expect(screen.getByText("Paella valenciana")).toBeTruthy();
     });
 
     it("flujo completo: landing → generate → advertencia → generar nueva → éxito", async () => {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(planHoy()));
+        seedPlanHoy();
         mockFetchOk({
             generado_en: new Date().toISOString(),
             dias: [{
                 dia:    new Date().toISOString(),
-                comida: { nombre: "Fabada asturiana" },
-                cena:   { nombre: "Caldo gallego" },
+                comida: {
+                    nombre: "Fabada asturiana",
+                    grupo_principal: "legumbres",
+                    ingredientes: [],
+                    pasos: ["Paso 1"],
+                    tags: ["asturiana"],
+                },
+                cena: {
+                    nombre: "Caldo gallego",
+                    grupo_principal: "sopa",
+                    ingredientes: [],
+                    pasos: ["Paso 1"],
+                    tags: ["gallega"],
+                },
             }],
         });
-        render(<App />);
+        await renderAsFirstTime();
         fireEvent.click(screen.getByText("Get Started"));
-        fireEvent.click(screen.getByText("Generar planificación"));
+        clickGenerateButton();
         await waitFor(() => screen.getByText("Generar nueva"));
         fireEvent.click(screen.getByText("Generar nueva"));
         await waitFor(() => expect(screen.getByText("Fabada asturiana")).toBeTruthy());
@@ -195,14 +332,14 @@ describe("SISTEMA", () => {
     });
 
     it("Regenerar desde el menú vuelve a mostrar la advertencia", async () => {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(planHoy()));
-        render(<App />);
+        seedPlanHoy();
+        await renderAsFirstTime();
         fireEvent.click(screen.getByText("Get Started"));
-        fireEvent.click(screen.getByText("Generar planificación"));
+        clickGenerateButton();
         await waitFor(() => screen.getByText("Ver la existente"));
         fireEvent.click(screen.getByText("Ver la existente"));
-        await waitFor(() => screen.getByText("↺ Regenerar"));
-        fireEvent.click(screen.getByText("↺ Regenerar"));
+        await waitFor(() => screen.getByText("Regenerar"));
+        fireEvent.click(screen.getByText("Regenerar"));
         expect(screen.getByText("Ya tienes una planificación de hoy")).toBeTruthy();
     });
 });
