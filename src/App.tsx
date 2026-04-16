@@ -3,6 +3,7 @@ import "./App.css";
 
 import { CalendarView } from "@/components/planning/CalendarView";
 import { DayFullscreenView } from "@/components/planning/DayFullscreenView";
+import { BottomNavBar } from "@/components/planning/BottomNavBar";
 import { ConfirmOverwriteState } from "@/components/planning/states/ConfirmOverwriteState";
 import { LandingState } from "@/components/planning/states/LandingState";
 import { GenerateState } from "@/components/planning/states/GenerateState";
@@ -25,6 +26,9 @@ import {
 } from "@/lib/planning.storage";
 import { getDiasPrevios } from "@/lib/planning.utils";
 import { AppState, DiaPlanning, MealTab, Planificacion } from "@/types/planning";
+import { generarListaCompra } from "@/lib/generarLista";
+import { CheckCircle2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 function App() {
   const [appState, setAppState] = useState<AppState>("initializing");
@@ -33,6 +37,8 @@ function App() {
   const [planificacionExistente, setPlanificacionExistente] = useState<Planificacion | null>(null);
   const [selectedDia, setSelectedDia] = useState<DiaPlanning | null>(null);
   const [activeMealTab, setActiveMealTab] = useState<MealTab>("comida");
+  const [successListaDialogOpen, setSuccessListaDialogOpen] = useState(false);
+  const [listaItemsCount, setListaItemsCount] = useState<number | null>(null);
 
   useEffect(() => {
     migrateLegacyStorage();
@@ -79,6 +85,21 @@ function App() {
     setAppState("success");
   };
 
+  const handleGenerarLista = () => {
+    try {
+      const lista = generarListaCompra();
+      setListaItemsCount(lista.total_items);
+      setSuccessListaDialogOpen(true);
+    } catch (err) {
+      console.error("Error al generar la lista de la compra:", err);
+    }
+  };
+
+  const handleNavBarProfileClick = (action: "mi-perfil" | "configurar-horario") => {
+    // TODO: Implementar navegación a estas secciones cuando estén disponibles
+    console.log("Perfil action:", action);
+  };
+
   const doGenerate = async () => {
     setAppState("loading");
     try {
@@ -111,6 +132,9 @@ function App() {
     onRegenerate: handleRequestGenerate,
     onDaySelect: handleDaySelect,
   };
+
+  const showNavBar = !["initializing", "landing", "generate", "loading", "error", "confirm-overwrite"].includes(appState);
+  const currentNavTab = appState === "day-detail" ? "calendar" : appState === "success" ? "calendar" : undefined;
 
   return (
       <div
@@ -175,6 +199,50 @@ function App() {
                 onBack={() => setAppState("generate")}
                 onRetry={() => void doGenerate()}
             />
+        )}
+
+        {/* Bottom Navigation Bar */}
+        {showNavBar && (
+            <BottomNavBar
+                onCalendarClick={() => setAppState("success")}
+                onShoppingListClick={handleGenerarLista}
+                onProfileClick={handleNavBarProfileClick}
+                activeTab={currentNavTab}
+            />
+        )}
+
+        {/* Success Lista Dialog */}
+        {successListaDialogOpen && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4"
+            onClick={() => setSuccessListaDialogOpen(false)}
+            role="presentation"
+          >
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-label="Lista de la compra generada"
+              className="w-full max-w-sm rounded-2xl border border-border bg-background p-5 shadow-xl animate-in fade-in zoom-in-95 duration-200"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="flex items-start gap-3">
+                <span className="mt-0.5 rounded-full bg-primary/10 p-1.5 text-primary">
+                  <CheckCircle2 className="size-5" />
+                </span>
+                <div>
+                  <h3 className="text-base font-semibold text-foreground">Lista generada correctamente</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Se han generado {listaItemsCount ?? 0} ingredientes para tu compra.
+                  </p>
+                </div>
+              </div>
+              <div className="mt-5 flex justify-end">
+                <Button size="sm" className="rounded-lg px-4" onClick={() => setSuccessListaDialogOpen(false)}>
+                  Entendido
+                </Button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
   );
