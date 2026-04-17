@@ -118,8 +118,8 @@ export function CalendarView({ planificacion, onRegenerate, onDaySelect }: Calen
         </div>
 
         <div ref={listRef}
-             className="flex max-h-[70dvh] flex-col gap-px overflow-y-auto border-t border-border bg-background pb-[calc(6.5rem+env(safe-area-inset-bottom))]">
-          {diasDelMes.map(({date, key, planDia}) => {
+             className="flex max-h-[70dvh] flex-col overflow-y-auto border-t border-border bg-background pb-10">
+          {diasDelMes.map(({date, key, planDia}, index) => {
             const numeroDia = date.getDate();
             const dayShort = date.toLocaleDateString("es-ES", {weekday: "short"}).replace(".", "");
             const dayName = date.toLocaleDateString("es-ES", {weekday: "long"});
@@ -135,6 +135,7 @@ export function CalendarView({ planificacion, onRegenerate, onDaySelect }: Calen
                     onClick={() => planDia && onDaySelect(planDia)}
                     disabled={!tieneMenu}
                     aria-label={tieneMenu ? `Ver detalle del ${dayName}` : `${dayName} sin menu asignado`}
+                    className={cn(index > 0 && "border-t border-border/50")}
                 >
                   <div className={cn(
                       "flex gap-4 px-5 py-4 items-stretch text-left transition-colors active:scale-[0.99]",
@@ -144,44 +145,32 @@ export function CalendarView({ planificacion, onRegenerate, onDaySelect }: Calen
                   )}>
 
                     <div className="flex flex-col items-center justify-center w-14 shrink-0">
-                <span
-                    className={cn(
-                        "text-4xl font-black tabular-nums leading-none",
-                        diaActual ? "text-primary" : "text-foreground/80"
-                    )}
-                >
-                  {numeroDia}
-                </span>
+                      <span
+                          className={cn(
+                              "text-4xl font-black tabular-nums leading-none",
+                              diaActual ? "text-primary" : "text-foreground/80"
+                          )}
+                      >
+                        {numeroDia}
+                      </span>
                       <span
                           className={cn(
                               "text-[9px] font-bold uppercase tracking-widest mt-1",
                               diaActual ? "text-primary" : "text-muted-foreground"
                           )}
                       >
-                  {dayShort}
-                </span>
+                        {dayShort}
+                      </span>
+                      {diaActual && (
+                          <span className="text-[9px] border border-green-600 text-green-600 px-1.5 rounded-full font-bold uppercase tracking-widest mt-1">
+                            Hoy
+                          </span>
+                      )}
                     </div>
 
                     <div className={cn("w-px self-stretch rounded-full", diaActual ? "bg-primary/30" : "bg-border")}/>
 
                     <div className="flex flex-col gap-2.5 flex-1 justify-center min-w-0">
-                      <div className="flex items-center gap-2">
-                  <span
-                      className={cn(
-                          "text-xs font-semibold uppercase tracking-widest",
-                          diaActual ? "text-green-600" : "text-muted-foreground"
-                      )}
-                  >
-                    {dayName}
-                  </span>
-                        {diaActual && (
-                            <span
-                                className="text-[9px] border border-green-600 text-green-600 px-1.5 rounded-full font-bold uppercase tracking-widest">
-                      Hoy
-                    </span>
-                        )}
-                      </div>
-
                       {tieneMenu && planDia ? (
                           <>
                             <div className="flex flex-col gap-0.5 min-w-0">
@@ -213,16 +202,16 @@ export function CalendarView({ planificacion, onRegenerate, onDaySelect }: Calen
           <div className="rounded-2xl border border-border/80 bg-background/95 p-2 shadow-xl backdrop-blur supports-backdrop-filter:bg-background/85">
             <div className="grid grid-cols-2 gap-2">
               <Button
-                variant="outline"
-                onClick={onRegenerate}
-                className="h-11 rounded-xl border-border/80 px-4 font-semibold"
+                  variant="outline"
+                  onClick={onRegenerate}
+                  className="h-11 rounded-xl border-border/80 px-4 font-semibold"
               >
                 <RotateCcw className="size-4" />
                 Regenerar
               </Button>
               <Button
-                onClick={handleGenerarLista}
-                className="h-11 rounded-xl px-4 font-semibold shadow-sm"
+                  onClick={handleGenerarLista}
+                  className="h-11 rounded-xl px-4 font-semibold shadow-sm"
               >
                 <ShoppingCart className="size-4" />
                 Generar lista
@@ -232,36 +221,36 @@ export function CalendarView({ planificacion, onRegenerate, onDaySelect }: Calen
         </div>
 
         {successDialogOpen && (
-          <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4"
-            onClick={() => setSuccessDialogOpen(false)}
-            role="presentation"
-          >
             <div
-              role="dialog"
-              aria-modal="true"
-              aria-label="Lista de la compra generada"
-              className="w-full max-w-sm rounded-2xl border border-border bg-background p-5 shadow-xl animate-in fade-in zoom-in-95 duration-200"
-              onClick={(event) => event.stopPropagation()}
+                className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4"
+                onClick={() => setSuccessDialogOpen(false)}
+                role="presentation"
             >
-              <div className="flex items-start gap-3">
+              <div
+                  role="dialog"
+                  aria-modal="true"
+                  aria-label="Lista de la compra generada"
+                  className="w-full max-w-sm rounded-2xl border border-border bg-background p-5 shadow-xl animate-in fade-in zoom-in-95 duration-200"
+                  onClick={(event) => event.stopPropagation()}
+              >
+                <div className="flex items-start gap-3">
                 <span className="mt-0.5 rounded-full bg-primary/10 p-1.5 text-primary">
                   <CheckCircle2 className="size-5" />
                 </span>
-                <div>
-                  <h3 className="text-base font-semibold text-foreground">Lista generada correctamente</h3>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Se han generado {listaItemsCount ?? 0} ingredientes para tu compra.
-                  </p>
+                  <div>
+                    <h3 className="text-base font-semibold text-foreground">Lista generada correctamente</h3>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Se han generado {listaItemsCount ?? 0} ingredientes para tu compra.
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-5 flex justify-end">
+                  <Button size="sm" className="rounded-lg px-4" onClick={() => setSuccessDialogOpen(false)}>
+                    Entendido
+                  </Button>
                 </div>
               </div>
-              <div className="mt-5 flex justify-end">
-                <Button size="sm" className="rounded-lg px-4" onClick={() => setSuccessDialogOpen(false)}>
-                  Entendido
-                </Button>
-              </div>
             </div>
-          </div>
         )}
       </section>
   );
