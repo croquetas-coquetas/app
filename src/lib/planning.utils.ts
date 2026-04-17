@@ -26,6 +26,7 @@ export function formatUnidad(unidad: string): string {
     unidad: "",
     unidades: "",
     cucharadas: "cucharadas",
+    cucharada: "cucharada",
     taza: "taza",
     tazas: "tazas",
     pizca: "pizca",
