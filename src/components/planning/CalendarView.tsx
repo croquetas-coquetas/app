@@ -118,7 +118,7 @@ export function CalendarView({ planificacion, onRegenerate, onDaySelect }: Calen
         </div>
 
         <div ref={listRef}
-             className="flex max-h-[70dvh] flex-col overflow-y-auto border-t border-border bg-background pb-10">
+             className="flex max-h-[70dvh] flex-col overflow-y-auto border-t border-border bg-background pb-[calc(2rem+env(safe-area-inset-bottom))]">
           {diasDelMes.map(({date, key, planDia}, index) => {
             const numeroDia = date.getDate();
             const dayShort = date.toLocaleDateString("es-ES", {weekday: "short"}).replace(".", "");
