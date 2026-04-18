@@ -88,10 +88,9 @@ export function CalendarView({ planificacion, onRegenerate, onDaySelect }: Calen
           className="w-full max-w-3xl mx-auto calendar-enter rounded-2xl border border-border bg-background overflow-hidden">
         <div className="px-5 pt-7 pb-5">
           <div>
-            <p className="text-xs font-semibold tracking-[0.2em] text-muted-foreground uppercase">Planificacion
-              mensual</p>
+            <p className="text-xs font-semibold tracking-[0.2em] text-muted-foreground uppercase">SmartCook</p>
             <h2 className="text-2xl font-bold text-foreground mt-1.5 text-balance">
-              Menú del mes
+              Menú semanal
             </h2>
             <p className="text-xs text-muted-foreground mt-0.5">
               Generado el {formatFechaGenerado(planificacion.generado_en)}

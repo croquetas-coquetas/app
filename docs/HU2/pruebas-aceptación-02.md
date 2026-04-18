@@ -3,7 +3,7 @@
 ## Información General
 
 - **Responsable de las pruebas:** Daniel Maksymiv  
-- **Fecha:** 16/04/2026  
+- **Fecha:** 17/04/2026  
 - **Historia de Usuario:** 2  
 
 ## Descripción
