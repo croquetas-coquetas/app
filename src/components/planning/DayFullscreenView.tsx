@@ -20,6 +20,8 @@ export function DayFullscreenView({ dia, activeTab, onTabChange, onBack }: DayFu
 
   const recetaActiva = activeTab === "comida" ? dia.comida : dia.cena;
   const isCurrentDay = isToday(dia.dia);
+  const pasos = recetaActiva.pasos ?? [];
+  const hayPasosVacios = pasos.some((paso) => typeof paso !== "string" || paso.trim().length === 0);
 
   return (
     <section className="day-detail-screen day-detail-enter" aria-label="Detalle del dia seleccionado">
@@ -93,11 +95,15 @@ export function DayFullscreenView({ dia, activeTab, onTabChange, onBack }: DayFu
 
         <div className="day-detail-steps-wrap">
           <p className="day-detail-section-label">Pasos</p>
-          {recetaActiva.pasos && recetaActiva.pasos.length > 0 ? (
+          {hayPasosVacios ? (
+            <p className="day-detail-error" role="alert">
+              Hay un paso vacío en esta receta. Revisa los datos antes de continuar.
+            </p>
+          ) : pasos.length > 0 ? (
             <ol className="day-detail-steps-list">
-              {recetaActiva.pasos.map((paso, idx) => (
+              {pasos.map((paso, idx) => (
                 <li key={`paso-${idx}`} className="day-detail-step-item p-1">
-                  <Badge variant="outline" className="day-detail-step-badge mr-2">
+                  <Badge variant="outline" className="day-detail-step-badge mr-2 text-sm">
                     Paso {idx + 1}
                   </Badge>
                   {paso}

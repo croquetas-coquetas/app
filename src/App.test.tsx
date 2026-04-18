@@ -89,7 +89,7 @@ function makePlanificacion(fecha: Date) {
     };
 }
 
-const planHoy  = () => makePlanificacion(new Date());
+const planHoy = () => makePlanificacion(new Date());
 
 async function advanceInit() {
     await act(async () => {
@@ -181,7 +181,7 @@ describe("UNIDAD", () => {
     });
 
     it("al generar sin plan previo pasa a loading", async () => {
-        vi.stubGlobal("fetch", vi.fn(() => new Promise(() => {})));
+        vi.stubGlobal("fetch", vi.fn(() => new Promise(() => { })));
         await renderAsFirstTime();
         fireEvent.click(screen.getByText("Get Started"));
         clickGenerateButton();
@@ -305,7 +305,7 @@ describe("SISTEMA", () => {
         mockFetchOk({
             generado_en: new Date().toISOString(),
             dias: [{
-                dia:    new Date().toISOString(),
+                dia: new Date().toISOString(),
                 comida: {
                     nombre: "Fabada asturiana",
                     grupo_principal: "legumbres",
