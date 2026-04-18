@@ -1,13 +1,21 @@
 // @vitest-environment jsdom
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { describe, it, expect, beforeAll, beforeEach, afterEach, vi } from "vitest";
 import { render, screen, fireEvent, waitFor, cleanup } from "@testing-library/react";
 import App from "./App";
+import { STORAGE_META } from "@/lib/planning.constants";
 
 
 afterEach(() => {
     cleanup();
     localStorage.clear();
     vi.restoreAllMocks();
+});
+
+beforeAll(() => {
+    Object.defineProperty(HTMLElement.prototype, "scrollTo", {
+        value: vi.fn(),
+        writable: true,
+    });
 });
 
 
@@ -20,21 +28,25 @@ function makePlanificacion(fecha: Date) {
             {
                 dia: fecha.toISOString(),
                 comida: { nombre: "Paella valenciana" },
-                cena:   { nombre: "Ensalada mixta" },
+                cena: { nombre: "Ensalada mixta" },
             },
             {
                 dia: new Date(fecha.getTime() + 86400000).toISOString(),
                 comida: { nombre: "Lentejas" },
-                cena:   { nombre: "Tortilla de patatas" },
+                cena: { nombre: "Tortilla de patatas" },
             },
         ],
     };
 }
 
-const planHoy  = () => makePlanificacion(new Date());
+const planHoy = () => makePlanificacion(new Date());
 
 function irAGenerate() {
     fireEvent.click(screen.getByText("Get Started"));
+}
+
+function clickGenerarPlanificacion() {
+    fireEvent.click(screen.getByRole("button", { name: "Generar planificación" }));
 }
 
 
@@ -60,14 +72,14 @@ describe("UNIDAD", () => {
     it("Get Started lleva al estado generate", () => {
         render(<App />);
         fireEvent.click(screen.getByText("Get Started"));
-        expect(screen.getByText("Generar planificación")).toBeTruthy();
+        expect(screen.getByRole("heading", { name: "Generar planificación" })).toBeTruthy();
     });
 
     it("muestra el mensaje de error del servidor cuando la API falla", async () => {
         mockFetchError("No hay suficientes recetas");
         render(<App />);
         fireEvent.click(screen.getByText("Get Started"));
-        fireEvent.click(screen.getByText("Generar planificación"));
+        clickGenerarPlanificacion();
         await waitFor(() => expect(screen.getByText(/Algo salió mal/i)).toBeTruthy());
         expect(screen.getByText("No hay suficientes recetas")).toBeTruthy();
     });
@@ -76,16 +88,16 @@ describe("UNIDAD", () => {
         mockFetchFallo();
         render(<App />);
         fireEvent.click(screen.getByText("Get Started"));
-        fireEvent.click(screen.getByText("Generar planificación"));
+        clickGenerarPlanificacion();
         await waitFor(() => expect(screen.getByText(/Algo salió mal/i)).toBeTruthy());
         expect(screen.getByText(/No se pudo conectar/i)).toBeTruthy();
     });
 
     it("al generar sin plan previo pasa a loading", () => {
-        vi.stubGlobal("fetch", vi.fn(() => new Promise(() => {})));
+        vi.stubGlobal("fetch", vi.fn(() => new Promise(() => { })));
         render(<App />);
         fireEvent.click(screen.getByText("Get Started"));
-        fireEvent.click(screen.getByText("Generar planificación"));
+        clickGenerarPlanificacion();
         expect(screen.getByText(/Generando tu menú/i)).toBeTruthy();
     });
 
@@ -93,7 +105,7 @@ describe("UNIDAD", () => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(planHoy()));
         render(<App />);
         fireEvent.click(screen.getByText("Get Started"));
-        fireEvent.click(screen.getByText("Generar planificación"));
+        clickGenerarPlanificacion();
         await waitFor(() =>
             expect(screen.getByText("¿Quieres ver la planificación existente o generar una nueva?")).toBeTruthy()
         );
@@ -117,17 +129,17 @@ describe("INTEGRACION", () => {
     it("devuelve null si localStorage está vacío", () => {
         vi.stubGlobal("fetch", vi.fn(() => new Promise(() => {
         })));
-        render(<App/>);
+        render(<App />);
         irAGenerate();
-        fireEvent.click(screen.getByText("Generar planificación"));
+        clickGenerarPlanificacion();
         expect(screen.queryByText(/Ya tienes una planificación de hoy/i)).toBeNull();
     });
 
     it("devuelve la planificación si fue generada", () => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(planHoy()));
-        render(<App/>);
+        render(<App />);
         irAGenerate();
-        fireEvent.click(screen.getByText("Generar planificación"));
+        clickGenerarPlanificacion();
         expect(screen.getByText(/Ya tienes una planificación de hoy/i)).toBeTruthy();
     });
 
@@ -136,10 +148,10 @@ describe("INTEGRACION", () => {
         mockFetchOk(plan);
         render(<App />);
         fireEvent.click(screen.getByText("Get Started"));
-        fireEvent.click(screen.getByText("Generar planificación"));
-        await waitFor(() => screen.getByText(/Menú de la semana/i));
-        const guardado = JSON.parse(localStorage.getItem(STORAGE_KEY)!);
-        expect(guardado.generado_en).toBe(plan.generado_en);
+        clickGenerarPlanificacion();
+        await waitFor(() => screen.getByText(/Menú del mes/i));
+        const meta = JSON.parse(localStorage.getItem(STORAGE_META)!);
+        expect(meta.generado_en).toBe(plan.generado_en);
     });
 
 });
@@ -150,15 +162,14 @@ describe("SISTEMA", () => {
         mockFetchOk(planHoy());
         render(<App />);
         expect(screen.getByText("SmartCook")).toBeTruthy();
-        expect(screen.getByText("Your intelligent cooking assistant")).toBeTruthy();
+        expect(screen.getByText("Planifica tu menú semanal de forma inteligente. Comidas equilibradas con un solo clic.")).toBeTruthy();
         fireEvent.click(screen.getByText("Get Started"));
-        expect(screen.getByText("Generar planificación")).toBeTruthy();
-        fireEvent.click(screen.getByText("Generar planificación"));
+        expect(screen.getByRole("heading", { name: "Generar planificación" })).toBeTruthy();
+        clickGenerarPlanificacion();
         expect(screen.getByText(/Generando tu menú/i)).toBeTruthy();
-        await waitFor(() => expect(screen.getByText(/Menú de la semana/i)).toBeTruthy());
+        await waitFor(() => expect(screen.getByText(/Menú del mes/i)).toBeTruthy());
         expect(screen.getByText("Paella valenciana")).toBeTruthy();
-        expect(screen.getByText("↺ Regenerar")).toBeTruthy();
-        expect(screen.getByText("Inicio")).toBeTruthy();
+        expect(screen.getByRole("button", { name: "Regenerar" })).toBeTruthy();
     });
 
     it("flujo completo: landing → generate → error → reintentar → éxito", async () => {
@@ -168,10 +179,10 @@ describe("SISTEMA", () => {
         );
         render(<App />);
         fireEvent.click(screen.getByText("Get Started"));
-        fireEvent.click(screen.getByText("Generar planificación"));
+        clickGenerarPlanificacion();
         await waitFor(() => screen.getByText("Servidor caído"));
         fireEvent.click(screen.getByText("Reintentar"));
-        await waitFor(() => expect(screen.getByText(/Menú de la semana/i)).toBeTruthy());
+        await waitFor(() => expect(screen.getByText(/Menú del mes/i)).toBeTruthy());
         expect(screen.getByText("Paella valenciana")).toBeTruthy();
     });
 
@@ -180,14 +191,14 @@ describe("SISTEMA", () => {
         mockFetchOk({
             generado_en: new Date().toISOString(),
             dias: [{
-                dia:    new Date().toISOString(),
+                dia: new Date().toISOString(),
                 comida: { nombre: "Fabada asturiana" },
-                cena:   { nombre: "Caldo gallego" },
+                cena: { nombre: "Caldo gallego" },
             }],
         });
         render(<App />);
         fireEvent.click(screen.getByText("Get Started"));
-        fireEvent.click(screen.getByText("Generar planificación"));
+        clickGenerarPlanificacion();
         await waitFor(() => screen.getByText("Generar nueva"));
         fireEvent.click(screen.getByText("Generar nueva"));
         await waitFor(() => expect(screen.getByText("Fabada asturiana")).toBeTruthy());
@@ -198,11 +209,11 @@ describe("SISTEMA", () => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(planHoy()));
         render(<App />);
         fireEvent.click(screen.getByText("Get Started"));
-        fireEvent.click(screen.getByText("Generar planificación"));
+        clickGenerarPlanificacion();
         await waitFor(() => screen.getByText("Ver la existente"));
         fireEvent.click(screen.getByText("Ver la existente"));
-        await waitFor(() => screen.getByText("↺ Regenerar"));
-        fireEvent.click(screen.getByText("↺ Regenerar"));
+        await waitFor(() => screen.getByRole("button", { name: "Regenerar" }));
+        fireEvent.click(screen.getByRole("button", { name: "Regenerar" }));
         expect(screen.getByText("Ya tienes una planificación de hoy")).toBeTruthy();
     });
 });

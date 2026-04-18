@@ -2,6 +2,8 @@ import { Ingrediente, Planificacion } from "@/types/planning";
 
 const CUCHARADA_A_ML = 15;
 const PIZCA_A_G = 1;
+const HOJA_A_G = 0.5;
+const DIENTE_A_G = 5;
 
 export function formatFechaGenerado(iso?: string) {
   if (!iso) return "-";
@@ -43,7 +45,7 @@ export function formatUnidad(unidad: string): string {
 export function convertirIngredienteUnidad(ingrediente: Ingrediente): Ingrediente {
   const unidad = (ingrediente.unidad || "").toLowerCase().trim();
 
-  if (unidad === "cucharada" || unidad === "cucharadas" || unidad === "c/s") {
+  if (unidad === "cucharada" || unidad === "cucharadas") {
     return {
       ...ingrediente,
       cantidad: ingrediente.cantidad * CUCHARADA_A_ML,
@@ -55,6 +57,22 @@ export function convertirIngredienteUnidad(ingrediente: Ingrediente): Ingredient
     return {
       ...ingrediente,
       cantidad: ingrediente.cantidad * PIZCA_A_G,
+      unidad: "g",
+    };
+  }
+
+  if (unidad === "hoja" || unidad === "hojas") {
+    return {
+      ...ingrediente,
+      cantidad: ingrediente.cantidad * HOJA_A_G,
+      unidad: "g",
+    };
+  }
+
+  if (unidad === "dientes") {
+    return {
+      ...ingrediente,
+      cantidad: ingrediente.cantidad * DIENTE_A_G,
       unidad: "g",
     };
   }
