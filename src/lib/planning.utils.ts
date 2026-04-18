@@ -2,7 +2,7 @@ import { Ingrediente, Planificacion } from "@/types/planning";
 
 const CUCHARADA_A_ML = 15;
 const PIZCA_A_G = 1;
-const HOJA_A_G = 0.5;
+const HOJA_A_G = 3;
 const DIENTE_A_G = 5;
 
 export function formatFechaGenerado(iso?: string) {
