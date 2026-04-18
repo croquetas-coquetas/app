@@ -216,7 +216,7 @@ describe("INTEGRACION", () => {
         render(<App />);
         await advanceInit();
         expect(screen.getByText("No hay semana generada")).toBeTruthy();
-        expect(screen.getByText("Menú del mes")).toBeTruthy();
+        expect(screen.getByText("Menú semanal")).toBeTruthy();
     });
 
     it("si no es primera apertura y hay planificación, entra directo al calendario", async () => {
@@ -224,7 +224,7 @@ describe("INTEGRACION", () => {
         seedPlanHoy();
         render(<App />);
         await advanceInit();
-        expect(screen.getByText("Menú del mes")).toBeTruthy();
+        expect(screen.getByText("Menú semanal")).toBeTruthy();
         expect(screen.getByText("Paella valenciana")).toBeTruthy();
         expect(screen.queryByText("Get Started")).toBeNull();
     });
@@ -250,7 +250,7 @@ describe("INTEGRACION", () => {
         await renderAsFirstTime();
         fireEvent.click(screen.getByText("Get Started"));
         clickGenerateButton();
-        await waitFor(() => screen.getByText(/Menú del mes/i));
+        await waitFor(() => screen.getByText(/Menú semanal/i));
         expect(localStorage.getItem(STORAGE_META)).toBeTruthy();
         expect(localStorage.getItem(`${STORAGE_PREFIX}dia_0`)).toBeTruthy();
         const meta = JSON.parse(localStorage.getItem(STORAGE_META)!);
@@ -281,7 +281,7 @@ describe("SISTEMA", () => {
         expect(screen.getByRole("heading", { name: /Generar planificación/i })).toBeTruthy();
         clickGenerateButton();
         expect(screen.getByText(/Generando tu menú/i)).toBeTruthy();
-        await waitFor(() => expect(screen.getByText(/Menú del mes/i)).toBeTruthy());
+        await waitFor(() => expect(screen.getByText(/Menú semanal/i)).toBeTruthy());
         expect(screen.getByText("Paella valenciana")).toBeTruthy();
         expect(screen.getByText("Regenerar")).toBeTruthy();
     });
@@ -296,7 +296,7 @@ describe("SISTEMA", () => {
         clickGenerateButton();
         await waitFor(() => screen.getByText("Servidor caído"));
         fireEvent.click(screen.getByText("Reintentar"));
-        await waitFor(() => expect(screen.getByText(/Menú del mes/i)).toBeTruthy());
+        await waitFor(() => expect(screen.getByText(/Menú semanal/i)).toBeTruthy());
         expect(screen.getByText("Paella valenciana")).toBeTruthy();
     });
 
