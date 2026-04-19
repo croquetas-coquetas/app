@@ -1,0 +1,100 @@
+name: Frontend CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'src/**'
+      - 'tests-SC-05/**'
+      - 'package.json'
+      - 'tsconfig.json'
+      - 'vite.config.ts'
+      - '.github/workflows/frontend-ci.yml'
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'src/**'
+      - 'tests-SC-05/**'
+      - 'package.json'
+      - 'tsconfig.json'
+      - 'vite.config.ts'
+      - '.github/workflows/frontend-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test-sc05:
+    runs-on: ubuntu-latest
+    name: SC-05 Tests (Shopping List)
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Check TypeScript
+        run: bun run build
+
+      - name: Run SC-05 Unit Tests
+        run: bun test tests-SC-05/**Unitarios.test.ts
+        continue-on-error: false
+
+      - name: Run SC-05 Integration Tests
+        if: hashFiles('tests-SC-05/**Integracion.test.ts') != ''
+        run: bun test tests-SC-05/**Integracion.test.ts
+        continue-on-error: false
+
+      - name: Run SC-05 System Tests
+        if: hashFiles('tests-SC-05/**Sistema.test.ts') != ''
+        run: bun test tests-SC-05/**Sistema.test.ts
+        continue-on-error: false
+
+  lint:
+    runs-on: ubuntu-latest
+    name: Lint & Type Check
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Type Check
+        run: bunx tsc --noEmit
+
+      - name: Build Check
+        run: bun run build
+
+  all-tests-passed:
+    runs-on: ubuntu-latest
+    name: All Tests Summary
+    needs: [test-sc05, lint]
+    if: always()
+
+    steps:
+      - name: Check Test Results
+        run: |
+          if [ "${{ needs.test-sc05.result }}" != "success" ] || [ "${{ needs.lint.result }}" != "success" ]; then
+            echo "❌ Some tests or checks failed"
+            exit 1
+          fi
+          echo "✅ All tests and checks passed"
+          exit 0

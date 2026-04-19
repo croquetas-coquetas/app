@@ -9,6 +9,11 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:ui": "vitest --ui",
+    "test:sc05": "vitest tests-SC-05/",
+    "test:sc05:unit": "vitest tests-SC-05/**Unitarios.test.ts",
+    "test:sc05:integration": "vitest tests-SC-05/**Integracion.test.ts",
+    "test:sc05:system": "vitest tests-SC-05/**Sistema.test.ts",
+    "test:coverage": "vitest tests-SC-05/ --coverage",
     "tauri": "tauri"
   },
   "dependencies": {
