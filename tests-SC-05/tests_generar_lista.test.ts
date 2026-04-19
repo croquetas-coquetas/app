@@ -5,13 +5,17 @@ import * as plan from "@/types/planning.ts";
 // Mocks
 // ---------------------------------------------------------------------------
 
-vi.mock("@/lib/shopping.storage");
+const mockCargarPlanificacion = vi.fn();
 
-import { cargarPlanificacion } from "@/lib/shopping.storage";
+vi.mock("@/lib/shopping.storage", () => ({
+  cargarPlanificacion: mockCargarPlanificacion,
+  saveListaCompra: vi.fn(),
+  getSavedListaCompra: vi.fn(),
+}));
 
 import { generarListaCompra } from "@/lib/generarLista";
 
-const mockCargar = vi.mocked(cargarPlanificacion);
+const mockCargar = mockCargarPlanificacion;
 
 // ---------------------------------------------------------------------------
 // Funciones auxiliares
@@ -198,6 +202,62 @@ describe("generarListaCompra", () => {
       expect(sal?.cantidad).toBe(5);
     });
 
+    it("Convierte tazas a mililitros", () => {
+      mockCargar.mockReturnValue({
+        generado_en: "2025-01-01T00:00:00.000Z",
+        dias: [
+          makeDia(
+            [makeIngrediente("harina", 2, "tazas")],
+            [makeIngrediente("harina", 1, "taza")]
+          ),
+        ],
+      });
+
+      const result = generarListaCompra();
+      const harina = result.items.find((i) => i.nombre === "harina");
+
+      expect(harina?.unidad).toBe("ml");
+      expect(harina?.cantidad).toBe(720);
+    });
+
+    it("Convierte kilogramos a gramos", () => {
+      mockCargar.mockReturnValue({
+        generado_en: "2025-01-01T00:00:00.000Z",
+        dias: [
+          makeDia(
+            [makeIngrediente("arroz", 1, "kg")],
+            [makeIngrediente("arroz", 0.5, "kilogramo")]
+          ),
+        ],
+      });
+
+      const result = generarListaCompra();
+      const arroz = result.items.find((i) => i.nombre === "arroz");
+
+      // 1kg = 1000g, 0.5kg = 500g, total 1500g = 1.5kg (normalizado)
+      expect(arroz?.unidad).toBe("kg");
+      expect(arroz?.cantidad).toBe(1.5);
+    });
+
+    it("Convierte litros a mililitros", () => {
+      mockCargar.mockReturnValue({
+        generado_en: "2025-01-01T00:00:00.000Z",
+        dias: [
+          makeDia(
+            [makeIngrediente("agua", 1.5, "litros")],
+            [makeIngrediente("agua", 0.5, "l")]
+          ),
+        ],
+      });
+
+      const result = generarListaCompra();
+      const agua = result.items.find((i) => i.nombre === "agua");
+
+      // 1.5l = 1500ml, 0.5l = 500ml, total 2000ml = 2l (normalizado)
+      expect(agua?.unidad).toBe("l");
+      expect(agua?.cantidad).toBe(2);
+    });
+
     it("Elimina espacios en blanco sobrantes", () => {
       mockCargar.mockReturnValue({
         generado_en: "2025-01-01T00:00:00.000Z",
@@ -209,7 +269,88 @@ describe("generarListaCompra", () => {
     });
   });
 
-  // ── Ordenacion ──────────────────────────────────────────────────────────────
+  // Normalizacion de unidades
+
+  describe("Normalización de unidades", () => {
+    it("Convierte gramos a kilogramos cuando es >= 1000g", () => {
+      mockCargar.mockReturnValue({
+        generado_en: "2025-01-01T00:00:00.000Z",
+        dias: [
+          makeDia([makeIngrediente("harina", 2000, "g")]),
+        ],
+      });
+
+      const result = generarListaCompra();
+      const harina = result.items.find((i) => i.nombre === "harina");
+
+      expect(harina?.unidad).toBe("kg");
+      expect(harina?.cantidad).toBe(2);
+    });
+
+    it("Convierte mililitros a litros cuando es >= 1000ml", () => {
+      mockCargar.mockReturnValue({
+        generado_en: "2025-01-01T00:00:00.000Z",
+        dias: [
+          makeDia([makeIngrediente("agua", 1500, "ml")]),
+        ],
+      });
+
+      const result = generarListaCompra();
+      const agua = result.items.find((i) => i.nombre === "agua");
+
+      expect(agua?.unidad).toBe("l");
+      expect(agua?.cantidad).toBe(1.5);
+    });
+
+    it("No convierte si es menor a 1000", () => {
+      mockCargar.mockReturnValue({
+        generado_en: "2025-01-01T00:00:00.000Z",
+        dias: [
+          makeDia([makeIngrediente("sal", 500, "g")]),
+        ],
+      });
+
+      const result = generarListaCompra();
+      const sal = result.items.find((i) => i.nombre === "sal");
+
+      expect(sal?.unidad).toBe("g");
+      expect(sal?.cantidad).toBe(500);
+    });
+
+    it("Redondea a 2 decimales en la normalización", () => {
+      mockCargar.mockReturnValue({
+        generado_en: "2025-01-01T00:00:00.000Z",
+        dias: [
+          makeDia([makeIngrediente("harina", 1234, "g")]),
+        ],
+      });
+
+      const result = generarListaCompra();
+      const harina = result.items.find((i) => i.nombre === "harina");
+
+      expect(harina?.unidad).toBe("kg");
+      expect(harina?.cantidad).toBe(1.23);
+    });
+
+    it("Aplica normalización después de acumular ingredientes", () => {
+      mockCargar.mockReturnValue({
+        generado_en: "2025-01-01T00:00:00.000Z",
+        dias: [
+          makeDia([makeIngrediente("arroz", 600, "g")]),
+          makeDia([makeIngrediente("arroz", 500, "g")]),
+          makeDia([makeIngrediente("arroz", 100, "g")]),
+        ],
+      });
+
+      const result = generarListaCompra();
+      const arroz = result.items.find((i) => i.nombre === "arroz");
+
+      expect(arroz?.unidad).toBe("kg");
+      expect(arroz?.cantidad).toBe(1.2);
+    });
+  });
+
+  // Ordenacion
 
   describe("Ordenación", () => {
     it("Ordena los objetos por categoría", () => {

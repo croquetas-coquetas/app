@@ -180,7 +180,7 @@ export function normalizarUnidad(cantidad: number, unidad?: string): { cantidad:
   if (u === "ml" && cantidad >= 1000) {
     return {
       cantidad: Math.round((cantidad / 1000) * 100) / 100, // Redondear a 2 decimales
-      unidad: "L",
+      unidad: "l",
     };
   }
 
