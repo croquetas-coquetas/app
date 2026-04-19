@@ -5,12 +5,16 @@ import * as plan from "@/types/planning.ts";
 // Mocks
 // ---------------------------------------------------------------------------
 
-const mockCargarPlanificacion = vi.fn();
+const { mockCargarPlanificacion, mockSaveListaCompra, mockGetSavedListaCompra } = vi.hoisted(() => ({
+  mockCargarPlanificacion: vi.fn(),
+  mockSaveListaCompra: vi.fn(),
+  mockGetSavedListaCompra: vi.fn(),
+}));
 
 vi.mock("@/lib/shopping.storage", () => ({
   cargarPlanificacion: mockCargarPlanificacion,
-  saveListaCompra: vi.fn(),
-  getSavedListaCompra: vi.fn(),
+  saveListaCompra: mockSaveListaCompra,
+  getSavedListaCompra: mockGetSavedListaCompra,
 }));
 
 import { generarListaCompra } from "@/lib/generarLista";
