@@ -4,6 +4,9 @@ const CUCHARADA_A_ML = 15;
 const PIZCA_A_G = 1;
 const HOJA_A_G = 3;
 const DIENTE_A_G = 5;
+const TAZA_A_ML = 240;
+const KG_A_G = 1000;
+const LITRO_A_ML = 1000;
 
 export function formatFechaGenerado(iso?: string) {
   if (!iso) return "-";
@@ -77,6 +80,30 @@ export function convertirIngredienteUnidad(ingrediente: Ingrediente): Ingredient
     };
   }
 
+  if (unidad === "taza" || unidad === "tazas") {
+    return {
+      ...ingrediente,
+      cantidad: ingrediente.cantidad * TAZA_A_ML,
+      unidad: "ml",
+    };
+  }
+
+  if (unidad === "kg" || unidad === "kilogramo" || unidad === "kilogramos") {
+    return {
+      ...ingrediente,
+      cantidad: ingrediente.cantidad * KG_A_G,
+      unidad: "g",
+    };
+  }
+
+  if (unidad === "l" || unidad === "litro" || unidad === "litros") {
+    return {
+      ...ingrediente,
+      cantidad: ingrediente.cantidad * LITRO_A_ML,
+      unidad: "ml",
+    };
+  }
+
   return ingrediente;
 }
 
@@ -134,5 +161,29 @@ export function getDiasPrevios(plan: Planificacion | null): import("@/types/plan
       return false;
     }
   });
+}
+
+export function normalizarUnidad(cantidad: number, unidad?: string): { cantidad: number; unidad: string } {
+  if (!unidad) return { cantidad, unidad: "g" };
+
+  const u = unidad.toLowerCase().trim();
+
+  // Convertir g a kg si es >= 1000
+  if (u === "g" && cantidad >= 1000) {
+    return {
+      cantidad: Math.round((cantidad / 1000) * 100) / 100, // Redondear a 2 decimales
+      unidad: "kg",
+    };
+  }
+
+  // Convertir ml a l si es >= 1000
+  if (u === "ml" && cantidad >= 1000) {
+    return {
+      cantidad: Math.round((cantidad / 1000) * 100) / 100, // Redondear a 2 decimales
+      unidad: "L",
+    };
+  }
+
+  return { cantidad, unidad };
 }
 
