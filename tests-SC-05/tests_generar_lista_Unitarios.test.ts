@@ -181,7 +181,7 @@ describe("generarListaCompra", () => {
       const aceite = result.items.find((i) => i.nombre === "aceite");
 
       expect(aceite?.unidad).toBe("ml");
-      expect(aceite?.cantidad).toBe(45);
+      expect(aceite?.cantidad).toBe(45); 
     });
 
     it("Convierte pizcas a gramos", () => {
