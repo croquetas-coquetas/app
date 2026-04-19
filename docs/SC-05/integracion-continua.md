@@ -260,7 +260,7 @@ En GitHub Actions, verás:
 
 ```
 ✓ Run SC-05 Unit Tests
-  22 pass, 0 fail, 35 expect() calls
+  22 pass, 0 fail, 35 expect() calls 
   
 ✓ Run SC-05 Integration Tests
   [Skip si no existe archivo]
