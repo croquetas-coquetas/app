@@ -99,6 +99,8 @@ Para verificar que las conversiones funcionan correctamente:
 4. Buscar `smartcook_lista_compra`
 5. Verificar que las cantidades ≥1000 se muestren en kg (si g) o l (si ml)
 
+esto o cuendo este la sc06 mas facil
+
 ## Estado
 - Tarea completada
 - Código integrado y funcional
