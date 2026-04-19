@@ -175,7 +175,7 @@ export function normalizarUnidad(cantidad: number, unidad?: string): { cantidad:
       unidad: "kg",
     };
   }
- 
+  
   // Convertir ml a l si es >= 1000
   if (u === "ml" && cantidad >= 1000) {
     return {
