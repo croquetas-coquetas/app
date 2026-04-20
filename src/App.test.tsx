@@ -3,7 +3,10 @@ import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { render, screen, fireEvent, waitFor, cleanup, act } from "@testing-library/react";
 import App from "./App";
 import { savePlanificacion } from "@/lib/planning.storage";
+import { saveListaCompra } from "@/lib/shopping.storage";
 import { STORAGE_META, STORAGE_PREFIX } from "@/lib/planning.constants";
+import { Planificacion } from "@/types/planning";
+import { ListaCompra } from "@/types/shopping";
 
 
 const FIRST_TIME_KEY = "smartcook_first_time";
@@ -47,7 +50,7 @@ afterEach(() => {
     vi.restoreAllMocks();
 });
 
-function makePlanificacion(fecha: Date) {
+function makePlanificacion(fecha: Date): Planificacion {
     return {
         generado_en: fecha.toISOString(),
         dias: [
@@ -89,7 +92,7 @@ function makePlanificacion(fecha: Date) {
     };
 }
 
-const planHoy = () => makePlanificacion(new Date());
+const planHoy = (): Planificacion => makePlanificacion(new Date());
 
 async function advanceInit() {
     await act(async () => {
@@ -114,6 +117,48 @@ function seedNoEsPrimeraVez() {
 
 function seedPlanHoy() {
     savePlanificacion(planHoy());
+}
+
+function seedPlan(plan: Planificacion = planHoy()) {
+    savePlanificacion(plan);
+}
+
+function makePlanificacionConIngredientes(fecha: Date): Planificacion {
+    return {
+        generado_en: fecha.toISOString(),
+        dias: [
+            {
+                dia: fecha.toISOString(),
+                comida: {
+                    nombre: "Pasta con tomate",
+                    grupo_principal: "cereal",
+                    ingredientes: [
+                        { nombre: "Tomate", cantidad: 350, unidad: "g", categoria: "verdura" },
+                    ],
+                    pasos: ["Cocer la pasta"],
+                    tags: ["rapida"],
+                },
+                cena: {
+                    nombre: "Sopa",
+                    grupo_principal: "verduras",
+                    ingredientes: [
+                        { nombre: "Agua", cantidad: 1, unidad: "l", categoria: "otros" },
+                    ],
+                    pasos: ["Calentar"],
+                    tags: ["ligera"],
+                },
+            },
+        ],
+    };
+}
+
+function makeListaCompra(planificacionGeneradaEn: string, items: ListaCompra["items"]): ListaCompra {
+    return {
+        generado_en: new Date().toISOString(),
+        planificacion_generada_en: planificacionGeneradaEn,
+        total_items: items.length,
+        items,
+    };
 }
 
 function clickGenerateButton() {
@@ -196,6 +241,81 @@ describe("UNIDAD", () => {
         await waitFor(() =>
             expect(screen.getByText("¿Quieres ver la planificación existente o generar una nueva?")).toBeTruthy()
         );
+    });
+
+    it("SC-06 muestra una lista guardada con ingredientes y cantidades", async () => {
+        seedNoEsPrimeraVez();
+        const plan = makePlanificacionConIngredientes(new Date());
+        seedPlan(plan);
+        saveListaCompra(makeListaCompra(plan.generado_en!, [
+            { nombre: "Tomate", cantidad: 350, unidad: "g", categoria: "verdura" },
+        ]));
+
+        render(<App />);
+        await advanceInit();
+        fireEvent.click(screen.getByRole("button", { name: /Lista de la compra/i }));
+
+        expect(screen.getByRole("heading", { name: "Lista de la compra" })).toBeTruthy();
+        expect(screen.getByText("Tomate")).toBeTruthy();
+        expect(screen.getByText("350 g")).toBeTruthy();
+        expect(screen.getByText("0 de 1 comprados")).toBeTruthy();
+    });
+
+    it("SC-06 muestra el mensaje de lista vacia cuando la lista guardada no tiene ingredientes", async () => {
+        seedNoEsPrimeraVez();
+        const plan = planHoy();
+        seedPlan(plan);
+        saveListaCompra(makeListaCompra(plan.generado_en!, []));
+
+        render(<App />);
+        await advanceInit();
+        fireEvent.click(screen.getByRole("button", { name: /Lista de la compra/i }));
+
+        expect(screen.getByText("No hay ingredientes en esta lista.")).toBeTruthy();
+    });
+
+    it("SC-06 muestra el recuadro de generacion si no hay lista y abre la lista tras generar", async () => {
+        seedNoEsPrimeraVez();
+        const plan = makePlanificacionConIngredientes(new Date());
+        seedPlan(plan);
+
+        render(<App />);
+        await advanceInit();
+        fireEvent.click(screen.getByRole("button", { name: /Lista de la compra/i }));
+
+        expect(screen.getByText("No hay lista generada")).toBeTruthy();
+        expect(screen.getByText("Primero debe generarse la lista de la compra.")).toBeTruthy();
+
+        fireEvent.click(screen.getByRole("button", { name: "Generar" }));
+
+        expect(screen.getByRole("heading", { name: "Lista de la compra" })).toBeTruthy();
+        expect(screen.getByText("Tomate")).toBeTruthy();
+        expect(screen.getByText("350 g")).toBeTruthy();
+    });
+
+    it("SC-06 conserva los ingredientes marcados como comprados al volver a abrir la lista", async () => {
+        seedNoEsPrimeraVez();
+        const plan = makePlanificacionConIngredientes(new Date());
+        seedPlan(plan);
+        saveListaCompra(makeListaCompra(plan.generado_en!, [
+            { nombre: "Tomate", cantidad: 350, unidad: "g", categoria: "verdura" },
+        ]));
+
+        render(<App />);
+        await advanceInit();
+        fireEvent.click(screen.getByRole("button", { name: /Lista de la compra/i }));
+
+        const checkbox = screen.getByLabelText("Marcar Tomate como comprado") as HTMLInputElement;
+        fireEvent.click(checkbox);
+        expect(checkbox.checked).toBe(true);
+        expect(screen.getByText("1 de 1 comprados")).toBeTruthy();
+
+        fireEvent.click(screen.getByRole("button", { name: /Volver/i }));
+        fireEvent.click(screen.getByRole("button", { name: /Lista de la compra/i }));
+
+        const persistedCheckbox = screen.getByLabelText("Marcar Tomate como comprado") as HTMLInputElement;
+        expect(persistedCheckbox.checked).toBe(true);
+        expect(screen.getByText("1 de 1 comprados")).toBeTruthy();
     });
 });
 

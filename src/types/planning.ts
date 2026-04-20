@@ -5,6 +5,7 @@ export type AppState =
   | "confirm-overwrite"
   | "loading"
   | "success"
+  | "shopping-list"
   | "day-detail"
   | "error"
   | "no-plan-generated";
