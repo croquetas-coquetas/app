@@ -20,8 +20,6 @@ export function DayFullscreenView({ dia, activeTab, onTabChange, onBack }: DayFu
 
   const recetaActiva = activeTab === "comida" ? dia.comida : dia.cena;
   const isCurrentDay = isToday(dia.dia);
-  // const pasos = recetaActiva.pasos ?? [];
-  // const hayPasosVacios = pasos.some((paso) => typeof paso !== "string" || paso.trim().length === 0);
 
   return (
     <section className="day-detail-screen day-detail-enter" aria-label="Detalle del dia seleccionado">
