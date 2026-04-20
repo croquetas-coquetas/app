@@ -10,6 +10,7 @@ import { ErrorState } from "@/components/planning/states/ErrorState";
 import { LoadingState } from "@/components/planning/states/LoadingState";
 import { InitializingState } from "@/components/planning/states/InitializingState";
 import { NoPlanGeneratedState } from "@/components/planning/states/NoPlanGeneratedState";
+import { ShoppingListEmptyDialog } from "@/components/shopping/ShoppingListEmptyDialog";
 import { ShoppingListMissingDialog } from "@/components/shopping/ShoppingListMissingDialog";
 import { ShoppingListScreen } from "@/components/shopping/ShoppingListScreen";
 import { generarListaCompra } from "@/lib/generarLista";
@@ -40,6 +41,7 @@ function App() {
   const [activeMealTab, setActiveMealTab] = useState<MealTab>("comida");
   const [shoppingList, setShoppingList] = useState<ListaCompra | null>(null);
   const [shoppingListMissingOpen, setShoppingListMissingOpen] = useState(false);
+  const [shoppingListEmptyOpen, setShoppingListEmptyOpen] = useState(false);
 
   useEffect(() => {
     migrateLegacyStorage();
@@ -68,6 +70,7 @@ function App() {
 
   const handleRequestGenerate = () => {
     setShoppingListMissingOpen(false);
+    setShoppingListEmptyOpen(false);
     const hoy = getPlanificacionHoy();
     if (hoy) {
       setPlanificacionExistente(hoy);
@@ -79,6 +82,7 @@ function App() {
 
   const handleDaySelect = (dia: DiaPlanning) => {
     setShoppingListMissingOpen(false);
+    setShoppingListEmptyOpen(false);
     setSelectedDia(dia);
     setActiveMealTab("comida");
     setAppState("day-detail");
@@ -86,6 +90,7 @@ function App() {
 
   const handleBackToCalendar = () => {
     setShoppingListMissingOpen(false);
+    setShoppingListEmptyOpen(false);
     setAppState("success");
   };
 
@@ -103,19 +108,21 @@ function App() {
     const saved = getSavedListaCompra();
     if (isListaCompraForCurrentPlan(saved)) {
       if (saved.items.length === 0) {
-        window.alert("La lista de la compra está vacía");
         setShoppingList(null);
         setShoppingListMissingOpen(false);
+        setShoppingListEmptyOpen(true);
         return;
       }
 
       setShoppingList(saved);
       setShoppingListMissingOpen(false);
+      setShoppingListEmptyOpen(false);
       setAppState("shopping-list");
       return;
     }
 
     setShoppingList(null);
+    setShoppingListEmptyOpen(false);
     setShoppingListMissingOpen(true);
   };
 
@@ -213,6 +220,10 @@ function App() {
 
         {appState === "success" && shoppingListMissingOpen && (
             <ShoppingListMissingDialog onGenerate={handleShoppingListGenerate} />
+        )}
+
+        {appState === "success" && shoppingListEmptyOpen && (
+            <ShoppingListEmptyDialog onClose={() => setShoppingListEmptyOpen(false)} />
         )}
 
         {appState === "shopping-list" && shoppingList && (
