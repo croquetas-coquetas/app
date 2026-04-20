@@ -298,6 +298,18 @@
   color: var(--color-muted-foreground, #7a7a7a);
 }
 
+.day-detail-error {
+  margin: 0;
+  border: 1px solid #f3b3a7;
+  border-radius: 0.85rem;
+  background: #fff1ee;
+  color: #9f2417;
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.45;
+  padding: 0.75rem 0.85rem;
+}
+
 .day-detail-steps-wrap {
   display: flex;
   flex-direction: column;
