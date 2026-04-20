@@ -102,6 +102,13 @@ function App() {
 
     const saved = getSavedListaCompra();
     if (isListaCompraForCurrentPlan(saved)) {
+      if (saved.items.length === 0) {
+        window.alert("La lista de la compra está vacía");
+        setShoppingList(null);
+        setShoppingListMissingOpen(false);
+        return;
+      }
+
       setShoppingList(saved);
       setShoppingListMissingOpen(false);
       setAppState("shopping-list");

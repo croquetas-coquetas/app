@@ -261,17 +261,19 @@ describe("UNIDAD", () => {
         expect(screen.getByText("0 de 1 comprados")).toBeTruthy();
     });
 
-    it("SC-06 muestra el mensaje de lista vacia cuando la lista guardada no tiene ingredientes", async () => {
+    it("SC-06 muestra una alerta si la lista guardada no tiene ingredientes", async () => {
         seedNoEsPrimeraVez();
         const plan = planHoy();
         seedPlan(plan);
         saveListaCompra(makeListaCompra(plan.generado_en!, []));
+        const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
 
         render(<App />);
         await advanceInit();
         fireEvent.click(screen.getByRole("button", { name: /Lista de la compra/i }));
 
-        expect(screen.getByText("No hay ingredientes en esta lista.")).toBeTruthy();
+        expect(alertSpy).toHaveBeenCalledWith("La lista de la compra está vacía");
+        expect(screen.queryByRole("heading", { name: "Lista de la compra" })).toBeNull();
     });
 
     it("SC-06 muestra el recuadro de generacion si no hay lista y abre la lista tras generar", async () => {
