@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, RotateCcw, ShoppingCart } from "lucide-react";
+import { RotateCcw } from "lucide-react";
 import { MONTHS } from "@/lib/planning.constants";
 import { cn } from "@/lib/utils";
 import { formatFechaGenerado, getDayKey, isToday } from "@/lib/planning.utils";
 import { DiaPlanning, Planificacion } from "@/types/planning";
-import {generarListaCompra} from "@/lib/generarLista.ts";
 
 interface CalendarViewProps {
   planificacion: Planificacion;
@@ -16,8 +15,6 @@ interface CalendarViewProps {
 export function CalendarView({ planificacion, onRegenerate, onDaySelect }: CalendarViewProps) {
   const hoy = new Date();
   const [viewDate, setViewDate] = useState(() => new Date(hoy.getFullYear(), hoy.getMonth(), 1));
-  const [successDialogOpen, setSuccessDialogOpen] = useState(false);
-  const [listaItemsCount, setListaItemsCount] = useState<number | null>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
   const todayRef = useRef<HTMLButtonElement | null>(null);
 
@@ -73,16 +70,6 @@ export function CalendarView({ planificacion, onRegenerate, onDaySelect }: Calen
     });
   };
 
-  const handleGenerarLista = () => {
-    try {
-      const lista = generarListaCompra();
-      setListaItemsCount(lista.total_items);
-      setSuccessDialogOpen(true);
-    } catch (err) {
-      console.error("Error al generar la lista de la compra:", err);
-    }
-  };
-
   return (
       <section
           className="w-full max-w-3xl mx-auto calendar-enter rounded-2xl border border-border bg-background overflow-hidden">
@@ -96,6 +83,18 @@ export function CalendarView({ planificacion, onRegenerate, onDaySelect }: Calen
               Generado el {formatFechaGenerado(planificacion.generado_en)}
             </p>
           </div>
+
+          {/* Regenerate button top right */}
+          <Button
+            variant="outline"
+            size="icon-sm"
+            onClick={onRegenerate}
+            className="absolute top-7 right-5 rounded-lg border-border/80"
+            aria-label="Regenerar planificación"
+            title="Regenerar planificación"
+          >
+            <RotateCcw className="size-5" />
+          </Button>
         </div>
 
         <div className="px-4 pb-3">
