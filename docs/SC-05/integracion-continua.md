@@ -20,37 +20,19 @@ Se ha configurado un pipeline de integración continua completo para SC-05 que e
 
 **Archivo**: `.github/workflows/frontend-ci.yml`
 
-### Disparadores
-El workflow se ejecuta en:
-```yaml
-push:
-  branches: [main, develop]
-  paths: [src/**, tests-SC-05/**, package.json, ...]
-
-pull_request:
-  branches: [main, develop]
-  paths: [src/**, tests-SC-05/**, ...]
-```
-
-### Jobs Principales
-
-#### 1. **test-sc05** - Tests de SC-05
-Ejecuta tests en orden con validación strict:
+### Job: test-sc05
+Ejecuta tests unitarios de generación de lista:
 
 ```bash
-# 1. Tests Unitarios
 bun test tests-SC-05/**Unitarios.test.ts
-
-# 2. Tests Integración (si existen)
-bun test tests-SC-05/**Integracion.test.ts
-
-# 3. Tests Sistema (si existen)
-bun test tests-SC-05/**Sistema.test.ts
 ```
 
-**Comportamiento**:
-- Si un test falla, el workflow se detiene
-- Si un archivo de tests no existe, se ejecuta el siguiente
+**Tests ejecutados**: 22 tests unitarios
+- Estructura de lista
+- Acumulación de ingredientes
+- Normalización de unidades
+- Ordenación
+- Corner cases
 
 #### 2. **lint** - Type Check & Build
 ```bash
@@ -65,53 +47,53 @@ Valida que todos los jobs anteriores pasaron.
 
 **Archivo**: `.github/workflows/server-ci.yml` (actualizado)
 
-### Nuevos Steps para SC-05
+### Job: build-test
+Ejecuta tests del servidor:
 
-```yaml
-- name: Run SC-05 Backend Tests
-  if: ${{ hashFiles('server/test_sc_05_*.py') != '' }}
-  working-directory: server
-  run: pytest -q -v test_sc_05_unitarios.py test_sc_05_integracion.py test_sc_05_sistema.py || echo "SC-05 tests no encontrados"
+**Existing tests:**
+```bash
+pytest -q tests_unidad.py tests_integracion.py tests_sistema.py
 ```
 
-**Características**:
-- Solo ejecuta si existen archivos `test_sc_05_*.py`
-- No bloquea si no existen (para backward compatibility)
-- Ejecuta tests en orden: unitarios → integración → sistema
+**SC-05 Backend Tests:**
+```bash
+pytest -q -v test_sc_05_integracion.py
+```
+
+**Tests ejecutados**: 10 tests de integración
+- Validación de estructura
+- Unidades convertibles
+- Cantidades numéricas
+- Factores de conversión
+- Sin duplicados
+- Variabilidad de planes
+- Conversiones
+- Persistencia en BD
 
 ## Convención de Nombres de Tests
 
-### Frontend (TypeScript)
+### Frontend (TypeScript) - SC-05
 
 ```
 tests-SC-05/
-├── tests_generar_lista_Unitarios.test.ts
-│   └── Pruebas de funciones aisladas
-│
-├── tests_generar_lista_Integracion.test.ts    [POR CREAR]
-│   └── Pruebas sin mocks, con localStorage real
-│
-└── tests_generar_lista_Sistema.test.ts         [POR CREAR]
-    └── Flujo completo: API → frontend → lista
+└── tests_generar_lista_Unitarios.test.ts ✅
+    └── Pruebas de generarListaCompra()
 ```
 
-**Patrón de nombre**: `*{Unitarios|Integracion|Sistema}.test.ts`
+**Patrón**: `*Unitarios.test.ts`
 
-### Backend (Python)
+**Nota**: No hay integración/sistema frontend en SC-05 (generación de lista).
+Visualización de lista es otra SC diferente.
+
+### Backend (Python) - SC-05
 
 ```
 server/
-├── test_sc_05_unitarios.py                    [POR CREAR]
-│   └── Pruebas de funciones aisladas
-│
-├── test_sc_05_integracion.py                  [POR CREAR]
-│   └── Pruebas con API real
-│
-└── test_sc_05_sistema.py                      [POR CREAR]
-    └── Flujo completo del sistema
+└── test_sc_05_integracion.py ✅
+    └── Pruebas con API + MongoDB real
 ```
 
-**Patrón de nombre**: `test_sc_05_{unitarios|integracion|sistema}.py`
+**Patrón**: `test_sc_05_integracion.py`
 
 ## Scripts en package.json
 
@@ -122,8 +104,6 @@ Se han agregado scripts específicos para ejecutar tests localmente:
   "scripts": {
     "test:sc05": "vitest tests-SC-05/",
     "test:sc05:unit": "vitest tests-SC-05/**Unitarios.test.ts",
-    "test:sc05:integration": "vitest tests-SC-05/**Integracion.test.ts",
-    "test:sc05:system": "vitest tests-SC-05/**Sistema.test.ts",
     "test:coverage": "vitest tests-SC-05/ --coverage"
   }
 }
@@ -138,137 +118,60 @@ bun run test:sc05
 # Solo unitarios
 bun run test:sc05:unit
 
-# Solo integración
-bun run test:sc05:integration
-
-# Solo sistema
-bun run test:sc05:system
-
 # Con cobertura
 bun run test:coverage
 ```
 
 ## Flujo de Ejecución en CI
 
-### Cuando se hace Push/PR
+### Frontend Workflow (cuando hay cambios en src/ o tests-SC-05/)
 
 ```
 1. Checkout código
 2. Setup Bun
 3. Install dependencies
-4. 
-5. JOB: test-sc05
-   ├─ Run SC-05 Unit Tests
-   ├─ Run SC-05 Integration Tests (si existen)
-   └─ Run SC-05 System Tests (si existen)
-6.
-7. JOB: lint
-   ├─ Type Check (tsc)
-   └─ Build Check (vite)
-8.
-9. JOB: all-tests-passed (resumen)
-   └─ Valida que test-sc05 + lint pasaron
+4. TypeScript check & Build
+5. Run SC-05 Unit Tests (22 tests)
+   └─ tests_generar_lista_Unitarios.test.ts
+6. Run Lint & Type Check
+7. Summary
 ```
 
-## Cómo Crear Tests de Integración y Sistema
+### Server Workflow (cuando hay cambios en server/)
 
-### Frontend (TypeScript)
-
-**1. Crear `tests-SC-05/tests_generar_lista_Integracion.test.ts`:**
-
-```typescript
-import { describe, it, expect, beforeEach } from "vitest";
-
-describe("generarListaCompra - Integración", () => {
-  beforeEach(() => {
-    // Limpiar localStorage antes de cada test
-    localStorage.clear();
-  });
-
-  it("Debe guardar la lista en localStorage correctamente", () => {
-    // No usar mocks de storage
-    // Probar con localStorage real
-  });
-});
 ```
-
-**2. Crear `tests-SC-05/tests_generar_lista_Sistema.test.ts`:**
-
-```typescript
-describe("generarListaCompra - Sistema", () => {
-  it("Flujo completo: planificación → lista con conversiones", async () => {
-    // Simular flujo real desde API hasta lista generada
-  });
-});
-```
-
-### Backend (Python)
-
-**1. Crear `server/test_sc_05_integracion.py`:**
-
-```python
-import unittest
-from API_planificacion import API_planificacion
-
-class TestSC05Integracion(unittest.TestCase):
-    def test_api_devuelve_ingredientes_con_unidades_convertibles(self):
-        """Validar que API devuelve unidades que el frontend puede convertir"""
-        api = API_planificacion()
-        plan = api.generar_planificacion()
-        
-        for dia in plan["dias"]:
-            for meal in [dia["comida"], dia["cena"]]:
-                for ing in meal["ingredientes"]:
-                    unidad = ing["unidad"].lower()
-                    # Validar que unidad está en lista permitida
-                    assert unidad in ["g", "ml", "kg", "l", "cucharadas", ...]
-```
-
-**2. Crear `server/test_sc_05_sistema.py`:**
-
-```python
-class TestSC05Sistema(unittest.TestCase):
-    def test_flujo_completo_generacion_lista(self):
-        """Flujo: API planificación → frontend genera lista"""
-        # Test de integración completa
-        pass
+1. Checkout código
+2. Setup Python
+3. Install dependencies
+4. Compile server
+5. Run existing tests (si existen)
+6. Run SC-05 Backend Integration Tests (10 tests)
+   └─ test_sc_05_integracion.py
 ```
 
 ## Validación en CI
 
 **La pipeline valida:**
 
-✅ Tests unitarios pasan (22 tests)  
-✅ Tests de integración pasan (cuando existan)  
-✅ Tests de sistema pasan (cuando existan)  
+✅ Tests unitarios frontend pasan (22 tests)  
+✅ Tests de integración backend pasan (10 tests)  
 ✅ TypeScript compila sin errores  
 ✅ Proyecto construye correctamente  
 
 Si **cualquier test falla**, el workflow se detiene y marca el PR como ❌ fallido.
-
-## Rama de Ejecución
-
-El workflow se ejecuta en:
-- ✅ Push a `main`
-- ✅ Push a `develop`
-- ✅ Pull requests hacia `main` o `develop`
-- ✅ Solo si cambian archivos en `src/`, `tests-SC-05/`, `package.json`, etc.
 
 ## Logs y Debugging
 
 En GitHub Actions, verás:
 
 ```
-✓ Run SC-05 Unit Tests
+✓ Run SC-05 Unit Tests (Generación de Lista)
   22 pass, 0 fail, 35 expect() calls 
   
-✓ Run SC-05 Integration Tests
-  [Skip si no existe archivo]
+✓ Run SC-05 Backend Integration Tests
+  10 pass, 0 fail, validación completa con BD
   
-⏳ Run SC-05 System Tests
-  [Skip si no existe archivo]
-  
-✓ Run lint (Type Check)
+✓ Type Check & Build
   No errors found
 ```
 
@@ -277,37 +180,114 @@ Si algo falla:
 2. Expande el step que falló
 3. Verás el error detallado en los logs
 
+## Rama de Ejecución
+
+El workflow se ejecuta en:
+- ✅ Push a `main` o `develop` (cuando cambian archivos SC-05)
+- ✅ Pull requests hacia `main` o `develop` (cuando cambian archivos SC-05)
+- ✅ Solo si cambian archivos en `src/`, `tests-SC-05/`, `server/`, etc.
+
 ## Próximos Pasos
 
-1. **El equipo crea tests de integración**:
-   - Archivo: `tests-SC-05/tests_generar_lista_Integracion.test.ts`
-   - Framework: Vitest (igual que unitarios)
+### SC-05 Completada ✅
+Generación de lista de compra con conversiones de unidades está lista para producción.
 
-2. **El equipo crea tests de sistema**:
-   - Archivo: `tests-SC-05/tests_generar_lista_Sistema.test.ts`
-   - Framework: Vitest
+### Próximas SCs
+- **Visualización de lista**: Nueva SC con UI, localStorage y tests de frontend
+- **Edición de lista**: SC para modificar cantidades, eliminar ingredientes, etc.
 
-3. **El equipo crea tests backend (Python)**:
-   - Archivos: `server/test_sc_05_*.py`
-   - Framework: pytest (igual que otros tests)
+## Configuración Actual - SC-05
 
-El pipeline se ejecutará automáticamente sin cambios adicionales.
+| Componente | Cantidad | Estado |
+|-----------|----------|--------|
+| Tests Unitarios Frontend | 22 | ✅ Implementados |
+| Tests Integración Backend | 10 | ✅ Implementados |
+| Tests de Sistema | - | ⏳ Opcional |
+| Scripts en package.json | - | ✅ Agregados |
+| **Total Tests SC-05** | **32** | **✅ Producción** |
 
-## Configuración Actual
+## Frontend CI (TypeScript/Vitest)
 
-| Componente | Estado |
-|-----------|--------|
-| Frontend CI | ✅ Creado |
-| Server CI | ✅ Actualizado |
-| Tests Unitarios | ✅ Implementados (22 tests) |
-| Tests Integración | ⏳ Por crear |
-| Tests Sistema | ⏳ Por crear |
-| Scripts en package.json | ✅ Agregados |
+**Archivo**: `.github/workflows/frontend-ci.yml`
+
+Ejecuta:
+```bash
+bun test tests-SC-05/**Unitarios.test.ts
+```
+
+## Server CI (Python/Pytest)
+
+**Archivo**: `.github/workflows/server-ci.yml`
+
+Ejecuta:
+```bash
+pytest server/test_sc_05_integracion.py -v
+```
+
+## Estado de Tests - SC-05
+
+### Frontend - Tests Completados
+
+#### ✅ Tests Unitarios (22 tests)
+**Archivo**: `tests-SC-05/tests_generar_lista_Unitarios.test.ts`
+
+Prueban la función `generarListaCompra()`:
+```bash
+✓ Estructura de la lista (3 tests)
+✓ Acumulación de ingredientes (10 tests)
+✓ Normalización de unidades (5 tests)
+✓ Ordenación (2 tests)
+✓ Corner cases (2 tests)
+```
+
+**Ejecución**: `bun test tests-SC-05/tests_generar_lista_Unitarios.test.ts`
+
+**Nota**: Estos tests prueban la generación sin dependencias de BD ni persistencia.
+
+### Backend - Tests Completados
+
+#### ✅ Tests de Integración (10 tests)
+**Archivo**: `server/test_sc_05_integracion.py`
+
+Prueban que la API genera listas con unidades convertibles:
+```bash
+✓ Validación de estructura (1 test)
+  - Plan tiene 7 días con comida/cena
+
+✓ Validación de unidades (1 test)
+  - Todas las unidades son convertibles
+
+✓ Validación de cantidades (1 test)
+  - Cantidad > 0 y es numérica
+
+✓ Validación de factores (1 test)
+  - Factores coinciden con esperados
+
+✓ Validación de duplicados (1 test)
+  - Sin ingredientes duplicados por receta
+
+✓ Variabilidad de planes (1 test)
+  - Planes varían con diferentes seeds
+
+✓ Tests de conversiones (2 tests)
+  - Cucharadas → ml
+  - Mezcla de unidades convertibles
+
+✓ Tests de persistencia (2 tests)
+  - Guardado/recuperación de planes
+  - Múltiples planes sin colisiones
+```
+
+**Ejecución**: `pytest server/test_sc_05_integracion.py -v`
+
+**Requisitos**: MongoDB en localhost:27017
 
 ## Referencias
 
 - Frontend Workflow: `.github/workflows/frontend-ci.yml`
 - Server Workflow: `.github/workflows/server-ci.yml`
-- Tests Unitarios: `tests-SC-05/tests_generar_lista_Unitarios.test.ts`
-- Documentación Tests: `docs/SC-05/pruebas-unitarias.md`
+- Tests Unitarios Frontend: `tests-SC-05/tests_generar_lista_Unitarios.test.ts`
+- Tests Integración Backend: `server/test_sc_05_integracion.py`
+- Documentación Tests Unitarios: `docs/SC-05/pruebas-unitarias.md`
+- Documentación Tests Integración: `docs/SC-05/pruebas-integracion.md`
 - Implementación: `docs/SC-05/implementacion-factores-conversion.md`

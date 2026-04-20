@@ -45,7 +45,7 @@ jobs:
         working-directory: server
         run: pytest -q tests_unidad.py tests_integracion.py tests_sistema.py
 
-      - name: Run SC-05 Backend Tests
-        if: ${{ hashFiles('server/test_sc_05_*.py') != '' }}
+      - name: Run SC-05 Backend Integration Tests
+        if: ${{ hashFiles('server/test_sc_05_integracion.py') != '' }}
         working-directory: server
-        run: pytest -q -v test_sc_05_unitarios.py test_sc_05_integracion.py test_sc_05_sistema.py || echo "SC-05 tests no encontrados, saltando..."
+        run: pytest -q -v test_sc_05_integracion.py

@@ -47,18 +47,8 @@ jobs:
       - name: Check TypeScript
         run: bun run build
 
-      - name: Run SC-05 Unit Tests
+      - name: Run SC-05 Unit Tests (Generación de Lista)
         run: bun test tests-SC-05/**Unitarios.test.ts
-        continue-on-error: false
-
-      - name: Run SC-05 Integration Tests
-        if: hashFiles('tests-SC-05/**Integracion.test.ts') != ''
-        run: bun test tests-SC-05/**Integracion.test.ts
-        continue-on-error: false
-
-      - name: Run SC-05 System Tests
-        if: hashFiles('tests-SC-05/**Sistema.test.ts') != ''
-        run: bun test tests-SC-05/**Sistema.test.ts
         continue-on-error: false
 
   lint:

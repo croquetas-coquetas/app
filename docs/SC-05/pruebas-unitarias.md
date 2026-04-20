@@ -1,7 +1,7 @@
-# SC-05 – Pruebas Unitarias de Generación de Lista de Compra
+# SC-05 – Pruebas Unitarias de Generación de Lista de Compra (Frontend)
 
 ## Descripción
-Documento que describe las pruebas unitarias implementadas para validar la funcionalidad de generación de lista de compra con conversión y normalización de unidades.
+Documento que describe las pruebas unitarias implementadas para validar la funcionalidad de generación de lista de compra (`generarListaCompra()`) con conversión y normalización de unidades.
 
 ## Ubicación
 - **Archivo de tests**: `tests-SC-05/tests_generar_lista_Unitarios.test.ts`
@@ -148,17 +148,15 @@ bun test tests-SC-05/tests_generar_lista_Unitarios.test.ts --coverage
 | Acumulación | 100% (entre comidas, días) |
 | Ordenación | 100% (categoría y alfabética) |
 
+
 ## Próximos Pasos
 
-Para completar la validación de SC-05 se necesitan:
+Para completar la validación de SC-05 se necesita:
 
-1. **Tests de Integración** (`tests-SC-05/tests_generar_lista_Integracion.test.ts`)
-   - Probar con localStorage real
-   - Validar persistencia en storage
-   
-2. **Tests de Sistema** (`server/test_sistema_sc_05.py`)
-   - Flujo completo: API → frontend → lista
-   - Validar ingredientes del servidor con conversiones del frontend
+**Tests de Integración Backend** (`server/test_sc_05_integracion.py`)
+- API devuelve ingredientes con unidades convertibles
+- Validar factores de conversión
+- Pruebas con MongoDB real
 
 ## Dependencias
 
@@ -169,7 +167,13 @@ Para completar la validación de SC-05 se necesitan:
 
 ## Estado
 
-- Pruebas unitarias: ✅ **Completadas**
-- Pruebas de integración: ⏳ Pendiente
-- Pruebas de sistema: ⏳ Pendiente
+- Pruebas unitarias: ✅ **Completadas** (22 tests)
+- Pruebas de integración: ✅ **Completadas** (10 tests backend)
+- SC-05: ✅ **Completada**
 - Listo para CI/CD: ✅ **Sí**
+
+## Archivos Relacionados
+
+- [pruebas-integracion.md](pruebas-integracion.md) - Integración Backend (MongoDB real)
+- [implementacion-factores-conversion.md](implementacion-factores-conversion.md) - Detalles técnicos
+- [integracion-continua.md](integracion-continua.md) - CI/CD pipeline
