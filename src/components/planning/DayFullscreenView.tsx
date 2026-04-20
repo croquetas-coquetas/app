@@ -20,8 +20,8 @@ export function DayFullscreenView({ dia, activeTab, onTabChange, onBack }: DayFu
 
   const recetaActiva = activeTab === "comida" ? dia.comida : dia.cena;
   const isCurrentDay = isToday(dia.dia);
-  const pasos = recetaActiva.pasos ?? [];
-  const hayPasosVacios = pasos.some((paso) => typeof paso !== "string" || paso.trim().length === 0);
+  // const pasos = recetaActiva.pasos ?? [];
+  // const hayPasosVacios = pasos.some((paso) => typeof paso !== "string" || paso.trim().length === 0);
 
   return (
     <section className="day-detail-screen day-detail-enter" aria-label="Detalle del dia seleccionado">
@@ -57,64 +57,77 @@ export function DayFullscreenView({ dia, activeTab, onTabChange, onBack }: DayFu
       </div>
 
       <article className="day-detail-card day-detail-content-enter">
+        <div className="day-detail-no-steps-wrap">
+          <p className="day-detail-no-steps-label">
+            {!recetaActiva.pasos || recetaActiva.pasos.length == 0 ? (
+                <div>
+                  <p className="day-detail-no-steps">No hay pasos disponibles para esta receta.</p>
+                </div>
+            ) : (
+                <div></div>
+            )}
+          </p>
+        </div>
+
+
         <p className="day-detail-section-label">{activeTab === "comida" ? "Comida" : "Cena"}</p>
         <h3 className="day-detail-recipe-name">{recetaActiva.nombre}</h3>
 
         <div className="day-detail-tags-wrap">
           <p className="day-detail-section-label">Tags</p>
           {recetaActiva.tags && recetaActiva.tags.length > 0 ? (
-            <div className="day-detail-tags-list" aria-label="Etiquetas de la receta">
-              {recetaActiva.tags.map((tag, idx) => (
-                <Badge key={`${tag}-${idx}`} variant="secondary">
-                  {tag}
-                </Badge>
-              ))}
-            </div>
+              <div className="day-detail-tags-list" aria-label="Etiquetas de la receta">
+                {recetaActiva.tags.map((tag, idx) => (
+                    <Badge key={`${tag}-${idx}`} variant="secondary">
+                      {tag}
+                    </Badge>
+                ))}
+              </div>
           ) : (
-            <p className="day-detail-empty">No hay tags para esta receta.</p>
+              <p className="day-detail-empty">No hay tags para esta receta.</p>
           )}
         </div>
 
         <div className="day-detail-ingredients-wrap">
           <p className="day-detail-section-label">Ingredientes</p>
           {recetaActiva.ingredientes && recetaActiva.ingredientes.length > 0 ? (
-            <ul className="day-detail-ingredients-list">
-              {recetaActiva.ingredientes.map((ing: Ingrediente, idx: number) => {
-                const unidad = formatUnidad(ing.unidad || "");
-                return (
-                  <li key={idx} className="day-detail-ingredient-item">
-                    {ing.cantidad || 0} {unidad} {unidad ? "de" : ""} {ing.nombre || "Ingrediente desconocido"}
-                  </li>
-                );
-              })}
-            </ul>
-          ) : (
-            <p className="day-detail-empty">No hay ingredientes disponibles para esta receta.</p>
-          )}
+              <ul className="day-detail-ingredients-list">
+                {recetaActiva.ingredientes.map((ing: Ingrediente, idx: number) => {
+                  const unidad = formatUnidad(ing.unidad || "");
+                  return (
+                      <li key={idx} className="day-detail-ingredient-item">
+                        {ing.cantidad || 0} {unidad} {unidad ? "de" : ""} {ing.nombre || "Ingrediente desconocido"}
+                      </li>
+                  );
+                })}
+              </ul>
+          ) : (<p className="day-detail-empty">No hay ingredientes disponibles para esta receta.</p>)}
         </div>
 
         <div className="day-detail-steps-wrap">
-          <p className="day-detail-section-label">Pasos</p>
-          {hayPasosVacios ? (
-            <p className="day-detail-error" role="alert">
-              Hay un paso vacío en esta receta. Revisa los datos antes de continuar.
-            </p>
-          ) : pasos.length > 0 ? (
-            <ol className="day-detail-steps-list">
-              {pasos.map((paso, idx) => (
-                <li key={`paso-${idx}`} className="day-detail-step-item p-1">
-                  <Badge variant="outline" className="day-detail-step-badge mr-2 text-sm">
-                    Paso {idx + 1}
-                  </Badge>
-                  {paso}
-                </li>
-              ))}
-            </ol>
+          {recetaActiva.pasos && recetaActiva.pasos.length > 0 ? (
+              <div>
+                <p className="day-detail-section-label">Pasos</p>
+                <ol className="day-detail-steps-list">
+                  {recetaActiva.pasos.map((paso, idx) => (
+
+
+                      <li key={`paso-${idx}`} className="day-detail-step-item p-1">
+                        <Badge variant="outline" className="day-detail-step-badge mr-2 text-sm">
+                          {idx + 1}
+                        </Badge>
+                        {paso}
+                      </li>
+
+                  ))}
+                </ol>
+              </div>
           ) : (
-            <p className="day-detail-empty">No hay pasos disponibles para esta receta.</p>
+              <div></div>
           )}
         </div>
       </article>
+
     </section>
   );
 }

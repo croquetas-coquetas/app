@@ -92,6 +92,7 @@
   --color-accent: oklch(0.952 0.04 149.214);
   --color-accent-foreground: oklch(0.38 0.14 149.214);
   --color-destructive: var(--destructive);
+  --color-error: oklch(0.6294 0.1623 44.47);
   --color-border: oklch(0.908 0.05 149.214);
   --color-input: oklch(0.908 0.05 149.214);
   --color-ring: oklch(0.623 0.194 149.214);
@@ -309,6 +310,14 @@
   line-height: 1.45;
   padding: 0.75rem 0.85rem;
 }
+
+.day-detail-no-steps {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--color-error, #7a7a7a);
+  font-weight: 600;
+}
+
 
 .day-detail-steps-wrap {
   display: flex;
