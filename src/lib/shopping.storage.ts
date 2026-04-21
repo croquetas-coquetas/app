@@ -1,11 +1,23 @@
 import { SHOPPING_KEY } from "@/lib/shopping.constants";
 import { ListaCompra } from "@/types/shopping";
 import { isListaCompra } from "@/lib/shopping.utils";
-import {STORAGE_META} from "@/lib/planning.constants.ts";
-import {DiaPlanning, Planificacion, PlanMeta} from "@/types/planning.ts";
-import {PlanificacionNoEncontradaError, ShoppingError, MetaNoEncontradaError} from "@/lib/shopping.ts";
-import {isPlanificacion} from "@/lib/planning.utils.ts";
+import { STORAGE_META } from "@/lib/planning.constants.ts";
+import { DiaPlanning, Planificacion, PlanMeta } from "@/types/planning.ts";
+import { PlanificacionNoEncontradaError, ShoppingError, MetaNoEncontradaError } from "@/lib/shopping.ts";
+import { isPlanificacion } from "@/lib/planning.utils.ts";
 
+
+/*
+──────────────────────── shopping.storage ────────────────────────────
+Gestiona responsabilidades relacionadas con localStorage, reconstruye 
+la planificación guardada y la incorpora a la generación de la lista
+de la compra. Esto se hace para evitar que la generación de la lista de
+la compra dependa de la planificación, y así poder generarla a partir 
+del localStorage sin necesidad de tener que generar una nueva planificación cada vez.
+*/
+
+
+//lee y devuelve la lista de la compra de localStorage o null si no hay nada guardado
 export function getSavedListaCompra(): ListaCompra | null {
     try {
         const raw = localStorage.getItem(SHOPPING_KEY);
@@ -28,13 +40,13 @@ export function clearListaCompra(): void {
 
 // ─── Lectura de localStorage ─────────────────────────────────────────────────
 
-export function cargarPlanificacion(): Planificacion {
+export function cargarUltimaPlanificacion(): Planificacion {
     // lee cuantos dias hay en total para escoger los 7 ultimos
     const meta = localStorage.getItem(STORAGE_META);
-    if(!meta) {
+    if (!meta) {
         throw new MetaNoEncontradaError();
     }
-    const meta_parsed:PlanMeta = JSON.parse(meta);
+    const meta_parsed: PlanMeta = JSON.parse(meta);
     let num_dias = meta_parsed.total_dias;
 
     // planificacion vacia donde se van a meter los dias parseados
@@ -43,14 +55,14 @@ export function cargarPlanificacion(): Planificacion {
     // por cada dia parsear y meter en el objeto planificacion
     for (let i = num_dias - 7; i < num_dias; i++) {
         // clave del dia
-        let dia:string = "smartcook_plan_dia_" + i;
+        let dia: string = "smartcook_plan_dia_" + i;
 
         const dia_raw = localStorage.getItem(dia);
         if (!dia_raw) {
             throw new PlanificacionNoEncontradaError();
         }
 
-        let dia_parsed:DiaPlanning = JSON.parse(dia_raw);
+        let dia_parsed: DiaPlanning = JSON.parse(dia_raw);
         planificacion.dias.push(dia_parsed);
     }
 

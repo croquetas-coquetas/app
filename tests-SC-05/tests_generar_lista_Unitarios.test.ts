@@ -1,18 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as plan from "@/types/planning.ts";
+import type { ItemCompra } from "@/types/shopping";
 
 // ---------------------------------------------------------------------------
 // Mocks
 // ---------------------------------------------------------------------------
 
-const { mockCargarPlanificacion, mockSaveListaCompra, mockGetSavedListaCompra } = vi.hoisted(() => ({
-  mockCargarPlanificacion: vi.fn(),
-  mockSaveListaCompra: vi.fn(),
-  mockGetSavedListaCompra: vi.fn(),
-}));
+const mockCargarPlanificacion = vi.fn();
+const mockSaveListaCompra = vi.fn();
+const mockGetSavedListaCompra = vi.fn();
 
 vi.mock("@/lib/shopping.storage", () => ({
-  cargarPlanificacion: mockCargarPlanificacion,
+  cargarUltimaPlanificacion: mockCargarPlanificacion,
   saveListaCompra: mockSaveListaCompra,
   getSavedListaCompra: mockGetSavedListaCompra,
 }));
@@ -117,7 +116,7 @@ describe("generarListaCompra", () => {
       });
 
       const result = generarListaCompra();
-      const tomate = result.items.find((i) => i.nombre === "tomate");
+      const tomate = result.items.find((i: ItemCompra) => i.nombre === "tomate");
 
       expect(tomate?.cantidad).toBe(250);
     });
@@ -133,7 +132,7 @@ describe("generarListaCompra", () => {
       });
 
       const result = generarListaCompra();
-      const arroz = result.items.find((i) => i.nombre === "arroz");
+      const arroz = result.items.find((i: ItemCompra) => i.nombre === "arroz");
 
       expect(arroz?.cantidad).toBe(350);
     });
@@ -165,7 +164,7 @@ describe("generarListaCompra", () => {
       });
 
       const result = generarListaCompra();
-      const leche = result.items.find((i) => i.nombre === "leche");
+      const leche = result.items.find((i: ItemCompra) => i.nombre === "leche");
 
       expect(leche?.unidad).toBe("ml");
     });
@@ -182,10 +181,10 @@ describe("generarListaCompra", () => {
       });
 
       const result = generarListaCompra();
-      const aceite = result.items.find((i) => i.nombre === "aceite");
+      const aceite = result.items.find((i: ItemCompra) => i.nombre === "aceite");
 
       expect(aceite?.unidad).toBe("ml");
-      expect(aceite?.cantidad).toBe(45); 
+      expect(aceite?.cantidad).toBe(45);
     });
 
     it("Convierte pizcas a gramos", () => {
@@ -200,7 +199,7 @@ describe("generarListaCompra", () => {
       });
 
       const result = generarListaCompra();
-      const sal = result.items.find((i) => i.nombre === "sal");
+      const sal = result.items.find((i: ItemCompra) => i.nombre === "sal");
 
       expect(sal?.unidad).toBe("g");
       expect(sal?.cantidad).toBe(5);
@@ -218,7 +217,7 @@ describe("generarListaCompra", () => {
       });
 
       const result = generarListaCompra();
-      const harina = result.items.find((i) => i.nombre === "harina");
+      const harina = result.items.find((i: ItemCompra) => i.nombre === "harina");
 
       expect(harina?.unidad).toBe("ml");
       expect(harina?.cantidad).toBe(720);
@@ -236,7 +235,7 @@ describe("generarListaCompra", () => {
       });
 
       const result = generarListaCompra();
-      const arroz = result.items.find((i) => i.nombre === "arroz");
+      const arroz = result.items.find((i: ItemCompra) => i.nombre === "arroz");
 
       // 1kg = 1000g, 0.5kg = 500g, total 1500g = 1.5kg (normalizado)
       expect(arroz?.unidad).toBe("kg");
@@ -255,7 +254,7 @@ describe("generarListaCompra", () => {
       });
 
       const result = generarListaCompra();
-      const agua = result.items.find((i) => i.nombre === "agua");
+      const agua = result.items.find((i: ItemCompra) => i.nombre === "agua");
 
       // 1.5l = 1500ml, 0.5l = 500ml, total 2000ml = 2l (normalizado)
       expect(agua?.unidad).toBe("l");
@@ -285,7 +284,7 @@ describe("generarListaCompra", () => {
       });
 
       const result = generarListaCompra();
-      const harina = result.items.find((i) => i.nombre === "harina");
+      const harina = result.items.find((i: ItemCompra) => i.nombre === "harina");
 
       expect(harina?.unidad).toBe("kg");
       expect(harina?.cantidad).toBe(2);
@@ -300,7 +299,7 @@ describe("generarListaCompra", () => {
       });
 
       const result = generarListaCompra();
-      const agua = result.items.find((i) => i.nombre === "agua");
+      const agua = result.items.find((i: ItemCompra) => i.nombre === "agua");
 
       expect(agua?.unidad).toBe("l");
       expect(agua?.cantidad).toBe(1.5);
@@ -315,7 +314,7 @@ describe("generarListaCompra", () => {
       });
 
       const result = generarListaCompra();
-      const sal = result.items.find((i) => i.nombre === "sal");
+      const sal = result.items.find((i: ItemCompra) => i.nombre === "sal");
 
       expect(sal?.unidad).toBe("g");
       expect(sal?.cantidad).toBe(500);
@@ -330,7 +329,7 @@ describe("generarListaCompra", () => {
       });
 
       const result = generarListaCompra();
-      const harina = result.items.find((i) => i.nombre === "harina");
+      const harina = result.items.find((i: ItemCompra) => i.nombre === "harina");
 
       expect(harina?.unidad).toBe("kg");
       expect(harina?.cantidad).toBe(1.23);
@@ -347,7 +346,7 @@ describe("generarListaCompra", () => {
       });
 
       const result = generarListaCompra();
-      const arroz = result.items.find((i) => i.nombre === "arroz");
+      const arroz = result.items.find((i: ItemCompra) => i.nombre === "arroz");
 
       expect(arroz?.unidad).toBe("kg");
       expect(arroz?.cantidad).toBe(1.2);
@@ -370,7 +369,7 @@ describe("generarListaCompra", () => {
       });
 
       const result = generarListaCompra();
-      const nombres = result.items.map((i) => i.nombre);
+      const nombres = result.items.map((i: ItemCompra) => i.nombre);
 
       expect(nombres.indexOf("pollo")).toBeLessThan(nombres.indexOf("queso"));
     });
@@ -387,7 +386,7 @@ describe("generarListaCompra", () => {
       });
 
       const result = generarListaCompra();
-      const nombres = result.items.map((i) => i.nombre);
+      const nombres = result.items.map((i: ItemCompra) => i.nombre);
 
       expect(nombres.indexOf("apio")).toBeLessThan(nombres.indexOf("zanahoria"));
     });
