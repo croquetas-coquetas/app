@@ -6,9 +6,19 @@ import type { ItemCompra } from "@/types/shopping";
 // Mocks
 // ---------------------------------------------------------------------------
 
-const mockCargarPlanificacion = vi.fn();
-const mockSaveListaCompra = vi.fn();
-const mockGetSavedListaCompra = vi.fn();
+let planificacionMock: plan.Planificacion | null = null;
+
+function mockCargarPlanificacion(): plan.Planificacion {
+  return planificacionMock as plan.Planificacion;
+}
+
+function mockSaveListaCompra(): void {
+  return;
+}
+
+function mockGetSavedListaCompra(): null {
+  return null;
+}
 
 vi.mock("@/lib/shopping.storage", () => ({
   cargarUltimaPlanificacion: mockCargarPlanificacion,
@@ -17,8 +27,6 @@ vi.mock("@/lib/shopping.storage", () => ({
 }));
 
 import { generarListaCompra } from "@/lib/generarLista";
-
-const mockCargar = mockCargarPlanificacion;
 
 // ---------------------------------------------------------------------------
 // Funciones auxiliares
@@ -47,17 +55,17 @@ function makeDia(comidaIngredientes: plan.Ingrediente[] = [], cenaIngredientes: 
 
 describe("generarListaCompra", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    planificacionMock = null;
   });
 
   // ── Estructura ────────────────────────────────────────────────────────────────
 
   describe("Estructura de la lista", () => {
     it("Devuelve una lista con la estructura correcta", () => {
-      mockCargar.mockReturnValue({
+      planificacionMock = {
         generado_en: "2025-01-01T00:00:00.000Z",
         dias: [makeDia([makeIngrediente("tomate", 200)])],
-      });
+      };
 
       const result = generarListaCompra();
 
@@ -70,10 +78,10 @@ describe("generarListaCompra", () => {
     });
 
     it("La fecha de generación es la actual y está en formato ISO", () => {
-      mockCargar.mockReturnValue({
+      planificacionMock = {
         generado_en: "2025-01-01T00:00:00.000Z",
         dias: [],
-      });
+      };
 
       const before = Date.now();
       const result = generarListaCompra();
@@ -85,7 +93,7 @@ describe("generarListaCompra", () => {
     });
 
     it("El número total de ingredientes es el correcto", () => {
-      mockCargar.mockReturnValue({
+      planificacionMock = {
         generado_en: "2025-01-01T00:00:00.000Z",
         dias: [
           makeDia(
@@ -93,7 +101,7 @@ describe("generarListaCompra", () => {
             [makeIngrediente("ajo", 10)]
           ),
         ],
-      });
+      };
 
       const result = generarListaCompra();
       expect(result.total_items).toBe(3);
@@ -105,7 +113,7 @@ describe("generarListaCompra", () => {
 
   describe("Acumulación de ingredientes", () => {
     it("Acumula ingredientes entre la comida y la cena", () => {
-      mockCargar.mockReturnValue({
+      planificacionMock = {
         generado_en: "2025-01-01T00:00:00.000Z",
         dias: [
           makeDia(
@@ -113,7 +121,7 @@ describe("generarListaCompra", () => {
             [makeIngrediente("tomate", 150)]
           ),
         ],
-      });
+      };
 
       const result = generarListaCompra();
       const tomate = result.items.find((i: ItemCompra) => i.nombre === "tomate");
@@ -122,14 +130,14 @@ describe("generarListaCompra", () => {
     });
 
     it("Acumula ingredientes a través de los días", () => {
-      mockCargar.mockReturnValue({
+      planificacionMock = {
         generado_en: "2025-01-01T00:00:00.000Z",
         dias: [
           makeDia([makeIngrediente("arroz", 200)]),
           makeDia([makeIngrediente("arroz", 100)]),
           makeDia([], [makeIngrediente("arroz", 50)]),
         ],
-      });
+      };
 
       const result = generarListaCompra();
       const arroz = result.items.find((i: ItemCompra) => i.nombre === "arroz");
@@ -138,7 +146,7 @@ describe("generarListaCompra", () => {
     });
 
     it("Separa ingredientes distintos", () => {
-      mockCargar.mockReturnValue({
+      planificacionMock = {
         generado_en: "2025-01-01T00:00:00.000Z",
         dias: [
           makeDia(
@@ -146,14 +154,14 @@ describe("generarListaCompra", () => {
             [makeIngrediente("cebolla", 50)]
           ),
         ],
-      });
+      };
 
       const result = generarListaCompra();
       expect(result.items).toHaveLength(2);
     });
 
     it("Almacena las unidades correctamente", () => {
-      mockCargar.mockReturnValue({
+      planificacionMock = {
         generado_en: "2025-01-01T00:00:00.000Z",
         dias: [
           makeDia(
@@ -161,7 +169,7 @@ describe("generarListaCompra", () => {
             [makeIngrediente("leche", 100, "ml")]
           ),
         ],
-      });
+      };
 
       const result = generarListaCompra();
       const leche = result.items.find((i: ItemCompra) => i.nombre === "leche");
@@ -170,7 +178,7 @@ describe("generarListaCompra", () => {
     });
 
     it("Convierte cucharadas a mililitros", () => {
-      mockCargar.mockReturnValue({
+      planificacionMock = {
         generado_en: "2025-01-01T00:00:00.000Z",
         dias: [
           makeDia(
@@ -178,7 +186,7 @@ describe("generarListaCompra", () => {
             [makeIngrediente("aceite", 1, "cucharada")]
           ),
         ],
-      });
+      };
 
       const result = generarListaCompra();
       const aceite = result.items.find((i: ItemCompra) => i.nombre === "aceite");
@@ -188,7 +196,7 @@ describe("generarListaCompra", () => {
     });
 
     it("Convierte pizcas a gramos", () => {
-      mockCargar.mockReturnValue({
+      planificacionMock = {
         generado_en: "2025-01-01T00:00:00.000Z",
         dias: [
           makeDia(
@@ -196,7 +204,7 @@ describe("generarListaCompra", () => {
             [makeIngrediente("sal", 2, "pizca")]
           ),
         ],
-      });
+      };
 
       const result = generarListaCompra();
       const sal = result.items.find((i: ItemCompra) => i.nombre === "sal");
@@ -206,7 +214,7 @@ describe("generarListaCompra", () => {
     });
 
     it("Convierte tazas a mililitros", () => {
-      mockCargar.mockReturnValue({
+      planificacionMock = {
         generado_en: "2025-01-01T00:00:00.000Z",
         dias: [
           makeDia(
@@ -214,7 +222,7 @@ describe("generarListaCompra", () => {
             [makeIngrediente("harina", 1, "taza")]
           ),
         ],
-      });
+      };
 
       const result = generarListaCompra();
       const harina = result.items.find((i: ItemCompra) => i.nombre === "harina");
@@ -224,7 +232,7 @@ describe("generarListaCompra", () => {
     });
 
     it("Convierte kilogramos a gramos", () => {
-      mockCargar.mockReturnValue({
+      planificacionMock = {
         generado_en: "2025-01-01T00:00:00.000Z",
         dias: [
           makeDia(
@@ -232,7 +240,7 @@ describe("generarListaCompra", () => {
             [makeIngrediente("arroz", 0.5, "kilogramo")]
           ),
         ],
-      });
+      };
 
       const result = generarListaCompra();
       const arroz = result.items.find((i: ItemCompra) => i.nombre === "arroz");
@@ -243,7 +251,7 @@ describe("generarListaCompra", () => {
     });
 
     it("Convierte litros a mililitros", () => {
-      mockCargar.mockReturnValue({
+      planificacionMock = {
         generado_en: "2025-01-01T00:00:00.000Z",
         dias: [
           makeDia(
@@ -251,7 +259,7 @@ describe("generarListaCompra", () => {
             [makeIngrediente("agua", 0.5, "l")]
           ),
         ],
-      });
+      };
 
       const result = generarListaCompra();
       const agua = result.items.find((i: ItemCompra) => i.nombre === "agua");
@@ -262,10 +270,10 @@ describe("generarListaCompra", () => {
     });
 
     it("Elimina espacios en blanco sobrantes", () => {
-      mockCargar.mockReturnValue({
+      planificacionMock = {
         generado_en: "2025-01-01T00:00:00.000Z",
         dias: [makeDia([makeIngrediente("  tomate  ", 100)])],
-      });
+      };
 
       const result = generarListaCompra();
       expect(result.items[0].nombre).toBe("tomate");
@@ -276,12 +284,12 @@ describe("generarListaCompra", () => {
 
   describe("Normalización de unidades", () => {
     it("Convierte gramos a kilogramos cuando es >= 1000g", () => {
-      mockCargar.mockReturnValue({
+      planificacionMock = {
         generado_en: "2025-01-01T00:00:00.000Z",
         dias: [
           makeDia([makeIngrediente("harina", 2000, "g")]),
         ],
-      });
+      };
 
       const result = generarListaCompra();
       const harina = result.items.find((i: ItemCompra) => i.nombre === "harina");
@@ -291,12 +299,12 @@ describe("generarListaCompra", () => {
     });
 
     it("Convierte mililitros a litros cuando es >= 1000ml", () => {
-      mockCargar.mockReturnValue({
+      planificacionMock = {
         generado_en: "2025-01-01T00:00:00.000Z",
         dias: [
           makeDia([makeIngrediente("agua", 1500, "ml")]),
         ],
-      });
+      };
 
       const result = generarListaCompra();
       const agua = result.items.find((i: ItemCompra) => i.nombre === "agua");
@@ -306,12 +314,12 @@ describe("generarListaCompra", () => {
     });
 
     it("No convierte si es menor a 1000", () => {
-      mockCargar.mockReturnValue({
+      planificacionMock = {
         generado_en: "2025-01-01T00:00:00.000Z",
         dias: [
           makeDia([makeIngrediente("sal", 500, "g")]),
         ],
-      });
+      };
 
       const result = generarListaCompra();
       const sal = result.items.find((i: ItemCompra) => i.nombre === "sal");
@@ -321,12 +329,12 @@ describe("generarListaCompra", () => {
     });
 
     it("Redondea a 2 decimales en la normalización", () => {
-      mockCargar.mockReturnValue({
+      planificacionMock = {
         generado_en: "2025-01-01T00:00:00.000Z",
         dias: [
           makeDia([makeIngrediente("harina", 1234, "g")]),
         ],
-      });
+      };
 
       const result = generarListaCompra();
       const harina = result.items.find((i: ItemCompra) => i.nombre === "harina");
@@ -336,14 +344,14 @@ describe("generarListaCompra", () => {
     });
 
     it("Aplica normalización después de acumular ingredientes", () => {
-      mockCargar.mockReturnValue({
+      planificacionMock = {
         generado_en: "2025-01-01T00:00:00.000Z",
         dias: [
           makeDia([makeIngrediente("arroz", 600, "g")]),
           makeDia([makeIngrediente("arroz", 500, "g")]),
           makeDia([makeIngrediente("arroz", 100, "g")]),
         ],
-      });
+      };
 
       const result = generarListaCompra();
       const arroz = result.items.find((i: ItemCompra) => i.nombre === "arroz");
@@ -358,7 +366,7 @@ describe("generarListaCompra", () => {
   describe("Ordenación", () => {
     it("Ordena los objetos por categoría", () => {
       // carne comes before lacteo in CATEGORIA_ORDEN
-      mockCargar.mockReturnValue({
+      planificacionMock = {
         generado_en: "2025-01-01T00:00:00.000Z",
         dias: [
           makeDia(
@@ -366,7 +374,7 @@ describe("generarListaCompra", () => {
             [makeIngrediente("pollo", 200)]    // carne
           ),
         ],
-      });
+      };
 
       const result = generarListaCompra();
       const nombres = result.items.map((i: ItemCompra) => i.nombre);
@@ -375,7 +383,7 @@ describe("generarListaCompra", () => {
     });
 
     it("Ordena alfabéticamente dentro de una misma categoría", () => {
-      mockCargar.mockReturnValue({
+      planificacionMock = {
         generado_en: "2025-01-01T00:00:00.000Z",
         dias: [
           makeDia(
@@ -383,7 +391,7 @@ describe("generarListaCompra", () => {
             [makeIngrediente("apio", 50)]          // verdura
           ),
         ],
-      });
+      };
 
       const result = generarListaCompra();
       const nombres = result.items.map((i: ItemCompra) => i.nombre);
@@ -396,10 +404,10 @@ describe("generarListaCompra", () => {
 
   describe("Corner cases", () => {
     it("Devuelve una lista vacía si no hay días", () => {
-      mockCargar.mockReturnValue({
+      planificacionMock = {
         generado_en: "2025-01-01T00:00:00.000Z",
         dias: [],
-      });
+      };
 
       const result = generarListaCompra();
       expect(result.items).toHaveLength(0);
@@ -407,10 +415,10 @@ describe("generarListaCompra", () => {
     });
 
     it("Si hay días pero no hay recetas en estos devuelve una lista vacía", () => {
-      mockCargar.mockReturnValue({
+      planificacionMock = {
         generado_en: "2025-01-01T00:00:00.000Z",
         dias: [makeDia([], [])],
-      });
+      };
 
       const result = generarListaCompra();
       expect(result.items).toHaveLength(0);
