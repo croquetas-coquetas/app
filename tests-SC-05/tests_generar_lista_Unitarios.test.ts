@@ -8,22 +8,17 @@ import type { ItemCompra } from "@/types/shopping";
 
 let planificacionMock: plan.Planificacion | null = null;
 
-function mockCargarPlanificacion(): plan.Planificacion {
-  return planificacionMock as plan.Planificacion;
-}
-
-function mockSaveListaCompra(): void {
-  return;
-}
-
-function mockGetSavedListaCompra(): null {
-  return null;
-}
-
 vi.mock("@/lib/shopping.storage", () => ({
-  cargarUltimaPlanificacion: mockCargarPlanificacion,
-  saveListaCompra: mockSaveListaCompra,
-  getSavedListaCompra: mockGetSavedListaCompra,
+  cargarUltimaPlanificacion: () => {
+    if (!planificacionMock) throw new Error("planificacionMock no está definido");
+    return planificacionMock;
+  },
+  saveListaCompra: () => {
+    return;
+  },
+  getSavedListaCompra: () => {
+    return null;
+  },
 }));
 
 import { generarListaCompra } from "@/lib/generarLista";

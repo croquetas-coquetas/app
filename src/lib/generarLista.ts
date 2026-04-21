@@ -10,8 +10,8 @@ import { normalizarUnidad } from "@/lib/planning.utils.ts";
     Finalmente, crea un objeto ListaCompra con la información de los ingredientes acumulados y ordenados
     y la guarda en localStorage. Esta función devuelve el objeto ListaCompra que genera.
 */
-export function generarListaCompra(): ListaCompra {
-    const planificacion = cargarUltimaPlanificacion();
+export function generarListaCompra(cargarPlanificacion = cargarUltimaPlanificacion): ListaCompra {
+    const planificacion = cargarPlanificacion();
 
     const ingredientesAcumulados = new Map<string, ItemCompra>();
 
