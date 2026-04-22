@@ -41,6 +41,7 @@ function App() {
 
   const [successListaDialogOpen, setSuccessListaDialogOpen] = useState(false);
   const [configurarHorarioDialogOpen, setConfigurarHorarioDialogOpen] = useState(false);
+  const [horarioError, setHorarioError] = useState("");
   const [horarios, setHorarios] = useState({
     comida: { inicio: "13:00", fin: "14:30" },
     cena: { inicio: "20:00", fin: "21:00" },
@@ -103,8 +104,14 @@ function App() {
 
   const handleNavBarProfileClick = (action: "mi-perfil" | "configurar-horario") => {
     if (action === "configurar-horario") {
+      setHorarioError("");
       setConfigurarHorarioDialogOpen(true);
     }
+  };
+
+  const closeConfigurarHorarioDialog = () => {
+    setHorarioError("");
+    setConfigurarHorarioDialogOpen(false);
   };
 
   const handleHorarioChange = (
@@ -119,9 +126,33 @@ function App() {
         [timeType]: value,
       },
     }));
+    setHorarioError("");
+  };
+
+  const validateHorarios = () => {
+    if (!horarios.comida.inicio || !horarios.comida.fin || !horarios.cena.inicio || !horarios.cena.fin) {
+      return "Debes completar todos los horarios. Indica hora de inicio y fin para comida y cena.";
+    }
+
+    if (horarios.comida.inicio >= horarios.comida.fin) {
+      return "El rango de comida es incorrecto: la hora de inicio debe ser anterior a la de fin (ejemplo: 13:00 a 14:30).";
+    }
+
+    if (horarios.cena.inicio >= horarios.cena.fin) {
+      return "El rango de cena es incorrecto: la hora de inicio debe ser anterior a la de fin (ejemplo: 20:00 a 21:00).";
+    }
+
+    return "";
   };
 
   const handleSaveHorarios = () => {
+    const validationError = validateHorarios();
+    if (validationError) {
+      setHorarioError(validationError);
+      return;
+    }
+
+    setHorarioError("");
     console.log("Horarios configurados:", horarios);
     setConfigurarHorarioDialogOpen(false);
   };
@@ -275,7 +306,7 @@ function App() {
         {configurarHorarioDialogOpen && (
             <div
                 className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4 backdrop-blur-sm"
-                onClick={() => setConfigurarHorarioDialogOpen(false)}
+                onClick={closeConfigurarHorarioDialog}
                 role="presentation"
             >
               <div
@@ -351,13 +382,20 @@ function App() {
                   </div>
                 </div>
 
+                {/* Mensaje de validacion */}
+                {horarioError && (
+                  <div className="mx-5 mb-4 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-xs text-red-700" role="alert">
+                    {horarioError}
+                  </div>
+                )}
+
                 {/* Footer */}
                 <div className="border-t border-border px-5 py-4 flex gap-2 justify-end">
                   <Button
                     size="sm"
                     variant="outline"
                     className="rounded-lg px-4"
-                    onClick={() => setConfigurarHorarioDialogOpen(false)}
+                    onClick={closeConfigurarHorarioDialog}
                   >
                     Cancelar
                   </Button>
