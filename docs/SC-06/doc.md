@@ -46,7 +46,7 @@ Responsabilidades:
 
 - Mostrar el titulo `Lista de la compra`.
 - Mostrar el boton `Volver`.
-- Mostrar el contador `X ingredientes de Y comprados`.
+- Mostrar el contador `X ingrediente de Y comprados` cuando solo hay 1 comprado, y `X ingredientes de Y comprados` en el resto de casos.
 - Mostrar una barra de busqueda de ingrediente en la cabecera.
 - Mostrar cada ingrediente en una lista plana.
 - Mostrar el nombre del ingrediente como texto principal.

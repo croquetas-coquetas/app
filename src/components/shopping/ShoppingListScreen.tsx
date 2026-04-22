@@ -36,6 +36,11 @@ function formatCantidad(item: ItemCompra): string {
   return item.unidad ? `${cantidad} ${item.unidad}` : cantidad;
 }
 
+function formatCheckedProgress(checkedCount: number, totalItems: number): string {
+  const label = checkedCount === 1 ? "ingrediente" : "ingredientes";
+  return `${checkedCount} ${label} de ${totalItems} comprados`;
+}
+
 function normalizeSearchText(value: string): string {
   return value
     .trim()
@@ -189,7 +194,7 @@ export function ShoppingListScreen({ lista, onBack }: ShoppingListScreenProps) {
         <div className="shopping-list-title-wrap">
           <h1 className="shopping-list-title">Lista de la compra</h1>
           <p className="shopping-list-progress">
-            {checkedCount} ingredientes de {lista.items.length} comprados
+            {formatCheckedProgress(checkedCount, lista.items.length)}
           </p>
         </div>
         <label className="shopping-list-search">

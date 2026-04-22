@@ -333,14 +333,14 @@ describe("UNIDAD", () => {
         const checkbox = screen.getByLabelText("Marcar Tomate como comprado") as HTMLInputElement;
         fireEvent.click(checkbox);
         expect(checkbox.checked).toBe(true);
-        expect(screen.getByText("1 ingredientes de 1 comprados")).toBeTruthy();
+        expect(screen.getByText("1 ingrediente de 1 comprados")).toBeTruthy();
 
         fireEvent.click(screen.getByRole("button", { name: /Volver/i }));
         fireEvent.click(screen.getByRole("button", { name: /Lista de la compra/i }));
 
         const persistedCheckbox = screen.getByLabelText("Marcar Tomate como comprado") as HTMLInputElement;
         expect(persistedCheckbox.checked).toBe(true);
-        expect(screen.getByText("1 ingredientes de 1 comprados")).toBeTruthy();
+        expect(screen.getByText("1 ingrediente de 1 comprados")).toBeTruthy();
     });
 
     it("SC-06 permite buscar ingredientes, reordena comprados y mantiene la vista al desmarcar", async () => {
