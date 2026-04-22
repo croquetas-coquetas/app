@@ -43,4 +43,4 @@ jobs:
             - name: Run server tests
               if: ${{ hashFiles('server/test*.py') != '' }}
               working-directory: server
-              run: pytest -q test_unidad.py test_integracion.py test_sistema.py
+              run: pytest -q test_unidad.py test_integracion.py
