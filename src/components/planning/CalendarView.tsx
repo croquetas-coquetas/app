@@ -13,6 +13,14 @@ interface CalendarViewProps {
   onDaySelect: (dia: DiaPlanning) => void;
 }
 
+export function buildPlanMap(dias: DiaPlanning[]): Map<string, DiaPlanning> {
+  const map = new Map<string, DiaPlanning>();
+  for (const dia of dias) {
+    map.set(getDayKey(dia.dia), dia);
+  }
+  return map;
+}
+
 export function CalendarView({ planificacion, onRegenerate, onDaySelect }: CalendarViewProps) {
   const hoy = new Date();
   const [viewDate, setViewDate] = useState(() => new Date(hoy.getFullYear(), hoy.getMonth(), 1));
@@ -41,7 +49,7 @@ export function CalendarView({ planificacion, onRegenerate, onDaySelect }: Calen
       dias.push({date, key, planDia: planMap.get(key)});
     }
     return dias;
-  }, [planMap, viewMonth, viewYear]);
+  }, [buildPlanMap, viewMonth, viewYear]);
 
   useEffect(() => {
     const container = listRef.current;
