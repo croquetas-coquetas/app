@@ -46,8 +46,9 @@ Responsabilidades:
 
 - Mostrar el titulo `Lista de la compra`.
 - Mostrar el boton `Volver`.
-- Mostrar el contador `X ingrediente de Y comprados` cuando solo hay 1 comprado, y `X ingredientes de Y comprados` en el resto de casos.
 - Mostrar una barra de busqueda de ingrediente en la cabecera.
+- Mostrar en la cabecera el contador compacto `X / Y`.
+- Enmarcar el contenido en una tarjeta con la misma estetica de la pantalla de detalle de plato.
 - Mostrar cada ingrediente en una lista plana.
 - Mostrar el nombre del ingrediente como texto principal.
 - Mostrar cantidad y unidad debajo.
@@ -61,6 +62,8 @@ Responsabilidades:
 - Guardar los ingredientes comprados mediante las funciones de `shopping.storage.ts`.
 
 La pantalla no agrupa por categorias. Aunque `ItemCompra` puede contener `categoria`, esa informacion no se usa para organizar visualmente la lista. La lista se muestra como una compra normal y directa.
+
+La lista se presenta dentro de una tarjeta reutilizando la estetica de `DayFullscreenView`: cabecera sticky compacta, titulo con `day-detail-recipe-name`, tarjeta `day-detail-card` y seccion de ingredientes con `day-detail-section-label`.
 
 La cabecera usa posicion fija relativa al scroll con `position: sticky`, `top: 0`, fondo y desenfoque ligero. Esto mantiene visibles el boton de vuelta, el titulo, el contador y la busqueda mientras el usuario se desplaza por listas largas.
 
@@ -356,9 +359,11 @@ Clases:
 .shopping-list-title-wrap
 .shopping-list-title
 .shopping-list-progress
+.shopping-list-card
+.shopping-list-heading
 .shopping-list-search
 .shopping-list-search-icon
-.shopping-list-empty
+.shopping-list-ingredients-wrap
 .shopping-list-items
 .shopping-list-item
 .shopping-list-row
@@ -368,9 +373,9 @@ Clases:
 .shopping-list-subtitle
 ```
 
-La pantalla es sobria, plana y centrada en lectura rapida.
+La pantalla adopta el mismo enmarcado que la vista de detalle de plato. El contenido principal se renderiza dentro de `day-detail-card day-detail-content-enter` y se organiza con etiquetas `day-detail-section-label`, igual que las secciones de ingredientes y pasos del plato.
 
-La cabecera se mantiene visible durante el scroll mediante `position: sticky`. La barra de busqueda ocupa todo el ancho disponible, tiene icono de lupa y usa `type="search"` con `aria-label="Buscar ingrediente"`.
+La cabecera se mantiene visible durante el scroll mediante `position: sticky`, con distribucion horizontal equivalente a `day-detail-header`. La barra de busqueda ocupa todo el ancho disponible dentro de la tarjeta, tiene icono de lupa y usa `type="search"` con `aria-label="Buscar ingrediente"`.
 
 Los ingredientes marcados como comprados aparecen tachados mediante estilos asociados al checkbox.
 

@@ -37,8 +37,7 @@ function formatCantidad(item: ItemCompra): string {
 }
 
 function formatCheckedProgress(checkedCount: number, totalItems: number): string {
-  const label = checkedCount === 1 ? "ingrediente" : "ingredientes";
-  return `${checkedCount} ${label} de ${totalItems} comprados`;
+  return `${checkedCount} / ${totalItems}`;
 }
 
 function normalizeSearchText(value: string): string {
@@ -186,17 +185,18 @@ export function ShoppingListScreen({ lista, onBack }: ShoppingListScreenProps) {
   };
 
   return (
-    <section className="shopping-list-screen">
+    <section className="shopping-list-screen day-detail-enter" aria-label="Lista de la compra">
       <header className="shopping-list-header">
         <Button variant="outline" size="sm" onClick={onBack} className="shopping-list-back-button">
           ← Volver
         </Button>
         <div className="shopping-list-title-wrap">
-          <h1 className="shopping-list-title">Lista de la compra</h1>
-          <p className="shopping-list-progress">
-            {formatCheckedProgress(checkedCount, lista.items.length)}
-          </p>
+          <p className="shopping-list-title">Lista de la compra</p>
+          <span className="shopping-list-progress">{formatCheckedProgress(checkedCount, lista.items.length)}</span>
         </div>
+      </header>
+
+      <article className="day-detail-card day-detail-content-enter shopping-list-card">
         <label className="shopping-list-search">
           <Search className="shopping-list-search-icon" aria-hidden="true" />
           <input
@@ -207,14 +207,16 @@ export function ShoppingListScreen({ lista, onBack }: ShoppingListScreenProps) {
             aria-label="Buscar ingrediente"
           />
         </label>
-      </header>
 
-      {lista.items.length === 0 ? (
-        <p className="shopping-list-empty">No hay ingredientes en esta lista.</p>
-      ) : visibleItems.length === 0 ? (
-        <p className="shopping-list-empty">No hay ingredientes que coincidan.</p>
-      ) : (
-        <ul className="shopping-list-items" aria-label="Ingredientes para comprar">
+        <div className="shopping-list-ingredients-wrap">
+          <p className="day-detail-section-label">Ingredientes</p>
+
+          {lista.items.length === 0 ? (
+            <p className="day-detail-empty">No hay ingredientes en esta lista.</p>
+          ) : visibleItems.length === 0 ? (
+            <p className="day-detail-empty">No hay ingredientes que coincidan.</p>
+          ) : (
+            <ul className="shopping-list-items" aria-label="Ingredientes para comprar">
           {visibleItems.map(({ item, key }) => {
             const checked = checkedItems.has(key);
 
@@ -246,8 +248,10 @@ export function ShoppingListScreen({ lista, onBack }: ShoppingListScreenProps) {
               </li>
             );
           })}
-        </ul>
-      )}
+            </ul>
+          )}
+        </div>
+      </article>
     </section>
   );
 }
