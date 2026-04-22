@@ -26,6 +26,7 @@ export interface Ingrediente {
 export interface Receta {
   nombre: string;
   grupo_principal: string;
+  duracion?: number;
   ingredientes: Ingrediente[];
   pasos: string[];
   tags: string[];

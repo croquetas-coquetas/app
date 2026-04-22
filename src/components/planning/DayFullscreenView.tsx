@@ -10,6 +10,17 @@ interface DayFullscreenViewProps {
   onBack: () => void;
 }
 
+function formatDuracion(duracion?: number): string {
+  if (!Number.isFinite(duracion) || (duracion ?? 0) <= 0) return "0 min";
+
+  const minutos = Math.floor(duracion as number);
+  if (minutos <= 60) return `${minutos} min`;
+
+  const horas = Math.floor(minutos / 60);
+  const restoMinutos = minutos % 60;
+  return `${horas} horas y ${restoMinutos} minutos`;
+}
+
 export function DayFullscreenView({ dia, activeTab, onTabChange, onBack }: DayFullscreenViewProps) {
   const date = new Date(dia.dia);
   const dayLabel = date.toLocaleDateString("es-ES", {
@@ -58,11 +69,11 @@ export function DayFullscreenView({ dia, activeTab, onTabChange, onBack }: DayFu
         <div className="day-detail-no-steps-wrap">
           <p className="day-detail-no-steps-label">
             {!recetaActiva.pasos || recetaActiva.pasos.length == 0 ? (
-                <div>
-                  <p className="day-detail-no-steps">No hay pasos disponibles para esta receta.</p>
-                </div>
+              <div>
+                <p className="day-detail-no-steps">No hay pasos disponibles para esta receta.</p>
+              </div>
             ) : (
-                <div></div>
+              <div></div>
             )}
           </p>
         </div>
@@ -74,54 +85,59 @@ export function DayFullscreenView({ dia, activeTab, onTabChange, onBack }: DayFu
         <div className="day-detail-tags-wrap">
           <p className="day-detail-section-label">Tags</p>
           {recetaActiva.tags && recetaActiva.tags.length > 0 ? (
-              <div className="day-detail-tags-list" aria-label="Etiquetas de la receta">
-                {recetaActiva.tags.map((tag, idx) => (
-                    <Badge key={`${tag}-${idx}`} variant="secondary">
-                      {tag}
-                    </Badge>
-                ))}
-              </div>
+            <div className="day-detail-tags-list" aria-label="Etiquetas de la receta">
+              {recetaActiva.tags.map((tag, idx) => (
+                <Badge key={`${tag}-${idx}`} variant="secondary">
+                  {tag}
+                </Badge>
+              ))}
+            </div>
           ) : (
-              <p className="day-detail-empty">No hay tags para esta receta.</p>
+            <p className="day-detail-empty">No hay tags para esta receta.</p>
           )}
+        </div>
+
+        <div className="day-detail-ingredients-wrap">
+          <p className="day-detail-section-label">DURACIÓN DE ELABORACIÓN</p>
+          <p className="day-detail-ingredient-item day-detail-duration-value">{formatDuracion(recetaActiva.duracion)}</p>
         </div>
 
         <div className="day-detail-ingredients-wrap">
           <p className="day-detail-section-label">Ingredientes</p>
           {recetaActiva.ingredientes && recetaActiva.ingredientes.length > 0 ? (
-              <ul className="day-detail-ingredients-list">
-                {recetaActiva.ingredientes.map((ing: Ingrediente, idx: number) => {
-                  const unidad = formatUnidad(ing.unidad || "");
-                  return (
-                      <li key={idx} className="day-detail-ingredient-item">
-                        {ing.cantidad || 0} {unidad} {unidad ? "de" : ""} {ing.nombre || "Ingrediente desconocido"}
-                      </li>
-                  );
-                })}
-              </ul>
+            <ul className="day-detail-ingredients-list">
+              {recetaActiva.ingredientes.map((ing: Ingrediente, idx: number) => {
+                const unidad = formatUnidad(ing.unidad || "");
+                return (
+                  <li key={idx} className="day-detail-ingredient-item">
+                    {ing.cantidad || 0} {unidad} {unidad ? "de" : ""} {ing.nombre || "Ingrediente desconocido"}
+                  </li>
+                );
+              })}
+            </ul>
           ) : (<p className="day-detail-empty">No hay ingredientes disponibles para esta receta.</p>)}
         </div>
 
         <div className="day-detail-steps-wrap">
           {recetaActiva.pasos && recetaActiva.pasos.length > 0 ? (
-              <div>
-                <p className="day-detail-section-label">Pasos</p>
-                <ol className="day-detail-steps-list">
-                  {recetaActiva.pasos.map((paso, idx) => (
+            <div>
+              <p className="day-detail-section-label">Pasos</p>
+              <ol className="day-detail-steps-list">
+                {recetaActiva.pasos.map((paso, idx) => (
 
 
-                      <li key={`paso-${idx}`} className="day-detail-step-item p-1">
-                        <Badge variant="outline" className="day-detail-step-badge mr-2 text-sm">
-                          {idx + 1}
-                        </Badge>
-                        {paso}
-                      </li>
+                  <li key={`paso-${idx}`} className="day-detail-step-item p-1">
+                    <Badge variant="outline" className="day-detail-step-badge mr-2 text-sm">
+                      {idx + 1}
+                    </Badge>
+                    {paso}
+                  </li>
 
-                  ))}
-                </ol>
-              </div>
+                ))}
+              </ol>
+            </div>
           ) : (
-              <div></div>
+            <div></div>
           )}
         </div>
       </article>

@@ -113,70 +113,70 @@ function App() {
   };
 
   return (
-      <div
-          className={isDayDetail ? "day-view-root bg-background" : "flex min-h-screen flex-col items-center justify-center bg-background"}
-          style={isDayDetail ? undefined : { padding: "1.5rem 1rem", boxSizing: "border-box" }}
-      >
-        {appState === "initializing" && <InitializingState />}
+    <div
+      className={isDayDetail ? "day-view-root bg-background" : "flex min-h-screen flex-col items-center justify-center bg-background"}
+      style={isDayDetail ? undefined : { padding: "1.5rem 1rem", boxSizing: "border-box" }}
+    >
+      {appState === "initializing" && <InitializingState />}
 
-        {appState === "landing" && (
-            <LandingState onGetStarted={() => setAppState("generate")} />
-        )}
+      {appState === "landing" && (
+        <LandingState onGetStarted={() => setAppState("generate")} />
+      )}
 
-        {appState === "generate" && (
-            <GenerateState
-                onGenerate={handleRequestGenerate}
-                onBack={() => setAppState("landing")}
-            />
-        )}
+      {appState === "generate" && (
+        <GenerateState
+          onGenerate={handleRequestGenerate}
+          onBack={() => setAppState("landing")}
+        />
+      )}
 
-        {appState === "confirm-overwrite" && planificacionExistente && (
-            <ConfirmOverwriteState
-                planificacionExistente={planificacionExistente}
-                onShowExisting={() => {
-                  setPlanificacion(planificacionExistente);
-                  setAppState("success");
-                }}
-                onGenerateNew={() => void doGenerate()}
-            />
-        )}
+      {appState === "confirm-overwrite" && planificacionExistente && (
+        <ConfirmOverwriteState
+          planificacionExistente={planificacionExistente}
+          onShowExisting={() => {
+            setPlanificacion(planificacionExistente);
+            setAppState("success");
+          }}
+          onGenerateNew={() => void doGenerate()}
+        />
+      )}
 
-        {appState === "loading" && <LoadingState />}
+      {appState === "loading" && <LoadingState />}
 
-        {appState === "success" && planificacion && (
-            <div
-                className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full"
-                style={{ maxWidth: "100%", boxSizing: "border-box" }}
-            >
-              <CalendarView {...calendarViewProps} />
-            </div>
-        )}
+      {appState === "success" && planificacion && (
+        <div
+          className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full"
+          style={{ maxWidth: "100%", boxSizing: "border-box" }}
+        >
+          <CalendarView {...calendarViewProps} />
+        </div>
+      )}
 
-        {appState === "no-plan-generated" && (
-            <NoPlanGeneratedState
-                planificacion={planificacion || { dias: [] }}
-                onGenerate={handleRequestGenerate}
-                onDaySelect={handleDaySelect}
-            />
-        )}
+      {appState === "no-plan-generated" && (
+        <NoPlanGeneratedState
+          planificacion={planificacion || { dias: [] }}
+          onGenerate={handleRequestGenerate}
+          onDaySelect={handleDaySelect}
+        />
+      )}
 
-        {appState === "day-detail" && selectedDia && (
-            <DayFullscreenView
-                dia={selectedDia}
-                activeTab={activeMealTab}
-                onTabChange={setActiveMealTab}
-                onBack={handleBackToCalendar}
-            />
-        )}
+      {appState === "day-detail" && selectedDia && (
+        <DayFullscreenView
+          dia={selectedDia}
+          activeTab={activeMealTab}
+          onTabChange={setActiveMealTab}
+          onBack={handleBackToCalendar}
+        />
+      )}
 
-        {appState === "error" && (
-            <ErrorState
-                errorMsg={errorMsg}
-                onBack={() => setAppState("generate")}
-                onRetry={() => void doGenerate()}
-            />
-        )}
-      </div>
+      {appState === "error" && (
+        <ErrorState
+          errorMsg={errorMsg}
+          onBack={() => setAppState("generate")}
+          onRetry={() => void doGenerate()}
+        />
+      )}
+    </div>
   );
 }
 

@@ -150,6 +150,7 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -293,6 +294,11 @@
   line-height: 1.4;
 }
 
+.day-detail-duration-value {
+  margin: 0;
+  padding-left: 1rem;
+}
+
 .day-detail-empty {
   margin: 0;
   font-size: 0.9rem;
@@ -351,6 +357,7 @@
     transform: translateX(14px);
     opacity: 0;
   }
+
   to {
     transform: translateX(0);
     opacity: 1;
@@ -362,6 +369,7 @@
     transform: translateY(8px);
     opacity: 0;
   }
+
   to {
     transform: translateY(0);
     opacity: 1;
@@ -373,6 +381,7 @@
     opacity: 0;
     transform: translateY(6px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -380,6 +389,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .calendar-enter,
   .day-detail-enter,
   .day-detail-content-enter {
@@ -396,6 +406,7 @@
   background-color: oklch(0.623 0.194 149.214);
   color: oklch(1 0 0);
 }
+
 [data-slot="button"][data-variant="default"]:hover:not(:disabled) {
   background-color: oklch(0.56 0.18 149.214);
 }
@@ -405,6 +416,7 @@
   color: oklch(1 0 0);
   border-color: oklch(0.623 0.194 149.214);
 }
+
 [data-slot="button"][data-variant="outline"]:hover:not(:disabled) {
   background-color: oklch(0.56 0.18 149.214);
   color: oklch(1 0 0);
@@ -414,6 +426,7 @@
   background-color: oklch(0.623 0.194 149.214);
   color: oklch(1 0 0);
 }
+
 [data-slot="button"][data-variant="ghost"]:hover:not(:disabled) {
   background-color: oklch(0.56 0.18 149.214);
   color: oklch(1 0 0);
@@ -423,6 +436,7 @@
   background-color: oklch(0.623 0.194 149.214);
   color: oklch(1 0 0);
 }
+
 [data-slot="button"][data-variant="secondary"]:hover:not(:disabled) {
   background-color: oklch(0.56 0.18 149.214);
 }
@@ -433,7 +447,7 @@ button.day-inactive {
   cursor: default;
 }
 
-button.day-inactive:hover > div {
+button.day-inactive:hover>div {
   background-color: oklch(0.965 0 0);
   transition: background-color 150ms ease;
 }

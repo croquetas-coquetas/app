@@ -7,6 +7,7 @@ function cleanDiaPlanning(dia: DiaPlanning): DiaPlanning {
     comida: {
       nombre: dia.comida.nombre,
       grupo_principal: dia.comida.grupo_principal,
+      duracion: dia.comida.duracion,
       ingredientes: dia.comida.ingredientes,
       pasos: dia.comida.pasos,
       tags: dia.comida.tags,
@@ -14,6 +15,7 @@ function cleanDiaPlanning(dia: DiaPlanning): DiaPlanning {
     cena: {
       nombre: dia.cena.nombre,
       grupo_principal: dia.cena.grupo_principal,
+      duracion: dia.cena.duracion,
       ingredientes: dia.cena.ingredientes,
       pasos: dia.cena.pasos,
       tags: dia.cena.tags,
