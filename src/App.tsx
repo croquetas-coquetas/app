@@ -27,7 +27,7 @@ import {
   markAsNotFirstTime,
 } from "@/lib/planning.storage";
 import { getDiasPrevios } from "@/lib/planning.utils";
-import { DEFAULT_HORARIOS, validateHorarios } from "@/lib/horarios";
+import { loadHorariosFromStorage, saveHorariosToStorage, validateHorarios } from "@/lib/horarios";
 import { AppState, DiaPlanning, HorarioField, HorariosDisponibilidad, MealTab, Planificacion } from "@/types/planning";
 import { generarListaCompra } from "@/lib/generarLista";
 import {CalendarIcon, CheckCircle2} from "lucide-react";
@@ -45,7 +45,7 @@ function App() {
   const [successListaDialogOpen, setSuccessListaDialogOpen] = useState(false);
   const [configurarHorarioDialogOpen, setConfigurarHorarioDialogOpen] = useState(false);
   const [horarioError, setHorarioError] = useState("");
-  const [horarios, setHorarios] = useState<HorariosDisponibilidad>(DEFAULT_HORARIOS);
+  const [horarios, setHorarios] = useState<HorariosDisponibilidad>(() => loadHorariosFromStorage());
 
   useEffect(() => {
     migrateLegacyStorage();
@@ -154,6 +154,7 @@ function App() {
     }
 
     setHorarioError("");
+    saveHorariosToStorage(horarios);
     console.log("Horarios configurados:", horarios);
     closeConfigurarHorarioDialog();
   };
@@ -166,6 +167,7 @@ function App() {
     }
 
     setHorarioError("");
+    saveHorariosToStorage(horarios);
     console.log("Horarios configurados:", horarios);
     void doGenerate();
   };
