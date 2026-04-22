@@ -3,7 +3,7 @@ import { getDayKey, isToday, formatFechaGenerado } from "@/lib/planning.utils";
 import {DiaPlanning} from "../src/types/planning";
 import { buildPlanMap } from "../src/components/planning/CalendarView";
 
-// ─── planMap ────────────────────────────────────────────────────────────────
+// ─── buildPlanMap ────────────────────────────────────────────────────────────────
 
 describe("Construir el mapa de días", () => {
     it("Mapea cada día por su fecha", () => {
@@ -93,7 +93,7 @@ describe("Construir el mapa de días", () => {
 // ─── getDayKey ───────────────────────────────────────────────────────────────
 
 describe("Pruebas de getDayKey()", () => {
-    it("Extrae AAAA-MM-DD de una fecha ISO completa", () => {
+    it("Extrae YYYY-MM-DD de una fecha ISO completa", () => {
         expect(getDayKey("2026-04-22T00:00:00.000Z")).toBe("2026-04-22");
     });
 });
@@ -114,11 +114,11 @@ describe("Pruebas de isToday()", () => {
         expect(isToday("2026-04-22T00:00:00.000Z")).toBe(true);
     });
 
-    it("Devuelve falso para el dia anterior", () => {
+    it("Devuelve falso para fechas anteriores", () => {
         expect(isToday("2026-04-21T00:00:00.000Z")).toBe(false);
     });
 
-    it("Devuelve falso para el dia siguiente", () => {
+    it("Devuelve falso para fechas posteriores", () => {
         expect(isToday("2026-04-23T00:00:00.000Z")).toBe(false);
     });
 });
@@ -126,15 +126,16 @@ describe("Pruebas de isToday()", () => {
 // ─── formatFechaGenerado ─────────────────────────────────────────────────────
 
 describe("Pruebas de formatFechaGenerado()", () => {
-    it("Incluye el número de día en el output", () => {
-        expect(formatFechaGenerado("2026-04-22T10:30:00.000Z")).toContain("22");
+    it("Formatea una fecha correctamente", () => {
+        expect(formatFechaGenerado("2026-04-22T10:30:00.000Z")).toBe("22 de abril a las 12:30");
     });
 
     it("No salta error con una fecha ISO válida", () => {
         expect(() => formatFechaGenerado("2026-01-01T00:00:00.000Z")).not.toThrow();
+        expect(() => formatFechaGenerado("2026-12-31T23:59:59.999Z")).not.toThrow();
     });
 
-    it("No tiene problemas con fechas de fin de año", () => {
-        expect(() => formatFechaGenerado("2026-12-31T23:59:59.000Z")).not.toThrow();
-    });
+    it("Devuelve '-' si no se le pasa nada", () => {
+        expect(formatFechaGenerado()).toBe("-");
+    })
 });
