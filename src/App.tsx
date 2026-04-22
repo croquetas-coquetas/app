@@ -27,7 +27,7 @@ import {
 import { getDiasPrevios } from "@/lib/planning.utils";
 import { AppState, DiaPlanning, MealTab, Planificacion } from "@/types/planning";
 import { generarListaCompra } from "@/lib/generarLista";
-import { CheckCircle2 } from "lucide-react";
+import {CalendarIcon, CheckCircle2} from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 function App() {
@@ -37,8 +37,14 @@ function App() {
   const [planificacionExistente, setPlanificacionExistente] = useState<Planificacion | null>(null);
   const [selectedDia, setSelectedDia] = useState<DiaPlanning | null>(null);
   const [activeMealTab, setActiveMealTab] = useState<MealTab>("comida");
-  const [successListaDialogOpen, setSuccessListaDialogOpen] = useState(false);
   const [listaItemsCount, setListaItemsCount] = useState<number | null>(null);
+
+  const [successListaDialogOpen, setSuccessListaDialogOpen] = useState(false);
+  const [configurarHorarioDialogOpen, setConfigurarHorarioDialogOpen] = useState(false);
+  const [horarios, setHorarios] = useState({
+    comida: { inicio: "13:00", fin: "14:30" },
+    cena: { inicio: "20:00", fin: "21:00" },
+  });
 
   useEffect(() => {
     migrateLegacyStorage();
@@ -96,8 +102,28 @@ function App() {
   };
 
   const handleNavBarProfileClick = (action: "mi-perfil" | "configurar-horario") => {
-    // TODO: Implementar navegación a estas secciones cuando estén disponibles
-    console.log("Perfil action:", action);
+    if (action === "configurar-horario") {
+      setConfigurarHorarioDialogOpen(true);
+    }
+  };
+
+  const handleHorarioChange = (
+    mealType: "comida" | "cena",
+    timeType: "inicio" | "fin",
+    value: string
+  ) => {
+    setHorarios((prev) => ({
+      ...prev,
+      [mealType]: {
+        ...prev[mealType],
+        [timeType]: value,
+      },
+    }));
+  };
+
+  const handleSaveHorarios = () => {
+    console.log("Horarios configurados:", horarios);
+    setConfigurarHorarioDialogOpen(false);
   };
 
   const doGenerate = async () => {
@@ -243,6 +269,108 @@ function App() {
               </div>
             </div>
           </div>
+        )}
+
+        {/* Configurar horarios dialog */}
+        {configurarHorarioDialogOpen && (
+            <div
+                className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4 backdrop-blur-sm"
+                onClick={() => setConfigurarHorarioDialogOpen(false)}
+                role="presentation"
+            >
+              <div
+                  role="dialog"
+                  aria-modal="true"
+                  aria-label="Configurar mi horario"
+                  className="w-full sm:max-w-sm rounded-2xl sm:rounded-2xl border border-border bg-background shadow-xl animate-in fade-in zoom-in-95 duration-200"
+                  onClick={(event) => event.stopPropagation()}
+              >
+                {/* Header */}
+                <div className="border-b border-border px-5 py-4">
+                  <div className="flex items-start gap-3">
+                    <span className="mt-0.5 rounded-full bg-primary/10 p-1.5 text-primary shrink-0">
+                      <CalendarIcon className="size-5" />
+                    </span>
+                    <div>
+                      <h3 className="text-base font-semibold text-foreground">Configurar mi horario</h3>
+                      <p className="text-xs text-muted-foreground mt-1">Define tu disponibilidad para cocinar</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Content */}
+                <div className="px-5 py-6 space-y-6">
+                  {/* Comida */}
+                  <div>
+                    <h4 className="text-sm font-semibold text-foreground mb-3">Comida</h4>
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1">
+                        <label className="block text-xs text-muted-foreground mb-2">De</label>
+                        <input
+                          type="time"
+                          value={horarios.comida.inicio}
+                          onChange={(e) => handleHorarioChange("comida", "inicio", e.target.value)}
+                          className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <label className="block text-xs text-muted-foreground mb-2">Hasta</label>
+                        <input
+                          type="time"
+                          value={horarios.comida.fin}
+                          onChange={(e) => handleHorarioChange("comida", "fin", e.target.value)}
+                          className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Cena */}
+                  <div>
+                    <h4 className="text-sm font-semibold text-foreground mb-3">Cena</h4>
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1">
+                        <label className="block text-xs text-muted-foreground mb-2">De</label>
+                        <input
+                          type="time"
+                          value={horarios.cena.inicio}
+                          onChange={(e) => handleHorarioChange("cena", "inicio", e.target.value)}
+                          className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <label className="block text-xs text-muted-foreground mb-2">Hasta</label>
+                        <input
+                          type="time"
+                          value={horarios.cena.fin}
+                          onChange={(e) => handleHorarioChange("cena", "fin", e.target.value)}
+                          className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div className="border-t border-border px-5 py-4 flex gap-2 justify-end">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="rounded-lg px-4"
+                    onClick={() => setConfigurarHorarioDialogOpen(false)}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    size="sm"
+                    className="rounded-lg px-4"
+                    onClick={handleSaveHorarios}
+                  >
+                    Guardar
+                  </Button>
+                </div>
+              </div>
+            </div>
         )}
       </div>
   );

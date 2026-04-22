@@ -35,11 +35,10 @@ export function BottomNavBar({
       {/* Overlay when menu is open */}
       {isProfileOpen && (
         <div
-          className="fixed inset-0 z-30"
+          className="fixed inset-0 z-30 backdrop-blur-sm"
           style={{
             backgroundColor: "rgba(0, 0, 0, 0.1)",
             animation: "fadeIn 200ms ease-out",
-            backdropFilter: "blur(2px)",
           }}
           onClick={() => setIsProfileOpen(false)}
           aria-hidden="true"
