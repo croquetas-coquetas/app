@@ -72,6 +72,18 @@ function App() {
     return () => clearTimeout(initTimer);
   }, []);
 
+  useEffect(() => {
+    const isModalOpen = successListaDialogOpen || configurarHorarioDialogOpen;
+    if (isModalOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [successListaDialogOpen, configurarHorarioDialogOpen]);
+
   const handleRequestGenerate = () => {
     const hoy = getPlanificacionHoy();
     if (hoy) {

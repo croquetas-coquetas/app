@@ -437,3 +437,25 @@ button.day-inactive:hover > div {
   background-color: oklch(0.965 0 0);
   transition: background-color 150ms ease;
 }
+
+/* Estilos específicos para inputs de tipo time */
+input[type="time"] {
+  color-scheme: light dark;
+  color: inherit;
+}
+
+input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.8);
+  cursor: pointer;
+}
+
+input[type="time"]::-webkit-calendar-picker-indicator:hover {
+  filter: invert(0.7);
+}
+
+/* Para navegadores que no soportan webkit */
+input[type="time"]::placeholder {
+  color: currentColor;
+  opacity: 1;
+}
+
