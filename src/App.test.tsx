@@ -3,7 +3,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { render, screen, fireEvent, waitFor, cleanup, act } from "@testing-library/react";
 import App from "./App";
 import { savePlanificacion } from "@/lib/planning.storage";
-import { STORAGE_META, STORAGE_PREFIX } from "@/lib/planning.constants";
+import { STORAGE_HORARIOS, STORAGE_META, STORAGE_PREFIX } from "@/lib/planning.constants";
 
 
 const FIRST_TIME_KEY = "smartcook_first_time";
@@ -103,7 +103,7 @@ async function renderAsFirstTime() {
     await advanceInit();
 }
 
-async function irAGenerate() {
+async function irAConfigurarHorarioInicial() {
     await renderAsFirstTime();
     fireEvent.click(screen.getByText("Get Started"));
 }
@@ -116,8 +116,8 @@ function seedPlanHoy() {
     savePlanificacion(planHoy());
 }
 
-function clickGenerateButton() {
-    fireEvent.click(screen.getByRole("button", { name: /Generar planificación/i }));
+function clickGenerateDesdeOnboarding() {
+    fireEvent.click(screen.getByRole("button", { name: /Guardar y generar planificacion/i }));
 }
 
 
@@ -135,6 +135,24 @@ function mockFetchError(error = "Error del servidor") {
 
 function mockFetchFallo() {
     vi.stubGlobal("fetch", vi.fn(() => Promise.reject(new Error("Network error"))));
+}
+
+function setHorarioFields(values: [string, string, string, string]) {
+    const inputs = document.querySelectorAll<HTMLInputElement>('input[type="time"]');
+    expect(inputs.length).toBe(4);
+    fireEvent.change(inputs[0], { target: { value: values[0] } });
+    fireEvent.change(inputs[1], { target: { value: values[1] } });
+    fireEvent.change(inputs[2], { target: { value: values[2] } });
+    fireEvent.change(inputs[3], { target: { value: values[3] } });
+}
+
+async function abrirConfigurarHorarioDesdePerfil() {
+    const profileButton = screen.getByRole("button", { name: /Abrir menú del perfil/i });
+    fireEvent.click(profileButton);
+    fireEvent.mouseDown(profileButton);
+    fireEvent.keyDown(profileButton, { key: "Enter", code: "Enter" });
+    const configurarHorarioItem = await screen.findByText(/Configurar horario/i, {}, { timeout: 2000 });
+    fireEvent.click(configurarHorarioItem);
 }
 
 
@@ -156,46 +174,49 @@ describe("UNIDAD", () => {
         expect(screen.getByText("Get Started")).toBeTruthy();
     });
 
-    it("Get Started lleva al estado generate", async () => {
+    it("Get Started lleva al onboarding de horario", async () => {
         await renderAsFirstTime();
         fireEvent.click(screen.getByText("Get Started"));
-        expect(screen.getByRole("heading", { name: /Generar planificación/i })).toBeTruthy();
+        expect(screen.getByRole("heading", { name: /Configura tu horario/i })).toBeTruthy();
+        expect(screen.getByText(/Rangos de cocina/i)).toBeTruthy();
+        expect(screen.getByRole("button", { name: /Guardar y generar planificacion/i })).toBeTruthy();
     });
 
     it("muestra el mensaje de error del servidor cuando la API falla", async () => {
         mockFetchError("No hay suficientes recetas");
-        await renderAsFirstTime();
-        fireEvent.click(screen.getByText("Get Started"));
-        clickGenerateButton();
+        await irAConfigurarHorarioInicial();
+        clickGenerateDesdeOnboarding();
         await waitFor(() => expect(screen.getByText(/Algo salió mal/i)).toBeTruthy());
         expect(screen.getByText("No hay suficientes recetas")).toBeTruthy();
     });
 
     it("muestra error de red cuando no hay conexión", async () => {
         mockFetchFallo();
-        await renderAsFirstTime();
-        fireEvent.click(screen.getByText("Get Started"));
-        clickGenerateButton();
+        await irAConfigurarHorarioInicial();
+        clickGenerateDesdeOnboarding();
         await waitFor(() => expect(screen.getByText(/Algo salió mal/i)).toBeTruthy());
         expect(screen.getByText(/No se pudo conectar/i)).toBeTruthy();
     });
 
-    it("al generar sin plan previo pasa a loading", async () => {
+    it("al generar desde onboarding pasa a loading", async () => {
         vi.stubGlobal("fetch", vi.fn(() => new Promise(() => { })));
-        await renderAsFirstTime();
-        fireEvent.click(screen.getByText("Get Started"));
-        clickGenerateButton();
+        await irAConfigurarHorarioInicial();
+        clickGenerateDesdeOnboarding();
         expect(screen.getByText(/Generando tu menú/i)).toBeTruthy();
     });
 
-    it("al generar con plan previo de hoy pasa a confirm-overwrite", async () => {
-        seedPlanHoy();
-        await renderAsFirstTime();
-        fireEvent.click(screen.getByText("Get Started"));
-        clickGenerateButton();
-        await waitFor(() =>
-            expect(screen.getByText("¿Quieres ver la planificación existente o generar una nueva?")).toBeTruthy()
-        );
+    it("guarda horarios en localStorage desde onboarding", async () => {
+        mockFetchOk(planHoy());
+        await irAConfigurarHorarioInicial();
+        setHorarioFields(["12:30", "14:00", "19:30", "21:30"]);
+        clickGenerateDesdeOnboarding();
+        await waitFor(() => expect(screen.getByText(/Menú del mes/i)).toBeTruthy());
+        const raw = localStorage.getItem(STORAGE_HORARIOS);
+        expect(raw).toBeTruthy();
+        expect(JSON.parse(raw!)).toEqual({
+            comida: { inicio: "12:30", fin: "14:00" },
+            cena: { inicio: "19:30", fin: "21:30" },
+        });
     });
 });
 
@@ -216,7 +237,10 @@ describe("INTEGRACION", () => {
         render(<App />);
         await advanceInit();
         expect(screen.getByText("No hay semana generada")).toBeTruthy();
-        expect(screen.getByText("Menú semanal")).toBeTruthy();
+        expect(screen.getByText("Menú del mes")).toBeTruthy();
+        expect(screen.getByRole("button", { name: /Ver calendario/i })).toBeTruthy();
+        expect(screen.getByRole("button", { name: /Generar lista de la compra/i })).toBeTruthy();
+        expect(screen.getByRole("button", { name: /Abrir menú del perfil/i })).toBeTruthy();
     });
 
     it("si no es primera apertura y hay planificación, entra directo al calendario", async () => {
@@ -224,33 +248,51 @@ describe("INTEGRACION", () => {
         seedPlanHoy();
         render(<App />);
         await advanceInit();
-        expect(screen.getByText("Menú semanal")).toBeTruthy();
+        expect(screen.getByText("Menú del mes")).toBeTruthy();
         expect(screen.getByText("Paella valenciana")).toBeTruthy();
         expect(screen.queryByText("Get Started")).toBeNull();
+        expect(screen.getByRole("button", { name: /Regenerar planificación/i })).toBeTruthy();
     });
 
-    it("al generar con localStorage vacío no muestra advertencia de planificación existente", async () => {
-        vi.stubGlobal("fetch", vi.fn(() => new Promise(() => {
-        })));
-        await irAGenerate();
-        clickGenerateButton();
-        expect(screen.queryByText(/Ya tienes una planificación de hoy/i)).toBeNull();
-    });
-
-    it("al generar con planificación de hoy guardada muestra confirm-overwrite", async () => {
+    it("desde el perfil permite abrir el modal de configurar horario", async () => {
         seedPlanHoy();
-        await irAGenerate();
-        clickGenerateButton();
-        expect(screen.getByText(/Ya tienes una planificación de hoy/i)).toBeTruthy();
+        seedNoEsPrimeraVez();
+        render(<App />);
+        await advanceInit();
+        await abrirConfigurarHorarioDesdePerfil();
+        expect(screen.getByRole("dialog", { name: /Configurar mi horario/i })).toBeTruthy();
+        expect(screen.getByRole("button", { name: /Guardar/i })).toBeTruthy();
+        fireEvent.click(screen.getByRole("button", { name: /Cancelar/i }));
+        await waitFor(() => {
+            expect(screen.queryByRole("dialog", { name: /Configurar mi horario/i })).toBeNull();
+        });
+    });
+
+    it("guardar horario desde modal persiste en localStorage", async () => {
+        seedPlanHoy();
+        seedNoEsPrimeraVez();
+        render(<App />);
+        await advanceInit();
+        await abrirConfigurarHorarioDesdePerfil();
+        setHorarioFields(["11:00", "13:30", "20:15", "22:00"]);
+        fireEvent.click(screen.getByRole("button", { name: /Guardar/i }));
+        await waitFor(() => {
+            expect(screen.queryByRole("dialog", { name: /Configurar mi horario/i })).toBeNull();
+        });
+        const raw = localStorage.getItem(STORAGE_HORARIOS);
+        expect(raw).toBeTruthy();
+        expect(JSON.parse(raw!)).toEqual({
+            comida: { inicio: "11:00", fin: "13:30" },
+            cena: { inicio: "20:15", fin: "22:00" },
+        });
     });
 
     it("guarda la planificación en localStorage tras éxito", async () => {
         const plan = planHoy();
         mockFetchOk(plan);
-        await renderAsFirstTime();
-        fireEvent.click(screen.getByText("Get Started"));
-        clickGenerateButton();
-        await waitFor(() => screen.getByText(/Menú semanal/i));
+        await irAConfigurarHorarioInicial();
+        clickGenerateDesdeOnboarding();
+        await waitFor(() => screen.getByText(/Menú del mes/i));
         expect(localStorage.getItem(STORAGE_META)).toBeTruthy();
         expect(localStorage.getItem(`${STORAGE_PREFIX}dia_0`)).toBeTruthy();
         const meta = JSON.parse(localStorage.getItem(STORAGE_META)!);
@@ -278,12 +320,13 @@ describe("SISTEMA", () => {
         await advanceInit();
         expect(screen.getByText("SmartCook")).toBeTruthy();
         fireEvent.click(screen.getByText("Get Started"));
-        expect(screen.getByRole("heading", { name: /Generar planificación/i })).toBeTruthy();
-        clickGenerateButton();
+        expect(screen.getByRole("heading", { name: /Configura tu horario/i })).toBeTruthy();
+        clickGenerateDesdeOnboarding();
         expect(screen.getByText(/Generando tu menú/i)).toBeTruthy();
-        await waitFor(() => expect(screen.getByText(/Menú semanal/i)).toBeTruthy());
+        await waitFor(() => expect(screen.getByText(/Menú del mes/i)).toBeTruthy());
         expect(screen.getByText("Paella valenciana")).toBeTruthy();
-        expect(screen.getByText("Regenerar")).toBeTruthy();
+        expect(screen.getByRole("button", { name: /Regenerar planificación/i })).toBeTruthy();
+        expect(screen.getByRole("button", { name: /Abrir menú del perfil/i })).toBeTruthy();
     });
 
     it("flujo completo: landing → generate → error → reintentar → éxito", async () => {
@@ -291,55 +334,36 @@ describe("SISTEMA", () => {
             .mockResolvedValueOnce({ ok: false, status: 503, json: () => Promise.resolve({ error: "Servidor caído" }) })
             .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(planHoy()) })
         );
-        await renderAsFirstTime();
-        fireEvent.click(screen.getByText("Get Started"));
-        clickGenerateButton();
+        await irAConfigurarHorarioInicial();
+        clickGenerateDesdeOnboarding();
         await waitFor(() => screen.getByText("Servidor caído"));
         fireEvent.click(screen.getByText("Reintentar"));
-        await waitFor(() => expect(screen.getByText(/Menú semanal/i)).toBeTruthy());
+        await waitFor(() => expect(screen.getByText(/Menú del mes/i)).toBeTruthy());
         expect(screen.getByText("Paella valenciana")).toBeTruthy();
     });
 
-    it("flujo completo: landing → generate → advertencia → generar nueva → éxito", async () => {
+    it("regenerar con plan de hoy muestra confirm-overwrite", async () => {
         seedPlanHoy();
-        mockFetchOk({
-            generado_en: new Date().toISOString(),
-            dias: [{
-                dia: new Date().toISOString(),
-                comida: {
-                    nombre: "Fabada asturiana",
-                    grupo_principal: "legumbres",
-                    ingredientes: [],
-                    pasos: ["Paso 1"],
-                    tags: ["asturiana"],
-                },
-                cena: {
-                    nombre: "Caldo gallego",
-                    grupo_principal: "sopa",
-                    ingredientes: [],
-                    pasos: ["Paso 1"],
-                    tags: ["gallega"],
-                },
-            }],
-        });
-        await renderAsFirstTime();
-        fireEvent.click(screen.getByText("Get Started"));
-        clickGenerateButton();
-        await waitFor(() => screen.getByText("Generar nueva"));
-        fireEvent.click(screen.getByText("Generar nueva"));
-        await waitFor(() => expect(screen.getByText("Fabada asturiana")).toBeTruthy());
-        expect(screen.getByText("Caldo gallego")).toBeTruthy();
+        seedNoEsPrimeraVez();
+        render(<App />);
+        await advanceInit();
+        fireEvent.click(screen.getByRole("button", { name: /Regenerar planificación/i }));
+        expect(screen.getByText("Ya tienes una planificación de hoy")).toBeTruthy();
     });
 
-    it("Regenerar desde el menú vuelve a mostrar la advertencia", async () => {
-        seedPlanHoy();
-        await renderAsFirstTime();
-        fireEvent.click(screen.getByText("Get Started"));
-        clickGenerateButton();
-        await waitFor(() => screen.getByText("Ver la existente"));
-        fireEvent.click(screen.getByText("Ver la existente"));
-        await waitFor(() => screen.getByText("Regenerar"));
-        fireEvent.click(screen.getByText("Regenerar"));
-        expect(screen.getByText("Ya tienes una planificación de hoy")).toBeTruthy();
+    it("la app carga horarios guardados y los muestra en onboarding", async () => {
+        localStorage.setItem(
+            STORAGE_HORARIOS,
+            JSON.stringify({
+                comida: { inicio: "10:00", fin: "12:00" },
+                cena: { inicio: "19:00", fin: "20:30" },
+            })
+        );
+        await irAConfigurarHorarioInicial();
+        const inputs = document.querySelectorAll<HTMLInputElement>('input[type="time"]');
+        expect(inputs[0].value).toBe("10:00");
+        expect(inputs[1].value).toBe("12:00");
+        expect(inputs[2].value).toBe("19:00");
+        expect(inputs[3].value).toBe("20:30");
     });
 });
