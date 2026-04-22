@@ -4,9 +4,11 @@ import "./App.css";
 import { CalendarView } from "@/components/planning/CalendarView";
 import { DayFullscreenView } from "@/components/planning/DayFullscreenView";
 import { BottomNavBar } from "@/components/planning/BottomNavBar";
+import { HorarioConfigFields } from "@/components/planning/HorarioConfigFields";
 import { ConfirmOverwriteState } from "@/components/planning/states/ConfirmOverwriteState";
 import { LandingState } from "@/components/planning/states/LandingState";
 import { GenerateState } from "@/components/planning/states/GenerateState";
+import { ScheduleOnboardingState } from "@/components/planning/states/ScheduleOnboardingState";
 import { ErrorState } from "@/components/planning/states/ErrorState";
 import { LoadingState } from "@/components/planning/states/LoadingState";
 import { InitializingState } from "@/components/planning/states/InitializingState";
@@ -25,7 +27,8 @@ import {
   markAsNotFirstTime,
 } from "@/lib/planning.storage";
 import { getDiasPrevios } from "@/lib/planning.utils";
-import { AppState, DiaPlanning, MealTab, Planificacion } from "@/types/planning";
+import { DEFAULT_HORARIOS, validateHorarios } from "@/lib/horarios";
+import { AppState, DiaPlanning, HorarioField, HorariosDisponibilidad, MealTab, Planificacion } from "@/types/planning";
 import { generarListaCompra } from "@/lib/generarLista";
 import {CalendarIcon, CheckCircle2} from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -42,10 +45,7 @@ function App() {
   const [successListaDialogOpen, setSuccessListaDialogOpen] = useState(false);
   const [configurarHorarioDialogOpen, setConfigurarHorarioDialogOpen] = useState(false);
   const [horarioError, setHorarioError] = useState("");
-  const [horarios, setHorarios] = useState({
-    comida: { inicio: "13:00", fin: "14:30" },
-    cena: { inicio: "20:00", fin: "21:00" },
-  });
+  const [horarios, setHorarios] = useState<HorariosDisponibilidad>(DEFAULT_HORARIOS);
 
   useEffect(() => {
     migrateLegacyStorage();
@@ -121,14 +121,19 @@ function App() {
     }
   };
 
+  const handleLandingGetStarted = () => {
+    setHorarioError("");
+    setAppState("schedule-onboarding");
+  };
+
   const closeConfigurarHorarioDialog = () => {
     setHorarioError("");
     setConfigurarHorarioDialogOpen(false);
   };
 
   const handleHorarioChange = (
-    mealType: "comida" | "cena",
-    timeType: "inicio" | "fin",
+    mealType: MealTab,
+    timeType: HorarioField,
     value: string
   ) => {
     setHorarios((prev) => ({
@@ -141,24 +146,8 @@ function App() {
     setHorarioError("");
   };
 
-  const validateHorarios = () => {
-    if (!horarios.comida.inicio || !horarios.comida.fin || !horarios.cena.inicio || !horarios.cena.fin) {
-      return "Debes completar todos los horarios. Indica hora de inicio y fin para comida y cena.";
-    }
-
-    if (horarios.comida.inicio >= horarios.comida.fin) {
-      return "El rango de comida es incorrecto: la hora de inicio debe ser anterior a la de fin (ejemplo: 13:00 a 14:30).";
-    }
-
-    if (horarios.cena.inicio >= horarios.cena.fin) {
-      return "El rango de cena es incorrecto: la hora de inicio debe ser anterior a la de fin (ejemplo: 20:00 a 21:00).";
-    }
-
-    return "";
-  };
-
   const handleSaveHorarios = () => {
-    const validationError = validateHorarios();
+    const validationError = validateHorarios(horarios);
     if (validationError) {
       setHorarioError(validationError);
       return;
@@ -166,7 +155,19 @@ function App() {
 
     setHorarioError("");
     console.log("Horarios configurados:", horarios);
-    setConfigurarHorarioDialogOpen(false);
+    closeConfigurarHorarioDialog();
+  };
+
+  const handleOnboardingGenerate = () => {
+    const validationError = validateHorarios(horarios);
+    if (validationError) {
+      setHorarioError(validationError);
+      return;
+    }
+
+    setHorarioError("");
+    console.log("Horarios configurados:", horarios);
+    void doGenerate();
   };
 
   const doGenerate = async () => {
@@ -202,7 +203,7 @@ function App() {
     onDaySelect: handleDaySelect,
   };
 
-  const showNavBar = !["initializing", "landing", "generate", "loading", "error", "confirm-overwrite"].includes(appState);
+  const showNavBar = !["initializing", "landing", "schedule-onboarding", "generate", "loading", "error", "confirm-overwrite"].includes(appState);
   const currentNavTab = appState === "day-detail" ? "calendar" : appState === "success" ? "calendar" : undefined;
 
   return (
@@ -213,7 +214,17 @@ function App() {
         {appState === "initializing" && <InitializingState />}
 
         {appState === "landing" && (
-            <LandingState onGetStarted={() => setAppState("generate")} />
+            <LandingState onGetStarted={handleLandingGetStarted} />
+        )}
+
+        {appState === "schedule-onboarding" && (
+            <ScheduleOnboardingState
+                horarios={horarios}
+                errorMsg={horarioError}
+                onHorarioChange={handleHorarioChange}
+                onBack={() => setAppState("landing")}
+                onGenerate={handleOnboardingGenerate}
+            />
         )}
 
         {appState === "generate" && (
@@ -265,7 +276,7 @@ function App() {
         {appState === "error" && (
             <ErrorState
                 errorMsg={errorMsg}
-                onBack={() => setAppState("generate")}
+                onBack={() => setAppState(isFirstTime() ? "schedule-onboarding" : "generate")}
                 onRetry={() => void doGenerate()}
             />
         )}
@@ -343,63 +354,8 @@ function App() {
 
                 {/* Content */}
                 <div className="px-5 py-6 space-y-6">
-                  {/* Comida */}
-                  <div>
-                    <h4 className="text-sm font-semibold text-foreground mb-3">Comida</h4>
-                    <div className="flex items-center gap-2">
-                      <div className="flex-1">
-                        <label className="block text-xs text-muted-foreground mb-2">De</label>
-                        <input
-                          type="time"
-                          value={horarios.comida.inicio}
-                          onChange={(e) => handleHorarioChange("comida", "inicio", e.target.value)}
-                          className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <label className="block text-xs text-muted-foreground mb-2">Hasta</label>
-                        <input
-                          type="time"
-                          value={horarios.comida.fin}
-                          onChange={(e) => handleHorarioChange("comida", "fin", e.target.value)}
-                          className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Cena */}
-                  <div>
-                    <h4 className="text-sm font-semibold text-foreground mb-3">Cena</h4>
-                    <div className="flex items-center gap-2">
-                      <div className="flex-1">
-                        <label className="block text-xs text-muted-foreground mb-2">De</label>
-                        <input
-                          type="time"
-                          value={horarios.cena.inicio}
-                          onChange={(e) => handleHorarioChange("cena", "inicio", e.target.value)}
-                          className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <label className="block text-xs text-muted-foreground mb-2">Hasta</label>
-                        <input
-                          type="time"
-                          value={horarios.cena.fin}
-                          onChange={(e) => handleHorarioChange("cena", "fin", e.target.value)}
-                          className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-                        />
-                      </div>
-                    </div>
-                  </div>
+                  <HorarioConfigFields horarios={horarios} onHorarioChange={handleHorarioChange} errorMsg={horarioError} />
                 </div>
-
-                {/* Mensaje de validacion */}
-                {horarioError && (
-                  <div className="mx-5 mb-4 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-xs text-red-700" role="alert">
-                    {horarioError}
-                  </div>
-                )}
 
                 {/* Footer */}
                 <div className="border-t border-border px-5 py-4 flex gap-2 justify-end">
