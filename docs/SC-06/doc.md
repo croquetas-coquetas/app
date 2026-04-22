@@ -10,11 +10,18 @@ La generacion no se reimplementa. El flujo reutiliza la funcion existente `gener
 
 Tambien se permite marcar ingredientes como comprados. Estos tachados se guardan aparte, sin modificar la lista original generada.
 
+La cabecera de la pantalla permanece visible durante el desplazamiento de la lista e incluye una barra de busqueda para filtrar ingredientes por nombre. Los ingredientes marcados como comprados se reordenan al fondo de la lista; el ultimo ingrediente marcado queda encima de los comprados anteriores.
+
+Cuando un ingrediente cambia de posicion al marcarse o desmarcarse, la fila se anima suavemente para representar la bajada o la subida dentro de la lista.
+
 ## Criterios Cubiertos
 
 - `SC-06-1`: si existe una lista generada con ingredientes, se muestra cada ingrediente junto con la cantidad total necesaria.
 - `SC-06-2`: si existe una lista generada pero esta vacia, se muestra `No hay ingredientes en esta lista.`
 - `SC-06-3`: si no existe lista generada para la planificacion actual, se muestra un recuadro con mensaje y boton `Generar`; al pulsarlo se genera la lista y se abre la pantalla de lista.
+- `SC-06-4`: la cabecera de la lista se mantiene visible al hacer scroll.
+- `SC-06-5`: la cabecera permite buscar ingredientes por nombre.
+- `SC-06-6`: al marcar un ingrediente como comprado, se mueve al fondo de la lista por encima del ultimo ingrediente comprado anteriormente.
 
 ## Archivos Modificados
 
@@ -39,15 +46,35 @@ Responsabilidades:
 
 - Mostrar el titulo `Lista de la compra`.
 - Mostrar el boton `Volver`.
-- Mostrar el contador `X de Y comprados`.
+- Mostrar el contador `X ingredientes de Y comprados`.
+- Mostrar una barra de busqueda de ingrediente en la cabecera.
 - Mostrar cada ingrediente en una lista plana.
 - Mostrar el nombre del ingrediente como texto principal.
 - Mostrar cantidad y unidad debajo.
 - Mostrar `No hay ingredientes en esta lista.` cuando `lista.items.length === 0`.
+- Mostrar `No hay ingredientes que coincidan.` cuando la busqueda no devuelve resultados.
 - Permitir marcar y desmarcar ingredientes como comprados.
+- Reordenar al fondo los ingredientes cuando se marcan como comprados.
+- Devolver el ingrediente a su posicion de pendientes cuando se desmarca.
+- Mantener estable la posicion de scroll al desmarcar, para que la vista no siga al ingrediente hacia arriba.
+- Animar suavemente la subida y bajada de ingredientes cuando cambia su posicion visual.
 - Guardar los ingredientes comprados mediante las funciones de `shopping.storage.ts`.
 
 La pantalla no agrupa por categorias. Aunque `ItemCompra` puede contener `categoria`, esa informacion no se usa para organizar visualmente la lista. La lista se muestra como una compra normal y directa.
+
+La cabecera usa posicion fija relativa al scroll con `position: sticky`, `top: 0`, fondo y desenfoque ligero. Esto mantiene visibles el boton de vuelta, el titulo, el contador y la busqueda mientras el usuario se desplaza por listas largas.
+
+La busqueda filtra por `item.nombre` y normaliza el texto para ignorar mayusculas, minusculas y diacriticos. No modifica la lista generada ni los tachados guardados.
+
+El orden visual se calcula en memoria:
+
+1. Ingredientes pendientes, respetando el orden original de la lista generada.
+2. Ingredientes comprados, al fondo.
+3. Dentro de los comprados, el marcado mas recientemente aparece primero, es decir, justo encima de los comprados anteriores.
+
+Al desmarcar un ingrediente comprado, el ingrediente vuelve al bloque de pendientes en su posicion original relativa. Para evitar que la pantalla persiga el elemento y suba la vista, se guarda la posicion de scroll antes del cambio y se restaura despues del render.
+
+La animacion de reordenacion usa una tecnica FLIP: antes del cambio se capturan las posiciones de las filas visibles y despues del render se anima cada fila desde su posicion anterior hasta la nueva mediante `transform`. Si el usuario tiene activada la reduccion de movimiento, no se ejecuta la animacion.
 
 El formateo de cantidad se hace en `formatCantidad(item)`. Si existe unidad, devuelve:
 
@@ -329,6 +356,8 @@ Clases:
 .shopping-list-title-wrap
 .shopping-list-title
 .shopping-list-progress
+.shopping-list-search
+.shopping-list-search-icon
 .shopping-list-empty
 .shopping-list-items
 .shopping-list-item
@@ -341,7 +370,11 @@ Clases:
 
 La pantalla es sobria, plana y centrada en lectura rapida.
 
+La cabecera se mantiene visible durante el scroll mediante `position: sticky`. La barra de busqueda ocupa todo el ancho disponible, tiene icono de lupa y usa `type="search"` con `aria-label="Buscar ingrediente"`.
+
 Los ingredientes marcados como comprados aparecen tachados mediante estilos asociados al checkbox.
+
+Las filas de ingredientes declaran `will-change: transform` para favorecer una animacion suave cuando cambian de posicion.
 
 ### Recuadro de lista no generada
 
@@ -401,9 +434,24 @@ Esto permite que el recuadro capture interaccion, pero la capa completa no funci
 3. `ShoppingListScreen` calcula la clave con `getListaCompraItemKey(item)`.
 4. La clave se guarda en el `Set`.
 5. El ingrediente se muestra tachado.
-6. El contador se actualiza.
-7. El `Set` se persiste en `localStorage`.
-8. Al volver a abrir la lista, se recuperan los tachados asociados a esa planificacion.
+6. El ingrediente se mueve al fondo de la lista.
+7. Si ya habia ingredientes comprados, el nuevo comprado queda encima de ellos.
+8. El contador se actualiza.
+9. El `Set` se persiste en `localStorage`.
+10. Al volver a abrir la lista, se recuperan los tachados asociados a esa planificacion.
+11. Si el usuario desmarca un ingrediente comprado, el ingrediente sube a su posicion de pendientes.
+12. La posicion de scroll se restaura para que la vista permanezca donde estaba.
+13. Las filas implicadas se animan desde su posicion anterior hasta la nueva, representando la subida o bajada.
+
+### Caso 5: busqueda de ingrediente
+
+1. El usuario abre una lista con ingredientes.
+2. Escribe en la barra `Buscar ingrediente`.
+3. `ShoppingListScreen` normaliza el texto introducido.
+4. La lista visible se filtra por nombre de ingrediente.
+5. Si hay coincidencias, se muestran respetando el orden visual de pendientes y comprados.
+6. Si no hay coincidencias, se muestra `No hay ingredientes que coincidan.`
+7. Al limpiar la busqueda, vuelve a mostrarse la lista completa.
 
 ## Decisiones Tecnicas
 
@@ -429,6 +477,12 @@ La lista no agrupa por categoria, tipo ni grupo alimentario.
 
 Los tachados se guardan aparte. `smartcook_lista_compra` permanece intacta.
 
+### Ordenar solo la vista y preservar el scroll
+
+Mover los comprados al fondo es un comportamiento visual de `ShoppingListScreen`. No se modifica el array `lista.items` guardado en `smartcook_lista_compra`.
+
+Al marcar se mueve el ingrediente al fondo. Al desmarcar vuelve al bloque de pendientes, pero antes se elimina el foco del checkbox y se restaura `window.scrollY` tras el render para no desplazar al usuario a otra zona de la lista.
+
 ### Validar pertenencia de la lista
 
 La lista guardada solo se abre si `planificacion_generada_en` coincide con la planificacion activa. Esto evita mezclar listas antiguas con planes nuevos.
@@ -442,6 +496,10 @@ Se anadieron pruebas en `src/App.test.tsx` para cubrir:
 - Recuadro de generacion cuando no hay lista.
 - Apertura automatica tras generar desde el recuadro.
 - Persistencia de ingredientes marcados como comprados.
+- Busqueda de ingredientes por nombre.
+- Reordenacion de ingredientes comprados al fondo.
+- Recolocacion del ingrediente al desmarcar sin mover la vista.
+- Animacion visual de subida y bajada al reordenar ingredientes.
 
 Comandos ejecutados:
 
@@ -453,7 +511,7 @@ Resultado:
 
 ```text
 2 archivos de test superados
-33 tests superados
+34 tests superados
 ```
 
 ```bash
@@ -483,8 +541,11 @@ SC-06 queda implementado como un flujo completo:
 - acceso desde planificacion
 - validacion de lista guardada
 - pantalla de lista
+- cabecera visible durante scroll
+- busqueda de ingrediente
 - mensaje para lista vacia
 - recuadro de generacion si falta lista
 - reutilizacion de `generarListaCompra()`
 - persistencia independiente de ingredientes comprados
+- reordenacion visual de ingredientes comprados al fondo
 

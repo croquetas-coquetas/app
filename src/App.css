@@ -439,17 +439,36 @@ button.day-inactive:hover > div {
 }
 
 .shopping-list-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 1rem;
   width: 100%;
+  margin-top: calc(-1 * max(env(safe-area-inset-top), 0.25rem));
+  padding: max(env(safe-area-inset-top), 0.25rem) 0 0.85rem;
+  background: color-mix(in oklab, var(--background) 94%, transparent);
+  backdrop-filter: blur(8px);
 }
 
 .shopping-list-back-button {
-  border-radius: 8px !important;
-  background: transparent !important;
-  color: var(--color-foreground, #111) !important;
+  min-height: 2rem !important;
+  border-color: var(--color-primary, #16a34a) !important;
+  border-radius: 9999px !important;
+  background: var(--color-primary, #16a34a) !important;
+  color: var(--color-primary-foreground, #fff) !important;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.14);
+  padding-inline: 0.8rem !important;
+  font-size: 0.85rem !important;
+  font-weight: 650 !important;
+  line-height: 1.1 !important;
+}
+
+.shopping-list-back-button:hover {
+  background: color-mix(in oklab, var(--color-primary, #16a34a) 92%, black) !important;
+  color: var(--color-primary-foreground, #fff) !important;
 }
 
 .shopping-list-title-wrap {
@@ -472,6 +491,46 @@ button.day-inactive:hover > div {
   font-weight: 600;
 }
 
+.shopping-list-search {
+  width: 100%;
+  min-height: 2.75rem;
+  display: grid;
+  grid-template-columns: 1.1rem 1fr;
+  gap: 0.65rem;
+  align-items: center;
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: 8px;
+  padding: 0 0.85rem;
+  background: var(--color-background, #fff);
+  color: var(--color-muted-foreground, #6b7280);
+}
+
+.shopping-list-search:focus-within {
+  border-color: var(--color-ring, #22c55e);
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--color-ring, #22c55e) 22%, transparent);
+}
+
+.shopping-list-search-icon {
+  width: 1.05rem;
+  height: 1.05rem;
+  flex: 0 0 auto;
+}
+
+.shopping-list-search input {
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--color-foreground, #111);
+  font: inherit;
+  font-size: 0.95rem;
+  line-height: 1.2;
+}
+
+.shopping-list-search input::placeholder {
+  color: var(--color-muted-foreground, #6b7280);
+}
+
 .shopping-list-empty {
   margin: 0;
   border: 1px solid var(--color-border, #e5e7eb);
@@ -491,7 +550,9 @@ button.day-inactive:hover > div {
 }
 
 .shopping-list-item {
+  position: relative;
   border-bottom: 1px solid var(--color-border, #e5e7eb);
+  will-change: transform;
 }
 
 .shopping-list-row {

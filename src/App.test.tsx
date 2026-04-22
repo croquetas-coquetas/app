@@ -44,6 +44,32 @@ function clearTestStorage() {
     localStorage.clear();
 }
 
+function installScrollMocks() {
+    Object.defineProperty(HTMLElement.prototype, "scrollTo", {
+        configurable: true,
+        value: vi.fn(),
+    });
+    Object.defineProperty(window, "scrollTo", {
+        configurable: true,
+        value: vi.fn(),
+    });
+    Object.defineProperty(window, "requestAnimationFrame", {
+        configurable: true,
+        value: (callback: FrameRequestCallback) => {
+            callback(0);
+            return 0;
+        },
+    });
+    Object.defineProperty(window, "scrollX", {
+        configurable: true,
+        value: 0,
+    });
+    Object.defineProperty(window, "scrollY", {
+        configurable: true,
+        value: 0,
+    });
+}
+
 afterEach(() => {
     cleanup();
     clearTestStorage();
@@ -188,10 +214,7 @@ describe("UNIDAD", () => {
     beforeEach(() => {
         installMemoryStorage();
         clearTestStorage();
-        Object.defineProperty(HTMLElement.prototype, "scrollTo", {
-            configurable: true,
-            value: vi.fn(),
-        });
+        installScrollMocks();
     });
 
     it("muestra spinner inicial y luego landing en primera apertura", async () => {
@@ -258,7 +281,7 @@ describe("UNIDAD", () => {
         expect(screen.getByRole("heading", { name: "Lista de la compra" })).toBeTruthy();
         expect(screen.getByText("Tomate")).toBeTruthy();
         expect(screen.getByText("350 g")).toBeTruthy();
-        expect(screen.getByText("0 de 1 comprados")).toBeTruthy();
+        expect(screen.getByText("0 ingredientes de 1 comprados")).toBeTruthy();
     });
 
     it("SC-06 muestra un aviso en la app si la lista guardada no tiene ingredientes", async () => {
@@ -310,14 +333,64 @@ describe("UNIDAD", () => {
         const checkbox = screen.getByLabelText("Marcar Tomate como comprado") as HTMLInputElement;
         fireEvent.click(checkbox);
         expect(checkbox.checked).toBe(true);
-        expect(screen.getByText("1 de 1 comprados")).toBeTruthy();
+        expect(screen.getByText("1 ingredientes de 1 comprados")).toBeTruthy();
 
         fireEvent.click(screen.getByRole("button", { name: /Volver/i }));
         fireEvent.click(screen.getByRole("button", { name: /Lista de la compra/i }));
 
         const persistedCheckbox = screen.getByLabelText("Marcar Tomate como comprado") as HTMLInputElement;
         expect(persistedCheckbox.checked).toBe(true);
-        expect(screen.getByText("1 de 1 comprados")).toBeTruthy();
+        expect(screen.getByText("1 ingredientes de 1 comprados")).toBeTruthy();
+    });
+
+    it("SC-06 permite buscar ingredientes, reordena comprados y mantiene la vista al desmarcar", async () => {
+        seedNoEsPrimeraVez();
+        const plan = makePlanificacionConIngredientes(new Date());
+        seedPlan(plan);
+        saveListaCompra(makeListaCompra(plan.generado_en!, [
+            { nombre: "Tomate", cantidad: 350, unidad: "g", categoria: "verdura" },
+            { nombre: "Leche", cantidad: 1, unidad: "l", categoria: "lacteo" },
+            { nombre: "Pan", cantidad: 1, unidad: "unidad", categoria: "cereal" },
+        ]));
+
+        render(<App />);
+        await advanceInit();
+        fireEvent.click(screen.getByRole("button", { name: /Lista de la compra/i }));
+
+        const search = screen.getByRole("searchbox", { name: "Buscar ingrediente" });
+        fireEvent.change(search, { target: { value: "lech" } });
+        expect(screen.getByText("Leche")).toBeTruthy();
+        expect(screen.queryByText("Tomate")).toBeNull();
+
+        fireEvent.change(search, { target: { value: "" } });
+        fireEvent.click(screen.getByLabelText("Marcar Tomate como comprado"));
+        fireEvent.click(screen.getByLabelText("Marcar Pan como comprado"));
+
+        const itemNames = screen
+            .getAllByRole("checkbox")
+            .map((checkbox) => checkbox.getAttribute("aria-label"));
+        expect(itemNames).toEqual([
+            "Marcar Leche como comprado",
+            "Marcar Pan como comprado",
+            "Marcar Tomate como comprado",
+        ]);
+
+        Object.defineProperty(window, "scrollY", {
+            configurable: true,
+            value: 320,
+        });
+        fireEvent.click(screen.getByLabelText("Marcar Tomate como comprado"));
+
+        const itemNamesAfterUncheck = screen
+            .getAllByRole("checkbox")
+            .map((checkbox) => checkbox.getAttribute("aria-label"));
+        expect(itemNamesAfterUncheck).toEqual([
+            "Marcar Tomate como comprado",
+            "Marcar Leche como comprado",
+            "Marcar Pan como comprado",
+        ]);
+        expect((screen.getByLabelText("Marcar Tomate como comprado") as HTMLInputElement).checked).toBe(false);
+        expect(window.scrollTo).toHaveBeenCalledWith({ left: 0, top: 320, behavior: "auto" });
     });
 });
 
@@ -327,10 +400,7 @@ describe("INTEGRACION", () => {
     beforeEach(() => {
         installMemoryStorage();
         clearTestStorage();
-        Object.defineProperty(HTMLElement.prototype, "scrollTo", {
-            configurable: true,
-            value: vi.fn(),
-        });
+        installScrollMocks();
     });
 
     it("si no es primera apertura y no hay planificación, muestra popup para generar", async () => {
@@ -387,10 +457,7 @@ describe("SISTEMA", () => {
     beforeEach(() => {
         installMemoryStorage();
         clearTestStorage();
-        Object.defineProperty(HTMLElement.prototype, "scrollTo", {
-            configurable: true,
-            value: vi.fn(),
-        });
+        installScrollMocks();
     });
 
     it("flujo completo: landing → generate → loading → éxito", async () => {
