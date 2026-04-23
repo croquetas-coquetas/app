@@ -54,7 +54,7 @@ class API_planificacion:
 
         self.__CONEXION = connection_uri if connection_uri is not None else os.getenv("MONGODB_URI")
         self.__DB_NAME = db_name or os.getenv("MONGODB_DB", "smartCook")
-        self.__COLLECTION_NAME = collection_name or os.getenv("MONGODB_COLLECTION", "recetas_duracion")
+        self.__COLLECTION_NAME = collection_name or os.getenv("MONGODB_COLLECTION", "recetas")
         self.__RECIPES_PATH = Path(
             recipes_path
             or os.getenv("RECETAS_JSON_PATH")
