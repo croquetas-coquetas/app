@@ -1,4 +1,9 @@
-import { Planificacion } from "@/types/planning";
+import { Ingrediente, Planificacion } from "@/types/planning";
+
+const CUCHARADA_A_ML = 15;
+const PIZCA_A_G = 1;
+const HOJA_A_G = 3;
+const DIENTE_A_G = 5;
 
 export function formatFechaGenerado(iso?: string) {
   if (!iso) return "-";
@@ -22,11 +27,12 @@ export function formatUnidad(unidad: string): string {
     litros: "l",
     unidad: "",
     unidades: "",
-    cucharada: "c/s",
-    cucharadas: "c/s",
+    cucharadas: "cucharadas",
+    cucharada: "cucharada",
     taza: "taza",
     tazas: "tazas",
     pizca: "pizca",
+    dientes: "dientes",
     hoja: "hoja",
     hojas: "hojas",
     g: "g",
@@ -34,6 +40,44 @@ export function formatUnidad(unidad: string): string {
     l: "l",
   };
   return mappings[unidad.toLowerCase()] || "g";
+}
+
+export function convertirIngredienteUnidad(ingrediente: Ingrediente): Ingrediente {
+  const unidad = (ingrediente.unidad || "").toLowerCase().trim();
+
+  if (unidad === "cucharada" || unidad === "cucharadas") {
+    return {
+      ...ingrediente,
+      cantidad: ingrediente.cantidad * CUCHARADA_A_ML,
+      unidad: "ml",
+    };
+  }
+
+  if (unidad === "pizca" || unidad === "pizcas") {
+    return {
+      ...ingrediente,
+      cantidad: ingrediente.cantidad * PIZCA_A_G,
+      unidad: "g",
+    };
+  }
+
+  if (unidad === "hoja" || unidad === "hojas") {
+    return {
+      ...ingrediente,
+      cantidad: ingrediente.cantidad * HOJA_A_G,
+      unidad: "g",
+    };
+  }
+
+  if (unidad === "dientes") {
+    return {
+      ...ingrediente,
+      cantidad: ingrediente.cantidad * DIENTE_A_G,
+      unidad: "g",
+    };
+  }
+
+  return ingrediente;
 }
 
 export function isToday(iso: string) {
