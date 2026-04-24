@@ -16,6 +16,7 @@ on:
       - 'capacitor.config.ts'
       - 'components.json'
       - '.github/workflows/android-ci.yml'
+      - 'tests/**'
   pull_request:
     paths:
       - 'android/**'
