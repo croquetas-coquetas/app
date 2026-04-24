@@ -1,6 +1,7 @@
 import { Ingrediente } from "@/types/planning";
 import { ItemCompra } from "@/types/shopping";
 import ingredientesData from "../../server/datasets/ingredientes.json";
+import { convertirIngredienteUnidad } from "@/lib/planning.utils";
 
 // ─── Mapa de categorías ──────────────────────────────────────────────────────
 
@@ -58,17 +59,18 @@ function claveIngrediente(nombre: string): string {
 
 export function acumularIngredientes(ingredientes: Ingrediente[], acumulado: Map<string, ItemCompra>): void {
     for (const ing of ingredientes) {
-        const clave = claveIngrediente(ing.nombre);
+        const ingredienteConvertido = convertirIngredienteUnidad(ing);
+        const clave = claveIngrediente(ingredienteConvertido.nombre);
         const categoria = categoriaMap.get(clave) || "otros";
         const existente = acumulado.get(clave);
 
         if (existente) {
-            existente.cantidad += ing.cantidad;
+            existente.cantidad += ingredienteConvertido.cantidad;
         } else {
             acumulado.set(clave, {
-                nombre: ing.nombre.trim(),
-                cantidad: ing.cantidad,
-                unidad: ing.unidad,
+                nombre: ingredienteConvertido.nombre.trim(),
+                cantidad: ingredienteConvertido.cantidad,
+                unidad: ingredienteConvertido.unidad,
                 categoria,
             });
         }
