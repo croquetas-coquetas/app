@@ -128,7 +128,7 @@ describe("Pruebas de isToday()", () => {
 
 describe("Pruebas de formatFechaGenerado()", () => {
     it("Formatea una fecha correctamente", () => {
-        expect(formatFechaGenerado("2026-04-22T10:30:00.000Z")).toBe("22 de abril, 12:30");
+        expect(formatFechaGenerado("2026-04-22T10:30:00.000Z")).toBe("22 de abril a las 10:30");
     });
 
     it("No salta error con una fecha ISO válida", () => {
