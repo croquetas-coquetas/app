@@ -1,0 +1,30 @@
+Estoy desarrollando una aplicación que genera una planificación semanal de comidas. La planificación consiste en lo siguiente:
+- Un plato para la comida y otro para la cena, en total 2 platos por día.
+- Genera 7 días ya que es una planificación semanal.
+- Los platos tienen un id, un nombre, una serie de ingredientes junto con sus cantidades y los pasos de la receta para elaborar el plato.
+- Cada plato tiene una serie de tags que lo caracterizan, en total hay 8 (verdura, carne, pescado, legumbre, lácteo, fruto seco, huevo y cereal). Un plato puede tener más de un tag y en ese caso se tendrían en cuenta todos los tags del plato (si uno tiene verdura y carne, se suma uno en cada tag al valorar el plato).
+- Una planificación, es decir, un intervalo de 7 días consecutivos, debe respetar que no haya ningún plato repetido en 14 días anteriores (por ejemplo el día 20 debe tener en cuenta que no haya ningún plato repetido desde el día 7, comprobando el id o el nombre vale ya que no se repite en ningún plato) y que en ese intervalo se cumplan las siguientes restricciones de tags: 
+    "verdura":    {"min": 7, "max": 14},
+    "lácteo":     {"min": 2, "max": 5},
+    "cereal":     {"min": 3, "max": 7},
+    "legumbre":   {"min": 1, "max": 4},
+    "fruto seco": {"min": 0, "max": 3},
+    "pescado":    {"min": 2, "max": 5},
+    "huevo":      {"min": 1, "max": 4},
+    "carne":      {"min": 2, "max": 6}
+- Esto quiere decir que en 7 días no puede haber más de 6 platos con el tag carne, pero al menos 2 platos sí deben tenerlo y lo mismo para cada tag.
+Cuando el usuario entra por primera vez, la aplicación genera una planificación nueva desde el día actual (si entra el día 8, generará desde este día hasta el día 14, que cumple 7 días). Una vez ya está dentro, puede ver la planificación existente o generar una nueva. Si quiere generar una planificación nueva, debe tener en cuenta días anteriores ya generados. Esto se hace de la siguiente forma:
+- Se tienen que generar 7 nuevos días desde el actual y se tienen que cumplir las dos restricciones ya mencionadas, que son la de repeticiones de platos y la de los tags.
+- Como un plato no puede repetirse en 14 días, para generar una planificación desde el día actual se deben revisar los días anteriores (imaginemos que el usuario quiere generar una nueva desde el día 12, se deben coger los días 8-11 para ver que en los 7 nuevos días no se coja ningún plato repetido 14 días hacia atrás para cada día, esto es que el día 15 por ejemplo no tenga ningún plato repetido desde el día 1, o que el 16 no tenga repetidos desde el día 2) y lo mismo para los tags, a modo de ventana deslizante en todos los intervalos posibles, tanto de 14 días para la repetición como de 7 días para los tags. Cada intervalo de 7 días debe cumplir las restricciones. Pues desde el día 8 hasta el 14 tienen que cumplirse los tags. Desde el 9 hasta el 15 también. Así sucesivamente, cada intervalo debe cumplirlo. Una vez generado, quedarían intactos los ya generados 8-11 pero se crean 7 días nuevos, desde el 12 hasta el 18.
+La primera vez que se genera una planificación no tiene en cuenta días anteriores porque no hay ningún día generado previamente en 14 días anteriores. El usuario puede ver la planificación actual o volver a generar una nueva teniendo en cuenta los días que ya han sido generados (mira 14 días hacia atrás de forma relativa al primer día de los últimos 7 días generados, es decir, si genero el día 12 hasta el 18, el primer día de los últimos 7 es el 12, así que mira 14 días hacia atrás en relación a ese día 12). A partir de esto, puede hacer una lista de la compra con todos los ingredientes de los últimos 7 días generados, que llamaremos planificación actual y que puede utilizar a modo de checklist. Puede ver toda la planificación existente ya que es un calendario y aparece en cada día el plato con sus detalles (más detallado en src del frontend).
+
+Para resumir todo lo anterior. Una planificación consta de 7 días con 2 platos en cada uno, por lo que tiene 14 días. Una planificación se genera mirando 14 días anteriores relativos al primer día de estos 7 días. Si no hay ningún día ya generado en estos 14 días, entonces se podría decir que no tiene en cuenta el historial porque no hay nada generado. Para generar una planificación se deben tener en cuenta dos restricciones:
+- Restricción de repetición. Cada día de la planificación debe mirar sus 14 anteriores días relativos para ver que no se repita ningún plato.
+- Restricción de tags. Para la planificación generada, se validan TODAS las ventanas posibles de 7 días consecutivos que incluyan al menos un día nuevo. Cada ventana debe cumplir los límites min/max de cada tag. Por ejemplo, si genero días 12-18 y tengo ya generados los días 8-11, valido las ventanas 8-14, 9-15, 10-16, 11-17 y 12-18.
+
+El stack tecnológico que utiliza el proyecto consta de lo siguiente. Para el Frontend estoy utilizando React con Vite. El Backend es en Python, que utiliza una API con Flask. La BBDD es MongoDB.
+Las carpetas son las siguientes:
+- Para el frontend se guarda todo en [src]
+- El backend se almacena en [server]. 
+- El algoritmo que genera la planificación se encuentra en el archivo API_planificacion.py
+Cuando ejecutamos la aplicación, se conecta a una API remota (el endpoint lo maneja app.py) y a su vez a una BBDD remota. La API contiene los mismos archivos exactos que la carpeta server. Para hacer pruebas de unidad del algoritmo (que se hacen con pytest), para no conectarse a la API, se prueba desde la propia carpeta server. La conexión a la BBDD se simula con los JSON extraídos de la propia base de datos, que se encuentran en /server/datasets. Ahí se puede ver el formato exacto de los datos.
