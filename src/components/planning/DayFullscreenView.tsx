@@ -10,7 +10,7 @@ interface DayFullscreenViewProps {
   onBack: () => void;
 }
 
-function formatDuracion(duracion?: number): string {
+export function formatDuracion(duracion?: number): string {
   if (!Number.isFinite(duracion) || (duracion ?? 0) <= 0) return "no disponible";
 
   const minutos = Math.floor(duracion as number);
@@ -19,6 +19,11 @@ function formatDuracion(duracion?: number): string {
   const horas = Math.floor(minutos / 60);
   const restoMinutos = minutos % 60;
   return `${horas} horas y ${restoMinutos} minutos`;
+}
+
+export function buildIngredientLabel(ing: Ingrediente): string {
+  const unidad = formatUnidad(ing.unidad ?? "");
+  return `${ing.cantidad || 0} ${unidad == " " ? "" : unidad + " de"} ${ing.nombre || "Ingrediente desconocido"}`.trim();
 }
 
 export function DayFullscreenView({ dia, activeTab, onTabChange, onBack }: DayFullscreenViewProps) {
@@ -107,10 +112,9 @@ export function DayFullscreenView({ dia, activeTab, onTabChange, onBack }: DayFu
           {recetaActiva.ingredientes && recetaActiva.ingredientes.length > 0 ? (
             <ul className="day-detail-ingredients-list">
               {recetaActiva.ingredientes.map((ing: Ingrediente, idx: number) => {
-                const unidad = formatUnidad(ing.unidad || "");
                 return (
                   <li key={idx} className="day-detail-ingredient-item">
-                    {ing.cantidad || 0} {unidad} {unidad ? "de" : ""} {ing.nombre || "Ingrediente desconocido"}
+                    {buildIngredientLabel(ing)}
                   </li>
                 );
               })}
