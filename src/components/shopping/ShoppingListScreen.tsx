@@ -191,7 +191,7 @@ export function ShoppingListScreen({ lista, onBack }: ShoppingListScreenProps) {
           ← Volver
         </Button>
         <div className="shopping-list-title-wrap">
-          <p className="shopping-list-title">Lista de la compra</p>
+          <h1 className="shopping-list-title">Lista de la compra</h1>
           <span className="shopping-list-progress">{formatCheckedProgress(checkedCount, lista.items.length)}</span>
         </div>
       </header>
