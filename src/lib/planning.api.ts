@@ -1,5 +1,5 @@
 import { API_URL } from "@/lib/planning.constants";
-import { Planificacion, DiaPlanning } from "@/types/planning";
+import { DiaPlanning, Planificacion } from "@/types/planning";
 
 function cleanDiaPlanning(dia: DiaPlanning): DiaPlanning {
   return {
@@ -23,14 +23,12 @@ function cleanDiaPlanning(dia: DiaPlanning): DiaPlanning {
 
 export async function fetchPlanificacionSemanal(diasPrevios?: DiaPlanning[] | null) {
   if (!diasPrevios || !Array.isArray(diasPrevios) || diasPrevios.length === 0) {
-    // Nueva planificación: GET sin argumentos
     return fetch(API_URL, {
       method: "GET",
       headers: { Accept: "application/json" },
     });
   }
 
-  // Regenerar planificación: POST con días previos limpios
   const diasLimpios = diasPrevios.map(cleanDiaPlanning);
   return fetch(API_URL, {
     method: "POST",
@@ -50,4 +48,3 @@ export async function extractApiError(res: Response): Promise<string> {
 export async function parsePlanificacionResponse(res: Response): Promise<Planificacion> {
   return (await res.json()) as Planificacion;
 }
-

@@ -1,5 +1,5 @@
 import { acumularIngredientes, CATEGORIA_ORDEN } from "@/lib/shopping.ts";
-import { ItemCompra, ListaCompra } from "@/types/shopping.ts";
+import { ItemCompra, ListaCompra, PlatoOmitidoCompra } from "@/types/shopping.ts";
 import { cargarUltimaPlanificacion, saveListaCompra } from "@/lib/shopping.storage.ts";
 import { normalizarUnidad } from "@/lib/planning.utils.ts";
 
@@ -14,10 +14,28 @@ export function generarListaCompra(cargarPlanificacion = cargarUltimaPlanificaci
     const planificacion = cargarPlanificacion();
 
     const ingredientesAcumulados = new Map<string, ItemCompra>();
+    const platosOmitidos: PlatoOmitidoCompra[] = [];
 
     for (const dia of planificacion.dias) {
-        acumularIngredientes(dia.comida.ingredientes ?? [], ingredientesAcumulados);
-        acumularIngredientes(dia.cena.ingredientes ?? [], ingredientesAcumulados);
+        const turnos = [
+            { nombre: "comida" as const, receta: dia.comida },
+            { nombre: "cena" as const, receta: dia.cena },
+        ];
+
+        for (const turno of turnos) {
+            const ingredientes = turno.receta.ingredientes ?? [];
+
+            if (ingredientes.length === 0) {
+                platosOmitidos.push({
+                    dia: dia.dia,
+                    turno: turno.nombre,
+                    nombre: turno.receta.nombre || "Plato sin nombre",
+                });
+                continue;
+            }
+
+            acumularIngredientes(ingredientes, ingredientesAcumulados);
+        }
     }
 
     const itemsAcumulados = Array.from(ingredientesAcumulados.values());
@@ -41,6 +59,8 @@ export function generarListaCompra(cargarPlanificacion = cargarUltimaPlanificaci
         planificacion_generada_en: planificacion.generado_en,
         total_items: itemsOrdenados.length,
         items: itemsOrdenados,
+        total_platos_omitidos: platosOmitidos.length,
+        platos_omitidos: platosOmitidos,
     };
 
     saveListaCompra(lista);

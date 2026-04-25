@@ -2,15 +2,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as plan from "@/types/planning.ts";
 import type { ItemCompra } from "@/types/shopping";
 
-// ---------------------------------------------------------------------------
-// Mocks
-// ---------------------------------------------------------------------------
-
 let planificacionMock: plan.Planificacion | null = null;
 
 vi.mock("@/lib/shopping.storage", () => ({
   cargarUltimaPlanificacion: () => {
-    if (!planificacionMock) throw new Error("planificacionMock no está definido");
+    if (!planificacionMock) throw new Error("planificacionMock no esta definido");
     return planificacionMock;
   },
   saveListaCompra: () => {
@@ -23,37 +19,29 @@ vi.mock("@/lib/shopping.storage", () => ({
 
 import { generarListaCompra } from "@/lib/generarLista";
 
-// ---------------------------------------------------------------------------
-// Funciones auxiliares
-// ---------------------------------------------------------------------------
-
 function makeIngrediente(nombre: string, cantidad: number, unidad = "g"): plan.Ingrediente {
-  return { nombre: nombre, cantidad: cantidad, unidad: unidad, categoria: "" };
+  return { nombre, cantidad, unidad, categoria: "" };
 }
 
-// el unico elemento importante para estos tests son los ingredientes presentes en cada receta
 function makeReceta(ingredientes: plan.Ingrediente[]): plan.Receta {
-  return { nombre: "", grupo_principal: "", ingredientes: ingredientes, pasos: [], tags: [] };
+  return { nombre: "", grupo_principal: "", ingredientes, pasos: [], tags: [] };
 }
 
-function makeDia(comidaIngredientes: plan.Ingrediente[] = [], cenaIngredientes: plan.Ingrediente[] = []): plan.DiaPlanning {
+function makeDia(
+  comidaIngredientes: plan.Ingrediente[] = [],
+  cenaIngredientes: plan.Ingrediente[] = [],
+): plan.DiaPlanning {
   return {
     dia: "2025-01-01",
     comida: makeReceta(comidaIngredientes),
-    cena: makeReceta(cenaIngredientes)
+    cena: makeReceta(cenaIngredientes),
   };
 }
-
-// ---------------------------------------------------------------------------
-// Tests
-// ---------------------------------------------------------------------------
 
 describe("generarListaCompra", () => {
   beforeEach(() => {
     planificacionMock = null;
   });
-
-  // ── Estructura ────────────────────────────────────────────────────────────────
 
   describe("Estructura de la lista", () => {
     it("Devuelve una lista con la estructura correcta", () => {
@@ -69,10 +57,12 @@ describe("generarListaCompra", () => {
         planificacion_generada_en: "2025-01-01T00:00:00.000Z",
         total_items: expect.any(Number),
         items: expect.any(Array),
+        total_platos_omitidos: expect.any(Number),
+        platos_omitidos: expect.any(Array),
       });
     });
 
-    it("La fecha de generación es la actual y está en formato ISO", () => {
+    it("La fecha de generacion es la actual y esta en formato ISO", () => {
       planificacionMock = {
         generado_en: "2025-01-01T00:00:00.000Z",
         dias: [],
@@ -87,13 +77,13 @@ describe("generarListaCompra", () => {
       expect(ts).toBeLessThanOrEqual(after);
     });
 
-    it("El número total de ingredientes es el correcto", () => {
+    it("El numero total de ingredientes es el correcto", () => {
       planificacionMock = {
         generado_en: "2025-01-01T00:00:00.000Z",
         dias: [
           makeDia(
             [makeIngrediente("tomate", 100), makeIngrediente("cebolla", 50)],
-            [makeIngrediente("ajo", 10)]
+            [makeIngrediente("ajo", 10)],
           ),
         ],
       };
@@ -104,16 +94,14 @@ describe("generarListaCompra", () => {
     });
   });
 
-  // ── Acumulacion ─────────────────────────────────────────────────────────
-
-  describe("Acumulación de ingredientes", () => {
+  describe("Acumulacion de ingredientes", () => {
     it("Acumula ingredientes entre la comida y la cena", () => {
       planificacionMock = {
         generado_en: "2025-01-01T00:00:00.000Z",
         dias: [
           makeDia(
             [makeIngrediente("tomate", 100)],
-            [makeIngrediente("tomate", 150)]
+            [makeIngrediente("tomate", 150)],
           ),
         ],
       };
@@ -124,7 +112,7 @@ describe("generarListaCompra", () => {
       expect(tomate?.cantidad).toBe(250);
     });
 
-    it("Acumula ingredientes a través de los días", () => {
+    it("Acumula ingredientes a traves de los dias", () => {
       planificacionMock = {
         generado_en: "2025-01-01T00:00:00.000Z",
         dias: [
@@ -146,7 +134,7 @@ describe("generarListaCompra", () => {
         dias: [
           makeDia(
             [makeIngrediente("tomate", 100)],
-            [makeIngrediente("cebolla", 50)]
+            [makeIngrediente("cebolla", 50)],
           ),
         ],
       };
@@ -161,7 +149,7 @@ describe("generarListaCompra", () => {
         dias: [
           makeDia(
             [makeIngrediente("leche", 200, "ml")],
-            [makeIngrediente("leche", 100, "ml")]
+            [makeIngrediente("leche", 100, "ml")],
           ),
         ],
       };
@@ -178,7 +166,7 @@ describe("generarListaCompra", () => {
         dias: [
           makeDia(
             [makeIngrediente("aceite", 2, "cucharadas")],
-            [makeIngrediente("aceite", 1, "cucharada")]
+            [makeIngrediente("aceite", 1, "cucharada")],
           ),
         ],
       };
@@ -196,7 +184,7 @@ describe("generarListaCompra", () => {
         dias: [
           makeDia(
             [makeIngrediente("sal", 3, "pizcas")],
-            [makeIngrediente("sal", 2, "pizca")]
+            [makeIngrediente("sal", 2, "pizca")],
           ),
         ],
       };
@@ -214,7 +202,7 @@ describe("generarListaCompra", () => {
         dias: [
           makeDia(
             [makeIngrediente("harina", 2, "tazas")],
-            [makeIngrediente("harina", 1, "taza")]
+            [makeIngrediente("harina", 1, "taza")],
           ),
         ],
       };
@@ -232,7 +220,7 @@ describe("generarListaCompra", () => {
         dias: [
           makeDia(
             [makeIngrediente("arroz", 1, "kg")],
-            [makeIngrediente("arroz", 0.5, "kilogramo")]
+            [makeIngrediente("arroz", 0.5, "kilogramo")],
           ),
         ],
       };
@@ -240,7 +228,6 @@ describe("generarListaCompra", () => {
       const result = generarListaCompra();
       const arroz = result.items.find((i: ItemCompra) => i.nombre === "arroz");
 
-      // 1kg = 1000g, 0.5kg = 500g, total 1500g = 1.5kg (normalizado)
       expect(arroz?.unidad).toBe("kg");
       expect(arroz?.cantidad).toBe(1.5);
     });
@@ -251,7 +238,7 @@ describe("generarListaCompra", () => {
         dias: [
           makeDia(
             [makeIngrediente("agua", 1.5, "litros")],
-            [makeIngrediente("agua", 0.5, "l")]
+            [makeIngrediente("agua", 0.5, "l")],
           ),
         ],
       };
@@ -259,7 +246,6 @@ describe("generarListaCompra", () => {
       const result = generarListaCompra();
       const agua = result.items.find((i: ItemCompra) => i.nombre === "agua");
 
-      // 1.5l = 1500ml, 0.5l = 500ml, total 2000ml = 2l (normalizado)
       expect(agua?.unidad).toBe("l");
       expect(agua?.cantidad).toBe(2);
     });
@@ -275,15 +261,11 @@ describe("generarListaCompra", () => {
     });
   });
 
-  // Normalizacion de unidades
-
-  describe("Normalización de unidades", () => {
+  describe("Normalizacion de unidades", () => {
     it("Convierte gramos a kilogramos cuando es >= 1000g", () => {
       planificacionMock = {
         generado_en: "2025-01-01T00:00:00.000Z",
-        dias: [
-          makeDia([makeIngrediente("harina", 2000, "g")]),
-        ],
+        dias: [makeDia([makeIngrediente("harina", 2000, "g")])],
       };
 
       const result = generarListaCompra();
@@ -296,9 +278,7 @@ describe("generarListaCompra", () => {
     it("Convierte mililitros a litros cuando es >= 1000ml", () => {
       planificacionMock = {
         generado_en: "2025-01-01T00:00:00.000Z",
-        dias: [
-          makeDia([makeIngrediente("agua", 1500, "ml")]),
-        ],
+        dias: [makeDia([makeIngrediente("agua", 1500, "ml")])],
       };
 
       const result = generarListaCompra();
@@ -311,9 +291,7 @@ describe("generarListaCompra", () => {
     it("No convierte si es menor a 1000", () => {
       planificacionMock = {
         generado_en: "2025-01-01T00:00:00.000Z",
-        dias: [
-          makeDia([makeIngrediente("sal", 500, "g")]),
-        ],
+        dias: [makeDia([makeIngrediente("sal", 500, "g")])],
       };
 
       const result = generarListaCompra();
@@ -323,12 +301,10 @@ describe("generarListaCompra", () => {
       expect(sal?.cantidad).toBe(500);
     });
 
-    it("Redondea a 2 decimales en la normalización", () => {
+    it("Redondea a 2 decimales en la normalizacion", () => {
       planificacionMock = {
         generado_en: "2025-01-01T00:00:00.000Z",
-        dias: [
-          makeDia([makeIngrediente("harina", 1234, "g")]),
-        ],
+        dias: [makeDia([makeIngrediente("harina", 1234, "g")])],
       };
 
       const result = generarListaCompra();
@@ -338,7 +314,7 @@ describe("generarListaCompra", () => {
       expect(harina?.cantidad).toBe(1.23);
     });
 
-    it("Aplica normalización después de acumular ingredientes", () => {
+    it("Aplica normalizacion despues de acumular ingredientes", () => {
       planificacionMock = {
         generado_en: "2025-01-01T00:00:00.000Z",
         dias: [
@@ -356,17 +332,14 @@ describe("generarListaCompra", () => {
     });
   });
 
-  // Ordenacion
-
-  describe("Ordenación", () => {
-    it("Ordena los objetos por categoría", () => {
-      // carne comes before lacteo in CATEGORIA_ORDEN
+  describe("Ordenacion", () => {
+    it("Ordena los objetos por categoria", () => {
       planificacionMock = {
         generado_en: "2025-01-01T00:00:00.000Z",
         dias: [
           makeDia(
-            [makeIngrediente("queso", 100)],   // lacteo
-            [makeIngrediente("pollo", 200)]    // carne
+            [makeIngrediente("queso", 100)],
+            [makeIngrediente("pollo", 200)],
           ),
         ],
       };
@@ -377,13 +350,13 @@ describe("generarListaCompra", () => {
       expect(nombres.indexOf("pollo")).toBeLessThan(nombres.indexOf("queso"));
     });
 
-    it("Ordena alfabéticamente dentro de una misma categoría", () => {
+    it("Ordena alfabeticamente dentro de una misma categoria", () => {
       planificacionMock = {
         generado_en: "2025-01-01T00:00:00.000Z",
         dias: [
           makeDia(
-            [makeIngrediente("zanahoria", 100)],  // verdura
-            [makeIngrediente("apio", 50)]          // verdura
+            [makeIngrediente("zanahoria", 100)],
+            [makeIngrediente("apio", 50)],
           ),
         ],
       };
@@ -395,10 +368,8 @@ describe("generarListaCompra", () => {
     });
   });
 
-  // ── Corner cases ───────────────────────────────────────────────────────────
-
   describe("Corner cases", () => {
-    it("Devuelve una lista vacía si no hay días", () => {
+    it("Devuelve una lista vacia si no hay dias", () => {
       planificacionMock = {
         generado_en: "2025-01-01T00:00:00.000Z",
         dias: [],
@@ -407,9 +378,10 @@ describe("generarListaCompra", () => {
       const result = generarListaCompra();
       expect(result.items).toHaveLength(0);
       expect(result.total_items).toBe(0);
+      expect(result.total_platos_omitidos).toBe(0);
     });
 
-    it("Si hay días pero no hay recetas en estos devuelve una lista vacía", () => {
+    it("Si hay dias pero no hay recetas con ingredientes devuelve una lista vacia", () => {
       planificacionMock = {
         generado_en: "2025-01-01T00:00:00.000Z",
         dias: [makeDia([], [])],
@@ -417,6 +389,45 @@ describe("generarListaCompra", () => {
 
       const result = generarListaCompra();
       expect(result.items).toHaveLength(0);
+      expect(result.total_platos_omitidos).toBe(2);
+      expect(result.platos_omitidos).toHaveLength(2);
+    });
+
+    it("Omite los platos sin ingredientes y devuelve sus nombres", () => {
+      planificacionMock = {
+        generado_en: "2025-01-01T00:00:00.000Z",
+        dias: [
+          {
+            dia: "2025-01-01T00:00:00.000Z",
+            comida: {
+              nombre: "Paella",
+              grupo_principal: "arroz",
+              ingredientes: [makeIngrediente("arroz", 200)],
+              pasos: [],
+              tags: [],
+            },
+            cena: {
+              nombre: "Crema de calabacin",
+              grupo_principal: "verdura",
+              ingredientes: [],
+              pasos: [],
+              tags: [],
+            },
+          },
+        ],
+      };
+
+      const result = generarListaCompra();
+
+      expect(result.items).toHaveLength(1);
+      expect(result.total_platos_omitidos).toBe(1);
+      expect(result.platos_omitidos).toEqual([
+        {
+          dia: "2025-01-01T00:00:00.000Z",
+          turno: "cena",
+          nombre: "Crema de calabacin",
+        },
+      ]);
     });
   });
 });
