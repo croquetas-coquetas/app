@@ -22,6 +22,10 @@ class InsufficientRecipesError(PlanningError):
     """No hay suficientes recetas únicas para generar la semana completa."""
 
 
+class TagConstraintViolationError(PlanningError):
+    """La planificación generada incumple las cuotas mínimas o máximas de algún tag nutricional."""
+
+
 CUOTAS: dict[str, dict[str, int]] = {
     "verdura":    {"min": 7, "max": 14},
     "lácteo":     {"min": 2, "max": 5},
@@ -352,8 +356,16 @@ class API_planificacion:
 
                 ids_recientes.append(self.__identificador_receta(plato))
 
+                # Comprobación de máximo: se lanza en el momento en que un plato
+                # definitivamente añadido supera el techo de cualquier tag.
                 for tag in self.__tags_nutricionales(plato):
                     conteo_ventana[tag] += 1
+                    if conteo_ventana[tag] > CUOTAS[tag]["max"]:
+                        raise TagConstraintViolationError(
+                            f"Se superó el máximo semanal de '{tag}': "
+                            f"{conteo_ventana[tag]} platos "
+                            f"(máx. permitido: {CUOTAS[tag]['max']})."
+                        )
 
                 dia[turno] = plato
                 plato_k += 1
@@ -361,6 +373,19 @@ class API_planificacion:
             # añadimos el nuevo día a la ventana (expulsa el más antiguo si maxlen)
             ventana_dias.append(dia)
             planificacion["dias"].append(dia)
+
+        # Comprobación de mínimos: se verifica una vez terminada la generación
+        # para poder informar de todas las cuotas incumplidas a la vez.
+        violaciones_min = [
+            f"'{tag}': {conteo_ventana.get(tag, 0)} platos (mín. requerido: {cuota['min']})"
+            for tag, cuota in CUOTAS.items()
+            if conteo_ventana.get(tag, 0) < cuota["min"]
+        ]
+        if violaciones_min:
+            raise TagConstraintViolationError(
+                "La planificación no alcanza los mínimos semanales en: "
+                + ", ".join(violaciones_min) + "."
+            )
 
         if dias_previos:
             todos_los_dias = list(dias_previos) + planificacion["dias"]

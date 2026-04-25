@@ -4,7 +4,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS    
 
 #from API_planificacion import API_planificacion, InsufficientRecipesError, PlanningError
-from API_planificacion import API_planificacion, InsufficientRecipesError, PlanningError
+from API_planificacion import API_planificacion, InsufficientRecipesError, PlanningError, TagConstraintViolationError
 
 def create_app() -> Flask:
     app = Flask(__name__)
@@ -20,6 +20,8 @@ def create_app() -> Flask:
         try:
             planificacion = API_planificacion().planifica(dias_previos=dias_previos)
         except InsufficientRecipesError as exc:
+            return jsonify({"error": str(exc)}), 400
+        except TagConstraintViolationError as exc:
             return jsonify({"error": str(exc)}), 400
         except PlanningError as exc:
             return jsonify({"error": str(exc)}), 503
