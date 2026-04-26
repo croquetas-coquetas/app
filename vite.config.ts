@@ -44,6 +44,6 @@ export default defineConfig(async () => ({
   test: {
       globals: true,
       environment: "jsdom",
-      setupFiles: ["@testing-library/jest-dom"],
+      setupFiles: ["@testing-library/jest-dom", "./tests/setup.ts"],
   },
 }));
