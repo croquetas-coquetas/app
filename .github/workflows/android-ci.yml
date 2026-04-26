@@ -32,6 +32,7 @@ on:
       - 'capacitor.config.ts'
       - 'components.json'
       - '.github/workflows/android-ci.yml'
+      - 'tests/**'
 
 permissions:
   contents: read
