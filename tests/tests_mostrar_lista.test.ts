@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest"; // or jest
+import { describe, it, expect, beforeEach} from "vitest"; // or jest
 
 // ── Types ────────────────────────────────────────────
 
@@ -313,7 +313,224 @@ describe("orderItems", () => {
     it("un key inexistente en checkedItems no afecta el orden", () => {
         const checked = new Set(["key-inexistente"]);
         const result = orderItems([wkA, wkB], checked);
-        // Ninguno está en checked → todos son pendientes → orden original
         expect(result).toEqual([wkA, wkB]);
+    });
+});
+
+
+
+// ──────── Pruebas Integracion ────────
+
+const storageMap = new Map<string, Set<string>>();
+
+function getCheckedListaCompraItems(lista: ListaCompra): Set<string> {
+    return new Set(storageMap.get(lista.id) ?? []);
+}
+
+function saveCheckedListaCompraItems(lista: ListaCompra, checked: Set<string>): void {
+    storageMap.set(lista.id, new Set(checked));
+}
+
+// ── Helpers de test ──────────────────────────────────────────────────────────
+
+const makeLista = (items: ItemCompra[], id = "lista-1"): ListaCompra => ({
+    id,
+    nombre: "Mi lista",
+    items,
+});
+
+
+function toggleItem(
+    lista: ListaCompra,
+    item: ItemCompra,
+    current: Set<string>
+): Set<string> {
+    const key = getListaCompraItemKey(item);
+    const next = new Set(current);
+    if (next.has(key)) {
+        next.delete(key);
+    } else {
+        next.add(key);
+    }
+    saveCheckedListaCompraItems(lista, next);
+    return next;
+}
+
+
+function buildVisibleItems(
+    lista: ListaCompra,
+    checkedItems: Set<string>,
+    searchTerm: string
+): ShoppingItemWithKey[] {
+    const itemsWithKeys = getItemsWithKeys(lista);
+    const ordered = orderItems(itemsWithKeys, checkedItems);
+    const normalized = normalizeSearchText(searchTerm);
+    if (!normalized) return ordered;
+    return ordered.filter(({ item }) =>
+        normalizeSearchText(item.nombre).includes(normalized)
+    );
+}
+
+
+function buildCheckedCount(lista: ListaCompra, checkedItems: Set<string>): number {
+    const currentKeys = new Set(getItemsWithKeys(lista).map(({ key }) => key));
+    return Array.from(checkedItems).filter((k) => currentKeys.has(k)).length;
+}
+
+// ── Setup ────────────────────────────────────────────────────────────────────
+
+beforeEach(() => {
+    storageMap.clear();
+});
+
+// ── Tests ────────────────────────────────────────────────────────────────────
+
+describe("Actualiza orden y progreso", () => {
+
+    it("marcar un ítem lo desplaza al final de la lista visible", () => {
+        const items = [makeItem("Leche", 2), makeItem("Pan", 1), makeItem("Huevos", 6)];
+        const lista = makeLista(items);
+        let checked = getCheckedListaCompraItems(lista);
+
+        checked = toggleItem(lista, items[0], checked); // marcar Leche
+
+        const visible = buildVisibleItems(lista, checked, "");
+        const nombres = visible.map(({ item }) => item.nombre);
+
+        expect(nombres.indexOf("Leche")).toBeGreaterThan(nombres.indexOf("Pan"));
+        expect(nombres.indexOf("Leche")).toBeGreaterThan(nombres.indexOf("Huevos"));
+    });
+
+    it("el progreso incrementa en 1 al marcar un ítem", () => {
+        const items = [makeItem("Leche", 2), makeItem("Pan", 1)];
+        const lista = makeLista(items);
+        let checked = getCheckedListaCompraItems(lista);
+
+        const progressBefore = buildCheckedCount(lista, checked);
+        checked = toggleItem(lista, items[0], checked);
+        const progressAfter = buildCheckedCount(lista, checked);
+
+        expect(progressAfter).toBe(progressBefore + 1);
+    });
+
+    it("el progreso decrementa al desmarcar un ítem", () => {
+        const items = [makeItem("Leche", 2), makeItem("Pan", 1)];
+        const lista = makeLista(items);
+        let checked = getCheckedListaCompraItems(lista);
+
+        checked = toggleItem(lista, items[0], checked); // marcar
+        const progressMarked = buildCheckedCount(lista, checked);
+
+        checked = toggleItem(lista, items[0], checked);
+        const progressUnmarked = buildCheckedCount(lista, checked);
+
+        expect(progressUnmarked).toBe(progressMarked - 1);
+    });
+
+    it("marcar varios ítems los ordena del más reciente al más antiguo", () => {
+        const items = [makeItem("A", 1), makeItem("B", 1), makeItem("C", 1)];
+        const lista = makeLista(items);
+        let checked = new Set<string>();
+
+        checked = toggleItem(lista, items[0], checked);
+        checked = toggleItem(lista, items[1], checked);
+        checked = toggleItem(lista, items[2], checked);
+
+        const visible = buildVisibleItems(lista, checked, "");
+        const comprados = visible.map(({ item }) => item.nombre);
+
+        expect(comprados[0]).toBe("C");
+        expect(comprados[1]).toBe("B");
+        expect(comprados[2]).toBe("A");
+    });
+
+    it("desmarcar un ítem lo devuelve a la sección de pendientes", () => {
+        const items = [makeItem("Leche", 2), makeItem("Pan", 1)];
+        const lista = makeLista(items);
+        let checked = new Set<string>();
+
+        checked = toggleItem(lista, items[0], checked);
+        checked = toggleItem(lista, items[0], checked);
+
+        const visible = buildVisibleItems(lista, checked, "");
+        const panIdx = visible.findIndex(({ item }) => item.nombre === "Pan");
+        const lecheIdx = visible.findIndex(({ item }) => item.nombre === "Leche");
+
+        expect(lecheIdx).toBeLessThan(panIdx);
+    });
+
+    it("formatCheckedProgress refleja el estado real tras varios toggles", () => {
+        const items = [
+            makeItem("A", 1),
+            makeItem("B", 1),
+            makeItem("C", 1),
+            makeItem("D", 1),
+        ];
+        const lista = makeLista(items);
+        let checked = new Set<string>();
+
+        checked = toggleItem(lista, items[0], checked);
+        checked = toggleItem(lista, items[2], checked);
+
+        const count = buildCheckedCount(lista, checked);
+        expect(formatCheckedProgress(count, lista.items.length)).toBe("2 / 4");
+    });
+});
+
+
+describe("Busqueda", () => {
+
+    it("la búsqueda por nombre exacto devuelve sólo ese ítem", () => {
+        const items = [makeItem("Leche", 2), makeItem("Pan", 1), makeItem("Aceite", 1)];
+        const lista = makeLista(items);
+        const checked = new Set<string>();
+
+        const visible = buildVisibleItems(lista, checked, "Pan");
+        expect(visible).toHaveLength(1);
+        expect(visible[0].item.nombre).toBe("Pan");
+    });
+
+    it("la búsqueda es insensible a acentos (Ácido → acido)", () => {
+        const items = [makeItem("Ácido ascórbico", 1), makeItem("Pan", 1)];
+        const lista = makeLista(items);
+
+        const visible = buildVisibleItems(lista, new Set(), "acido");
+        expect(visible).toHaveLength(1);
+        expect(visible[0].item.nombre).toBe("Ácido ascórbico");
+    });
+
+    it("la búsqueda sin coincidencias devuelve lista vacía", () => {
+        const items = [makeItem("Leche", 2), makeItem("Pan", 1)];
+        const lista = makeLista(items);
+
+        const visible = buildVisibleItems(lista, new Set(), "Tomate");
+        expect(visible).toHaveLength(0);
+    });
+
+    it("los ítems comprados que coinciden con la búsqueda aparecen después de los pendientes", () => {
+        const items = [
+            makeItem("Aceite de oliva", 1),
+            makeItem("Aceite de girasol", 1),
+        ];
+        const lista = makeLista(items);
+        let checked = new Set<string>();
+        checked = toggleItem(lista, items[0], checked); // marcar Aceite de oliva
+
+        const visible = buildVisibleItems(lista, checked, "aceite");
+        expect(visible).toHaveLength(2);
+        expect(visible[0].item.nombre).toBe("Aceite de girasol");
+        expect(visible[1].item.nombre).toBe("Aceite de oliva");
+    });
+
+    it("la búsqueda parcial devuelve todos los ítems que contienen el término", () => {
+        const items = [
+            makeItem("Tomate frito", 1),
+            makeItem("Tomate natural", 2),
+            makeItem("Pan", 1),
+        ];
+        const lista = makeLista(items);
+
+        const visible = buildVisibleItems(lista, new Set(), "tomate");
+        expect(visible).toHaveLength(2);
     });
 });
