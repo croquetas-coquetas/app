@@ -13,6 +13,14 @@ interface CalendarViewProps {
   onShoppingListOpen: () => void;
 }
 
+export function buildPlanMap(dias: DiaPlanning[]): Map<string, DiaPlanning> {
+    const map = new Map<string, DiaPlanning>();
+    for (const dia of dias) {
+        map.set(getDayKey(dia.dia), dia);
+    }
+    return map;
+}
+
 export function CalendarView({ planificacion, onRegenerate, onDaySelect, onShoppingListOpen }: CalendarViewProps) {
   const hoy = new Date();
   const [viewDate, setViewDate] = useState(() => new Date(hoy.getFullYear(), hoy.getMonth(), 1));
