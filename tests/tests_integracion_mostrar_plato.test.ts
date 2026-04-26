@@ -26,7 +26,11 @@ const makeDia = (daysOffset: number, overrides: Partial<DiaPlanning> = {}): DiaP
     return {
         dia: date.toISOString(),
         comida: makeReceta({ nombre: "Ensalada César" }),
-        cena: makeReceta({ nombre: "Sopa de tomate", duracion: 90, pasos: ["Triturar el tomate", "Hervir"], tags: ["caliente"] }),
+        cena: makeReceta({ nombre: "Sopa de tomate", duracion: 90, pasos: ["Triturar el tomate", "Hervir"],
+            tags: ["caliente"], ingredientes: [
+                { nombre: "Tomate", cantidad: 500, unidad: "gramos" },
+                { nombre: "Ajo", cantidad: 1, unidad: "dientes" },
+            ] }),
         ...overrides,
     };
 };
@@ -36,7 +40,7 @@ const makePlanificacion = (dias: DiaPlanning[]): Planificacion => ({
     dias,
 });
 
-// ── localStorage mock ─────────────────────────────────────────────────────────
+// ── mock de localStorage ─────────────────────────────────────────────────────────
 
 beforeEach(() => {
     const store: Record<string, string> = {};
@@ -59,7 +63,18 @@ afterEach(() => {
 // ── guardar una planificacion y luego cargar esa misma planificacion ───────────────────────────────────────────────────────────────
 
 describe("guardar una planificacion y luego cargarla", () => {
-    it("carga la misma planificacion que se ha guardado", () => {
+    it("conserva el timestamp de generado-en", () => {
+        const dias = Array.from({ length: 7 }, (_, i) => makeDia(i));
+        const planificacion = makePlanificacion(dias);
+
+        savePlanificacion(planificacion);
+        const loaded = cargarPlanificacion();
+        assert(loaded !== null, "la planificacion deberia estar cargada");
+
+        expect(loaded.generado_en).toBe(planificacion.generado_en);
+    });
+
+    it("los nombres de los platos en la planificacion cargada coinciden con los de la almacenada", () => {
         const dias = [makeDia(0), makeDia(1), makeDia(2),
             makeDia(3), makeDia(4), makeDia(5), makeDia(6)];
         const planificacion = makePlanificacion(dias);
@@ -73,80 +88,7 @@ describe("guardar una planificacion y luego cargarla", () => {
         expect(loaded.dias[0].cena.nombre).toBe("Sopa de tomate");
     });
 
-    it("conserva el timestamp de generado-en", () => {
-        const dias = Array.from({ length: 7 }, (_, i) => makeDia(i));
-        const planificacion = makePlanificacion(dias);
-
-        savePlanificacion(planificacion);
-        const loaded = cargarPlanificacion();
-        assert(loaded !== null, "la planificacion deberia estar cargada");
-
-        expect(loaded.generado_en).toBe(planificacion.generado_en);
-    });
-});
-
-// ── getDiasPrevios ────────────────────────────────────────────────────────────
-
-describe("getDiasPrevios tras cargar la planificacion", () => {
-    it("devuelve un array vacio si no hay planificacion", () => {
-        expect(getDiasPrevios(null)).toEqual([]);
-    });
-
-    it("devuelve solo los días anteriores a la planificación", () => {
-        const dias = [makeDia(-2), makeDia(-1), makeDia(0), makeDia(1)];
-        const planificacion = makePlanificacion(dias);
-
-        savePlanificacion(planificacion);
-        const loaded = cargarPlanificacion();
-        const previos = getDiasPrevios(loaded);
-
-        expect(previos).toHaveLength(2);
-        previos.forEach((dia) => {
-            expect(new Date(dia.dia).getTime()).toBeLessThan(new Date().setHours(0, 0, 0, 0));
-        });
-    });
-});
-
-// ── de cargar a seleccion de dia ─────────────────────────────────────────
-
-describe("de cargar a seleccion de dia", () => {
-    it("la planificacion cargada tiene la fecha del dia actual en ella", () => {
-        const dias = Array.from({ length: 7 }, (_, i) => makeDia(i));
-        const planificacion = makePlanificacion(dias);
-
-        savePlanificacion(planificacion);
-        const loaded = cargarPlanificacion();
-        assert(loaded !== null, "la planificacion deberia estar cargada");
-
-        const planMap = new Map<string, DiaPlanning>();
-        for (const dia of loaded.dias) {
-            planMap.set(getDayKey(dia.dia), dia);
-        }
-
-        const todayKey = getDayKey(new Date().toISOString());
-        expect(planMap.has(todayKey)).toBe(true);
-        expect(planMap.get(todayKey)?.comida.nombre).toBe("Ensalada César");
-    });
-
-    it("devuelve indefinido para un dia que no esta en la planificacion", () => {
-        const dias = Array.from({ length: 7 }, (_, i) => makeDia(i));
-        savePlanificacion(makePlanificacion(dias));
-        const loaded = cargarPlanificacion();
-        assert(loaded !== null, "la planificacion deberia estar cargada");
-
-        const planMap = new Map<string, DiaPlanning>();
-        for (const dia of loaded.dias) {
-            planMap.set(getDayKey(dia.dia), dia);
-        }
-
-        expect(planMap.get("1900-01-01")).toBeUndefined();
-    });
-});
-
-// ── de seleccion de dia a ver detalles de un plato ─────────────────────────────────────────
-
-describe("de seleccion de dia a ver detalles de un plato", () => {
-    it("los ingredientes de la comida estan correctamente formateados tras elegir un dia", () => {
+    it("los ingredientes de la comida estan correctamente formateados dentro de cada dia", () => {
         const dias = Array.from({ length: 7 }, (_, i) => makeDia(i));
         savePlanificacion(makePlanificacion(dias));
         const loaded = cargarPlanificacion();
@@ -159,7 +101,7 @@ describe("de seleccion de dia a ver detalles de un plato", () => {
         expect(labels).toContain("50 g de Picatostes");
     });
 
-    it("los ingredientes de la comida estan correctamente formateados tras elegir un dia", () => {
+    it("los ingredientes de la comida estan correctamente formateados dentro de cada dia", () => {
         const dias = Array.from({ length: 7 }, (_, i) => makeDia(i));
         savePlanificacion(makePlanificacion(dias));
         const loaded = cargarPlanificacion();
@@ -168,25 +110,11 @@ describe("de seleccion de dia a ver detalles de un plato", () => {
         const dia = loaded.dias[0];
         const labels = dia.cena.ingredientes.map(buildIngredientLabel);
 
-        expect(labels).toContain("200 g de Lechuga");
-        expect(labels).toContain("50 g de Picatostes");
+        expect(labels).toContain("500 g de Tomate");
+        expect(labels).toContain("1 dientes de Ajo");
     });
 
-    it("los nombres de la receta se cargan correctamente", () => {
-        const dias = Array.from({ length: 7 }, (_, i) => makeDia(i));
-        savePlanificacion(makePlanificacion(dias));
-        const loaded = cargarPlanificacion();
-        assert(loaded !== null, "la planificacion deberia estar cargada");
-
-        const dia = loaded.dias[0];
-        const getRecetaActiva = (tab: "comida" | "cena") =>
-            tab === "comida" ? dia.comida : dia.cena;
-
-        expect(getRecetaActiva("comida").nombre).toBe("Ensalada César");
-        expect(getRecetaActiva("cena").nombre).toBe("Sopa de tomate");
-    });
-
-    it("los pasos se almacenan y leen correctamente", () => {
+    it("los pasos se almacenan y cargan correctamente", () => {
         const dias = Array.from({ length: 7 }, (_, i) => makeDia(i));
         savePlanificacion(makePlanificacion(dias));
         const loaded = cargarPlanificacion();
@@ -197,7 +125,7 @@ describe("de seleccion de dia a ver detalles de un plato", () => {
         expect(dia.cena.pasos).toEqual(["Triturar el tomate", "Hervir"]);
     });
 
-    it("los tags se guardan y cargan perfectamente", () => {
+    it("los tags se almacenan y cargan correctamente", () => {
         const dias = Array.from({ length: 7 }, (_, i) => makeDia(i));
         savePlanificacion(makePlanificacion(dias));
         const loaded = cargarPlanificacion();
@@ -208,7 +136,7 @@ describe("de seleccion de dia a ver detalles de un plato", () => {
         expect(dia.cena.tags).toEqual(["caliente"]);
     });
 
-    it("la duracion de la comida se mantiene", () => {
+    it("la duracion de la comida se almacena y lee correctamente", () => {
         savePlanificacion(makePlanificacion([makeDia(0, {
             comida: makeReceta({ nombre: "Ensalada César", duracion: 30 }),
             cena: makeReceta({ nombre: "Sopa de tomate", duracion: 45 }),
@@ -219,7 +147,7 @@ describe("de seleccion de dia a ver detalles de un plato", () => {
         expect(loaded.dias[0].comida.duracion).toBe(30);
     });
 
-    it("la duracion de la cena se mantiene", () => {
+    it("la duracion de la cena se almacena y lee correctamente", () => {
         savePlanificacion(makePlanificacion([makeDia(0, {
             comida: makeReceta({ nombre: "Ensalada César", duracion: 30 }),
             cena: makeReceta({ nombre: "Sopa de tomate", duracion: 45 }),
@@ -297,6 +225,64 @@ describe("de seleccion de dia a ver detalles de un plato", () => {
         const dia = loaded.dias[0];
         expect(formatDuracion(dia.comida.duracion)).toBe("45 min");
         expect(formatDuracion(dia.cena.duracion)).toBe("2 horas y 0 minutos");
+    });
+});
+
+// ── getDiasPrevios ────────────────────────────────────────────────────────────
+
+describe("getDiasPrevios tras cargar la planificacion", () => {
+    it("devuelve un array vacio si no hay planificacion", () => {
+        expect(getDiasPrevios(null)).toEqual([]);
+    });
+
+    it("devuelve solo los días anteriores a la planificación", () => {
+        const dias = [makeDia(-2), makeDia(-1), makeDia(0), makeDia(1)];
+        const planificacion = makePlanificacion(dias);
+
+        savePlanificacion(planificacion);
+        const loaded = cargarPlanificacion();
+        const previos = getDiasPrevios(loaded);
+
+        expect(previos).toHaveLength(2);
+        previos.forEach((dia) => {
+            expect(new Date(dia.dia).getTime()).toBeLessThan(new Date().setHours(0, 0, 0, 0));
+        });
+    });
+});
+
+// ── de cargar a seleccion de dia ─────────────────────────────────────────
+
+describe("de cargar a seleccion de dia", () => {
+    it("la planificacion cargada tiene la fecha del dia actual en ella", () => {
+        const dias = Array.from({ length: 7 }, (_, i) => makeDia(i));
+        const planificacion = makePlanificacion(dias);
+
+        savePlanificacion(planificacion);
+        const loaded = cargarPlanificacion();
+        assert(loaded !== null, "la planificacion deberia estar cargada");
+
+        const planMap = new Map<string, DiaPlanning>();
+        for (const dia of loaded.dias) {
+            planMap.set(getDayKey(dia.dia), dia);
+        }
+
+        const todayKey = getDayKey(new Date().toISOString());
+        expect(planMap.has(todayKey)).toBe(true);
+        expect(planMap.get(todayKey)?.comida.nombre).toBe("Ensalada César");
+    });
+
+    it("devuelve indefinido para un dia que no esta en ninguna planificacion", () => {
+        const dias = Array.from({ length: 7 }, (_, i) => makeDia(i));
+        savePlanificacion(makePlanificacion(dias));
+        const loaded = cargarPlanificacion();
+        assert(loaded !== null, "la planificacion deberia estar cargada");
+
+        const planMap = new Map<string, DiaPlanning>();
+        for (const dia of loaded.dias) {
+            planMap.set(getDayKey(dia.dia), dia);
+        }
+
+        expect(planMap.get("1900-01-01")).toBeUndefined();
     });
 });
 
