@@ -22,6 +22,10 @@ class InsufficientRecipesError(PlanningError):
     """No hay suficientes recetas únicas para generar la semana completa."""
 
 
+class TagConstraintViolationError(PlanningError):
+    """La planificación generada incumple las cuotas mínimas o máximas de algún tag nutricional."""
+
+
 CUOTAS: dict[str, dict[str, int]] = {
     "verdura":    {"min": 7, "max": 14},
     "lácteo":     {"min": 2, "max": 5},
@@ -40,6 +44,7 @@ class API_planificacion:
         connection_uri: str | None = None,
         db_name: str | None = None,
         collection_name: str | None = None,
+        ingredients_path: str | None = None,
         recipes_path: str | Path | None = None,
         dias_totales: int = 7,
         comidas_por_dia: int = 2,
@@ -55,6 +60,7 @@ class API_planificacion:
         self.__CONEXION = connection_uri if connection_uri is not None else os.getenv("MONGODB_URI")
         self.__DB_NAME = db_name or os.getenv("MONGODB_DB", "smartCook")
         self.__COLLECTION_NAME = collection_name or os.getenv("MONGODB_COLLECTION", "recetas")
+        self.__INGREDIENTS_NAME = ingredients_path or os.getenv("MONGODB_INGREDIENTS", "ingredientes")
         self.__RECIPES_PATH = Path(
             recipes_path
             or os.getenv("RECETAS_JSON_PATH")
@@ -63,6 +69,7 @@ class API_planificacion:
 
         self.__CLIENT: MongoClient | None = None
         self.__RECETAS: Collection | None = None
+        self.__INGREDIENTES: Collection | None = None
         self.__FUENTE_DATOS = "json"
         self.__conectar_mongodb_si_esta_configurado()
 
@@ -86,6 +93,7 @@ class API_planificacion:
             client.admin.command("ping")
             self.__CLIENT = client
             self.__RECETAS = client[self.__DB_NAME][self.__COLLECTION_NAME]
+            self.__INGREDIENTES = client[self.__DB_NAME][self.__INGREDIENTS_NAME]
             self.__FUENTE_DATOS = "mongodb"
         except (PyMongoError, ValueError):
             self.__CLIENT = None
@@ -145,7 +153,11 @@ class API_planificacion:
         return total_recetas >= self.__DIAS_TOTALES * self.__COMIDAS_POR_DIA
 
     def __identificador_receta(self, receta: dict[str, Any]) -> str:
-        for clave in ("_id", "id", "nombre"):
+        # "nombre" se usa como clave primaria porque es el único campo que está
+        # garantizado tanto en las recetas del JSON/MongoDB como en los platos
+        # que llegan del frontend como dias_previos (donde _id e id no se envían).
+        # Todos los nombres son únicos en la base de datos de recetas.
+        for clave in ("nombre", "_id", "id"):
             valor = receta.get(clave)
             if valor is not None:
                 return str(valor)
@@ -344,8 +356,16 @@ class API_planificacion:
 
                 ids_recientes.append(self.__identificador_receta(plato))
 
+                # Comprobación de máximo: se lanza en el momento en que un plato
+                # definitivamente añadido supera el techo de cualquier tag.
                 for tag in self.__tags_nutricionales(plato):
                     conteo_ventana[tag] += 1
+                    if conteo_ventana[tag] > CUOTAS[tag]["max"]:
+                        raise TagConstraintViolationError(
+                            f"Se superó el máximo semanal de '{tag}': "
+                            f"{conteo_ventana[tag]} platos "
+                            f"(máx. permitido: {CUOTAS[tag]['max']})."
+                        )
 
                 dia[turno] = plato
                 plato_k += 1
@@ -353,6 +373,19 @@ class API_planificacion:
             # añadimos el nuevo día a la ventana (expulsa el más antiguo si maxlen)
             ventana_dias.append(dia)
             planificacion["dias"].append(dia)
+
+        # Comprobación de mínimos: se verifica una vez terminada la generación
+        # para poder informar de todas las cuotas incumplidas a la vez.
+        violaciones_min = [
+            f"'{tag}': {conteo_ventana.get(tag, 0)} platos (mín. requerido: {cuota['min']})"
+            for tag, cuota in CUOTAS.items()
+            if conteo_ventana.get(tag, 0) < cuota["min"]
+        ]
+        if violaciones_min:
+            raise TagConstraintViolationError(
+                "La planificación no alcanza los mínimos semanales en: "
+                + ", ".join(violaciones_min) + "."
+            )
 
         if dias_previos:
             todos_los_dias = list(dias_previos) + planificacion["dias"]
@@ -362,3 +395,24 @@ class API_planificacion:
             planificacion["dias"] = todos_los_dias
 
         return planificacion
+
+    def get_ingredientes(self) -> dict[str, str]:
+        mapa: dict[str, str] = {}
+        if self.__CONEXION:
+            if self.__INGREDIENTS_NAME is None:
+                raise PlanningError(
+                    "Se configuró MONGODB_URI, pero no se pudo conectar a MongoDB. "
+                    "Revisa URI, red y credenciales."
+                )
+
+
+            try:
+                for ing in self.__INGREDIENTES.find({}):
+                    nombre = ing.get("nombre")
+                    categoria = ing.get("categoria")
+                    if isinstance(nombre, str) and isinstance(categoria, str):
+                        mapa[nombre.lower()] = categoria.strip()
+                
+            except PyMongoError as exc:
+                raise PlanningError("No se pudieron cargar las recetas desde MongoDB.") from exc
+        return mapa

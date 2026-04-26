@@ -1,31 +1,21 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, RotateCcw, ShoppingCart } from "lucide-react";
+import { RotateCcw, ShoppingCart } from "lucide-react";
 import { MONTHS } from "@/lib/planning.constants";
 import { cn } from "@/lib/utils";
 import { formatFechaGenerado, getDayKey, isToday } from "@/lib/planning.utils";
 import { DiaPlanning, Planificacion } from "@/types/planning";
-import {generarListaCompra} from "@/lib/generarLista.ts";
 
 interface CalendarViewProps {
   planificacion: Planificacion;
   onRegenerate: () => void;
   onDaySelect: (dia: DiaPlanning) => void;
+  onShoppingListOpen: () => void;
 }
 
-export function buildPlanMap(dias: DiaPlanning[]): Map<string, DiaPlanning> {
-  const map = new Map<string, DiaPlanning>();
-  for (const dia of dias) {
-    map.set(getDayKey(dia.dia), dia);
-  }
-  return map;
-}
-
-export function CalendarView({ planificacion, onRegenerate, onDaySelect }: CalendarViewProps) {
+export function CalendarView({ planificacion, onRegenerate, onDaySelect, onShoppingListOpen }: CalendarViewProps) {
   const hoy = new Date();
   const [viewDate, setViewDate] = useState(() => new Date(hoy.getFullYear(), hoy.getMonth(), 1));
-  const [successDialogOpen, setSuccessDialogOpen] = useState(false);
-  const [listaItemsCount, setListaItemsCount] = useState<number | null>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
   const todayRef = useRef<HTMLButtonElement | null>(null);
 
@@ -49,7 +39,7 @@ export function CalendarView({ planificacion, onRegenerate, onDaySelect }: Calen
       dias.push({date, key, planDia: planMap.get(key)});
     }
     return dias;
-  }, [buildPlanMap, viewMonth, viewYear]);
+  }, [planMap, viewMonth, viewYear]);
 
   useEffect(() => {
     const container = listRef.current;
@@ -79,16 +69,6 @@ export function CalendarView({ planificacion, onRegenerate, onDaySelect }: Calen
       next.setMonth(next.getMonth() + 1);
       return new Date(next.getFullYear(), next.getMonth(), 1);
     });
-  };
-
-  const handleGenerarLista = () => {
-    try {
-      const lista = generarListaCompra();
-      setListaItemsCount(lista.total_items);
-      setSuccessDialogOpen(true);
-    } catch (err) {
-      console.error("Error al generar la lista de la compra:", err);
-    }
   };
 
   return (
@@ -205,7 +185,7 @@ export function CalendarView({ planificacion, onRegenerate, onDaySelect }: Calen
           })}
         </div>
 
-        <div className="fixed left-1/2 bottom-[max(env(safe-area-inset-bottom),1rem)] z-40 w-[calc(100%-1.5rem)] max-w-md -translate-x-1/2">
+        <div className="fixed left-1/2 bottom-[max(env(safe-area-inset-bottom),0.75rem)] z-40 w-[calc(100%-1.5rem)] max-w-md -translate-x-1/2">
           <div className="rounded-2xl border border-border/80 bg-background/95 p-2 shadow-xl backdrop-blur supports-backdrop-filter:bg-background/85">
             <div className="grid grid-cols-2 gap-2">
               <Button
@@ -217,48 +197,15 @@ export function CalendarView({ planificacion, onRegenerate, onDaySelect }: Calen
                 Regenerar
               </Button>
               <Button
-                  onClick={handleGenerarLista}
+                  onClick={onShoppingListOpen}
                   className="h-11 rounded-xl px-4 font-semibold shadow-sm"
               >
                 <ShoppingCart className="size-4" />
-                Generar lista
+                Lista de la compra
               </Button>
             </div>
           </div>
         </div>
-
-        {successDialogOpen && (
-            <div
-                className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4"
-                onClick={() => setSuccessDialogOpen(false)}
-                role="presentation"
-            >
-              <div
-                  role="dialog"
-                  aria-modal="true"
-                  aria-label="Lista de la compra generada"
-                  className="w-full max-w-sm rounded-2xl border border-border bg-background p-5 shadow-xl animate-in fade-in zoom-in-95 duration-200"
-                  onClick={(event) => event.stopPropagation()}
-              >
-                <div className="flex items-start gap-3">
-                <span className="mt-0.5 rounded-full bg-primary/10 p-1.5 text-primary">
-                  <CheckCircle2 className="size-5" />
-                </span>
-                  <div>
-                    <h3 className="text-base font-semibold text-foreground">Lista generada correctamente</h3>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Se han generado {listaItemsCount ?? 0} ingredientes para tu compra.
-                    </p>
-                  </div>
-                </div>
-                <div className="mt-5 flex justify-end">
-                  <Button size="sm" className="rounded-lg px-4" onClick={() => setSuccessDialogOpen(false)}>
-                    Entendido
-                  </Button>
-                </div>
-              </div>
-            </div>
-        )}
       </section>
   );
 }

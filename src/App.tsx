@@ -10,6 +10,10 @@ import { ErrorState } from "@/components/planning/states/ErrorState";
 import { LoadingState } from "@/components/planning/states/LoadingState";
 import { InitializingState } from "@/components/planning/states/InitializingState";
 import { NoPlanGeneratedState } from "@/components/planning/states/NoPlanGeneratedState";
+import { ShoppingListEmptyDialog } from "@/components/shopping/ShoppingListEmptyDialog";
+import { ShoppingListMissingDialog } from "@/components/shopping/ShoppingListMissingDialog";
+import { ShoppingListScreen } from "@/components/shopping/ShoppingListScreen";
+import { generarListaCompra } from "@/lib/generarLista";
 import {
   extractApiError,
   fetchPlanificacionSemanal,
@@ -24,7 +28,9 @@ import {
   markAsNotFirstTime,
 } from "@/lib/planning.storage";
 import { getDiasPrevios } from "@/lib/planning.utils";
+import { getSavedListaCompra } from "@/lib/shopping.storage";
 import { AppState, DiaPlanning, MealTab, Planificacion } from "@/types/planning";
+import { ListaCompra } from "@/types/shopping";
 
 function App() {
   const [appState, setAppState] = useState<AppState>("initializing");
@@ -33,6 +39,9 @@ function App() {
   const [planificacionExistente, setPlanificacionExistente] = useState<Planificacion | null>(null);
   const [selectedDia, setSelectedDia] = useState<DiaPlanning | null>(null);
   const [activeMealTab, setActiveMealTab] = useState<MealTab>("comida");
+  const [shoppingList, setShoppingList] = useState<ListaCompra | null>(null);
+  const [shoppingListMissingOpen, setShoppingListMissingOpen] = useState(false);
+  const [shoppingListEmptyOpen, setShoppingListEmptyOpen] = useState(false);
 
   useEffect(() => {
     migrateLegacyStorage();
@@ -60,6 +69,8 @@ function App() {
   }, []);
 
   const handleRequestGenerate = () => {
+    setShoppingListMissingOpen(false);
+    setShoppingListEmptyOpen(false);
     const hoy = getPlanificacionHoy();
     if (hoy) {
       setPlanificacionExistente(hoy);
@@ -70,13 +81,67 @@ function App() {
   };
 
   const handleDaySelect = (dia: DiaPlanning) => {
+    setShoppingListMissingOpen(false);
+    setShoppingListEmptyOpen(false);
     setSelectedDia(dia);
     setActiveMealTab("comida");
     setAppState("day-detail");
   };
 
   const handleBackToCalendar = () => {
+    setShoppingListMissingOpen(false);
+    setShoppingListEmptyOpen(false);
     setAppState("success");
+  };
+
+  const isListaCompraForCurrentPlan = (lista: ListaCompra | null): lista is ListaCompra => {
+    return Boolean(
+      lista &&
+      planificacion?.generado_en &&
+      lista.planificacion_generada_en === planificacion.generado_en
+    );
+  };
+
+  const handleShoppingListOpen = () => {
+    if (!planificacion) return;
+
+    const saved = getSavedListaCompra();
+    if (isListaCompraForCurrentPlan(saved)) {
+      if (saved.items.length === 0) {
+        setShoppingList(null);
+        setShoppingListMissingOpen(false);
+        setShoppingListEmptyOpen(true);
+        return;
+      }
+
+      setShoppingList(saved);
+      setShoppingListMissingOpen(false);
+      setShoppingListEmptyOpen(false);
+      setAppState("shopping-list");
+      return;
+    }
+
+    setShoppingList(null);
+    setShoppingListEmptyOpen(false);
+    setShoppingListMissingOpen(true);
+  };
+
+  const handleShoppingListGenerate = () => {
+    if (!planificacion) return;
+
+    try {
+      generarListaCompra();
+      const saved = getSavedListaCompra();
+      if (!isListaCompraForCurrentPlan(saved)) {
+        throw new Error("No se pudo recuperar una lista de la compra valida para la planificacion actual.");
+      }
+
+      setShoppingList(saved);
+      setShoppingListMissingOpen(false);
+      setAppState("shopping-list");
+    } catch (err) {
+      console.error("Error al generar la lista de la compra:", err);
+    }
   };
 
   const doGenerate = async () => {
@@ -110,6 +175,7 @@ function App() {
     planificacion: planificacion as Planificacion,
     onRegenerate: handleRequestGenerate,
     onDaySelect: handleDaySelect,
+    onShoppingListOpen: handleShoppingListOpen,
   };
 
   return (
@@ -150,6 +216,21 @@ function App() {
             >
               <CalendarView {...calendarViewProps} />
             </div>
+        )}
+
+        {appState === "success" && shoppingListMissingOpen && (
+            <ShoppingListMissingDialog onGenerate={handleShoppingListGenerate} />
+        )}
+
+        {appState === "success" && shoppingListEmptyOpen && (
+            <ShoppingListEmptyDialog onClose={() => setShoppingListEmptyOpen(false)} />
+        )}
+
+        {appState === "shopping-list" && shoppingList && (
+            <ShoppingListScreen
+                lista={shoppingList}
+                onBack={handleBackToCalendar}
+            />
         )}
 
         {appState === "no-plan-generated" && (
