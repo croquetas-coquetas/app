@@ -25,8 +25,8 @@ from API_planificacion import API_planificacion, CUOTAS, PlanningError
 # ============================================================================
 
 ITERACIONES = 1000  # Número de iteraciones para cada modo de prueba
-DIAS_REGEN = 1    # Días anteriores a pasar al algoritmo en modo con historial
-REGEN_MODE = "con_historial"  # Opciones: "sin_historial", "con_historial", "ambos"
+DIAS_REGEN = 3    # Simula regenerar a mitad de semana (días 1–3 en el pasado)
+REGEN_MODE = "ambos"  # Prueba ambos modos: sin y con historial
 
 
 # ============================================================================
@@ -41,8 +41,13 @@ def obtener_tags_plato(plato: dict[str, Any]) -> list[str]:
 
 
 def obtener_id_plato(plato: dict[str, Any]) -> str:
-    """Obtiene un identificador único para un plato."""
-    for clave in ("_id", "id", "nombre"):
+    """Obtiene un identificador único para un plato.
+    
+    Se usa 'nombre' como clave primaria para que los platos procedentes del
+    frontend (dias_previos, sin _id) y los platos recién generados (con _id)
+    se identifiquen de forma consistente. Los nombres son únicos en la BD.
+    """
+    for clave in ("nombre", "_id", "id"):
         valor = plato.get(clave)
         if valor is not None:
             return str(valor)

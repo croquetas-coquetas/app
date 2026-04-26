@@ -20,6 +20,7 @@ export function NoPlanGeneratedState({
           planificacion={planificacion}
           onRegenerate={onGenerate}
           onDaySelect={onDaySelect}
+          onShoppingListOpen={() => {}}
         />
       </div>
 

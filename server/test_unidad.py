@@ -22,7 +22,7 @@ with patch("dotenv.load_dotenv"), patch("pymongo.MongoClient"):
 
 ITERACIONES = 100          # Iteraciones por test parametrizado
 SEEDS = [4, 12, 733, 421, 929, 122, 652, 3, 565, 9991]  # Semillas a probar
-DIAS_REGEN_VALUES = [1, 2, 3, 5, 7]  # Valores de DIAS_REGEN a probar
+DIAS_REGEN_VALUES = [1, 2, 3, 4, 5, 6, 7]  # Valores de DIAS_REGEN a probar
 
 
 # ============================================================================
