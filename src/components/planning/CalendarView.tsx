@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { RotateCcw, ShoppingCart } from "lucide-react";
+import { RotateCcw } from "lucide-react";
 import { MONTHS } from "@/lib/planning.constants";
 import { cn } from "@/lib/utils";
 import { formatFechaGenerado, getDayKey, isToday } from "@/lib/planning.utils";
@@ -10,7 +10,6 @@ interface CalendarViewProps {
   planificacion: Planificacion;
   onRegenerate: () => void;
   onDaySelect: (dia: DiaPlanning) => void;
-  onShoppingListOpen: () => void;
 }
 
 export function buildPlanMap(dias: DiaPlanning[]): Map<string, DiaPlanning> {
@@ -21,7 +20,7 @@ export function buildPlanMap(dias: DiaPlanning[]): Map<string, DiaPlanning> {
     return map;
 }
 
-export function CalendarView({ planificacion, onRegenerate, onDaySelect, onShoppingListOpen }: CalendarViewProps) {
+export function CalendarView({ planificacion, onRegenerate, onDaySelect }: CalendarViewProps) {
   const hoy = new Date();
   const [viewDate, setViewDate] = useState(() => new Date(hoy.getFullYear(), hoy.getMonth(), 1));
   const listRef = useRef<HTMLDivElement | null>(null);
@@ -83,14 +82,27 @@ export function CalendarView({ planificacion, onRegenerate, onDaySelect, onShopp
       <section
           className="w-full max-w-3xl mx-auto calendar-enter rounded-2xl border border-border bg-background overflow-hidden">
         <div className="px-5 pt-7 pb-5">
-          <div>
-            <p className="text-xs font-semibold tracking-[0.2em] text-muted-foreground uppercase">SmartCook</p>
-            <h2 className="text-2xl font-bold text-foreground mt-1.5 text-balance">
-              Menú semanal
-            </h2>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Generado el {formatFechaGenerado(planificacion.generado_en)}
-            </p>
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold tracking-[0.2em] text-muted-foreground uppercase">SmartCook</p>
+              <h2 className="text-2xl font-bold text-foreground mt-1.5 text-balance">
+                Menú semanal
+              </h2>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Generado el {formatFechaGenerado(planificacion.generado_en)}
+              </p>
+            </div>
+
+            <Button
+                variant="outline"
+                size="icon-sm"
+                onClick={onRegenerate}
+                className="shrink-0 rounded-lg border-border/80"
+                aria-label="Regenerar planificación"
+                title="Regenerar planificación"
+            >
+              <RotateCcw className="size-5" />
+            </Button>
           </div>
         </div>
 
@@ -113,8 +125,8 @@ export function CalendarView({ planificacion, onRegenerate, onDaySelect, onShopp
         </div>
 
         <div ref={listRef}
-             className="flex max-h-[70dvh] flex-col overflow-y-auto border-t border-border bg-background pb-[calc(2rem+env(safe-area-inset-bottom))]">
-          {diasDelMes.map(({date, key, planDia}, index) => {
+             className="flex max-h-[70dvh] flex-col gap-px overflow-y-auto border-t border-border bg-background">
+          {diasDelMes.map(({date, key, planDia}) => {
             const numeroDia = date.getDate();
             const dayShort = date.toLocaleDateString("es-ES", {weekday: "short"}).replace(".", "");
             const dayName = date.toLocaleDateString("es-ES", {weekday: "long"});
@@ -130,7 +142,6 @@ export function CalendarView({ planificacion, onRegenerate, onDaySelect, onShopp
                     onClick={() => planDia && onDaySelect(planDia)}
                     disabled={!tieneMenu}
                     aria-label={tieneMenu ? `Ver detalle del ${dayName}` : `${dayName} sin menu asignado`}
-                    className={cn(index > 0 && "border-t border-border/50")}
                 >
                   <div className={cn(
                       "flex gap-4 px-5 py-4 items-stretch text-left transition-colors active:scale-[0.99]",
@@ -140,79 +151,63 @@ export function CalendarView({ planificacion, onRegenerate, onDaySelect, onShopp
                   )}>
 
                     <div className="flex flex-col items-center justify-center w-14 shrink-0">
-                      <span
-                          className={cn(
-                              "text-4xl font-black tabular-nums leading-none",
-                              diaActual ? "text-primary" : "text-foreground/80"
-                          )}
-                      >
-                        {numeroDia}
-                      </span>
+                <span
+                    className={cn(
+                        "text-4xl font-black tabular-nums leading-none",
+                        diaActual ? "text-primary" : "text-foreground/80"
+                    )}
+                >
+                  {numeroDia}
+                </span>
                       <span
                           className={cn(
                               "text-[9px] font-bold uppercase tracking-widest mt-1",
                               diaActual ? "text-primary" : "text-muted-foreground"
                           )}
                       >
-                        {dayShort}
-                      </span>
-                      {diaActual && (
-                          <span className="text-[9px] border border-green-600 text-green-600 px-1.5 rounded-full font-bold uppercase tracking-widest mt-1">
-                            Hoy
-                          </span>
-                      )}
+                  {dayShort}
+                </span>
                     </div>
 
                     <div className={cn("w-px self-stretch rounded-full", diaActual ? "bg-primary/30" : "bg-border")}/>
 
                     <div className="flex flex-col gap-2.5 flex-1 justify-center min-w-0">
-                      {tieneMenu && planDia ? (
-                          <>
-                            <div className="flex flex-col gap-0.5 min-w-0">
-                              <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-orange-400">Comida</span>
-                              <span className="text-sm font-semibold text-foreground leading-tight truncate">
-                                {planDia.comida.nombre}
-                              </span>
-                            </div>
-
-                            <div className="flex flex-col gap-0.5 min-w-0">
-                              <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-blue-400">Cena</span>
-                              <span className="text-sm font-semibold text-foreground leading-tight truncate">
-                                {planDia.cena.nombre}
-                              </span>
-                            </div>
-                          </>
-                      ) : (
-                          <span className="text-sm font-semibold text-muted-foreground/60">N/A</span>
+                      <div className="flex items-center gap-2">
+                  <span
+                      className={cn(
+                          "text-xs font-semibold uppercase tracking-widest",
+                          diaActual ? "text-green-600" : "text-muted-foreground"
                       )}
+                  >
+                    {dayName}
+                  </span>
+                        {diaActual && (
+                            <span
+                                className="text-[9px] border border-green-600 text-green-600 px-1.5 rounded-full font-bold uppercase tracking-widest">
+                      Hoy
+                    </span>
+                        )}
+                      </div>
 
+                      <div className="flex flex-col gap-0.5 min-w-0">
+                        <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-orange-400">Comida</span>
+                        <span className="text-sm font-semibold text-foreground leading-tight truncate">
+                    {tieneMenu && planDia ? planDia.comida.nombre : "Sin comida planificada"}
+                  </span>
+                      </div>
+
+                      <div className="flex flex-col gap-0.5 min-w-0">
+                        <span
+                            className="text-[9px] font-bold uppercase tracking-[0.18em] text-blue-400">Cena</span>
+                        <span className="text-sm font-semibold text-foreground leading-tight truncate">
+                    {tieneMenu && planDia ? planDia.cena.nombre : "Sin cena planificada"}
+                  </span>
+                      </div>
                     </div>
                   </div>
                 </button>
             );
           })}
-        </div>
-
-        <div className="fixed left-1/2 bottom-[max(env(safe-area-inset-bottom),0.75rem)] z-40 w-[calc(100%-1.5rem)] max-w-md -translate-x-1/2">
-          <div className="rounded-2xl border border-border/80 bg-background/95 p-2 shadow-xl backdrop-blur supports-backdrop-filter:bg-background/85">
-            <div className="grid grid-cols-2 gap-2">
-              <Button
-                  variant="outline"
-                  onClick={onRegenerate}
-                  className="h-11 rounded-xl border-border/80 px-4 font-semibold"
-              >
-                <RotateCcw className="size-4" />
-                Regenerar
-              </Button>
-              <Button
-                  onClick={onShoppingListOpen}
-                  className="h-11 rounded-xl px-4 font-semibold shadow-sm"
-              >
-                <ShoppingCart className="size-4" />
-                Lista de la compra
-              </Button>
-            </div>
-          </div>
         </div>
       </section>
   );

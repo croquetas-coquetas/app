@@ -1,7 +1,7 @@
 export type AppState =
   | "initializing"
   | "landing"
-  | "generate"
+  | "schedule-onboarding"
   | "confirm-overwrite"
   | "loading"
   | "success"
@@ -43,16 +43,17 @@ export interface Planificacion {
   dias: DiaPlanning[];
 }
 
-export interface DayModalProps {
-  dia: DiaPlanning;
-  onClose: () => void;
-}
-
 export type MealTab = "comida" | "cena";
 
-export interface DayFullscreenViewProps {
-  dia: DiaPlanning;
-  activeTab: MealTab;
-  onTabChange: (tab: MealTab) => void;
-  onBack: () => void;
+export type HorarioField = "inicio" | "fin";
+
+export interface HorarioRange {
+  inicio: string;
+  fin: string;
 }
+
+export interface HorariosDisponibilidad {
+  comida: HorarioRange;
+  cena: HorarioRange;
+}
+

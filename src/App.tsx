@@ -1,11 +1,13 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import "./App.css";
 
 import { CalendarView } from "@/components/planning/CalendarView";
 import { DayFullscreenView } from "@/components/planning/DayFullscreenView";
+import { BottomNavBar } from "@/components/planning/BottomNavBar";
+import { HorarioConfigFields } from "@/components/planning/HorarioConfigFields";
 import { ConfirmOverwriteState } from "@/components/planning/states/ConfirmOverwriteState";
 import { LandingState } from "@/components/planning/states/LandingState";
-import { GenerateState } from "@/components/planning/states/GenerateState";
+import { ScheduleOnboardingState } from "@/components/planning/states/ScheduleOnboardingState";
 import { ErrorState } from "@/components/planning/states/ErrorState";
 import { LoadingState } from "@/components/planning/states/LoadingState";
 import { InitializingState } from "@/components/planning/states/InitializingState";
@@ -13,7 +15,6 @@ import { NoPlanGeneratedState } from "@/components/planning/states/NoPlanGenerat
 import { ShoppingListEmptyDialog } from "@/components/shopping/ShoppingListEmptyDialog";
 import { ShoppingListMissingDialog } from "@/components/shopping/ShoppingListMissingDialog";
 import { ShoppingListScreen } from "@/components/shopping/ShoppingListScreen";
-import { generarListaCompra } from "@/lib/generarLista";
 import {
   extractApiError,
   fetchPlanificacionSemanal,
@@ -28,8 +29,12 @@ import {
   markAsNotFirstTime,
 } from "@/lib/planning.storage";
 import { getDiasPrevios } from "@/lib/planning.utils";
+import { loadHorariosFromStorage, saveHorariosToStorage, validateHorarios } from "@/lib/horarios";
+import { AppState, DiaPlanning, HorarioField, HorariosDisponibilidad, MealTab, Planificacion } from "@/types/planning";
+import { generarListaCompra } from "@/lib/generarLista";
+import { CalendarIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { getSavedListaCompra } from "@/lib/shopping.storage";
-import { AppState, DiaPlanning, MealTab, Planificacion } from "@/types/planning";
 import { ListaCompra } from "@/types/shopping";
 
 function App() {
@@ -39,9 +44,16 @@ function App() {
   const [planificacionExistente, setPlanificacionExistente] = useState<Planificacion | null>(null);
   const [selectedDia, setSelectedDia] = useState<DiaPlanning | null>(null);
   const [activeMealTab, setActiveMealTab] = useState<MealTab>("comida");
+
+  const [configurarHorarioDialogOpen, setConfigurarHorarioDialogOpen] = useState(false);
+  const [horarioError, setHorarioError] = useState("");
+  const [horarios, setHorarios] = useState<HorariosDisponibilidad>(() => loadHorariosFromStorage());
   const [shoppingList, setShoppingList] = useState<ListaCompra | null>(null);
   const [shoppingListMissingOpen, setShoppingListMissingOpen] = useState(false);
   const [shoppingListEmptyOpen, setShoppingListEmptyOpen] = useState(false);
+  const historyDepthRef = useRef(0);
+  const skipNextHistoryPushRef = useRef(false);
+  const lastBackKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
     migrateLegacyStorage();
@@ -68,6 +80,133 @@ function App() {
     return () => clearTimeout(initTimer);
   }, []);
 
+  const handleBackToCalendar = () => {
+    setShoppingListMissingOpen(false);
+    setShoppingListEmptyOpen(false);
+    setAppState("success");
+  };
+
+  const resolveBackNavigation = useCallback((): boolean => {
+    if (configurarHorarioDialogOpen) {
+      setHorarioError("");
+      setConfigurarHorarioDialogOpen(false);
+      return true;
+    }
+
+    if (shoppingListMissingOpen) {
+      setShoppingListMissingOpen(false);
+      return true;
+    }
+
+    if (shoppingListEmptyOpen) {
+      setShoppingListEmptyOpen(false);
+      return true;
+    }
+
+    if (appState === "day-detail" || appState === "shopping-list") {
+      handleBackToCalendar();
+      return true;
+    }
+
+    if (appState === "schedule-onboarding") {
+      setHorarioError("");
+      setAppState("landing");
+      return true;
+    }
+
+    if (appState === "error") {
+      setAppState(isFirstTime() ? "schedule-onboarding" : planificacion ? "success" : "no-plan-generated");
+      return true;
+    }
+
+    if (appState === "confirm-overwrite") {
+      setAppState(planificacion ? "success" : "no-plan-generated");
+      return true;
+    }
+
+    return false;
+  }, [
+    appState,
+    configurarHorarioDialogOpen,
+    planificacion,
+    shoppingListEmptyOpen,
+    shoppingListMissingOpen,
+  ]);
+
+  const triggerBackNavigation = useCallback(() => {
+    if (historyDepthRef.current > 0) {
+      skipNextHistoryPushRef.current = true;
+      window.history.back();
+      return;
+    }
+
+    resolveBackNavigation();
+  }, [resolveBackNavigation]);
+
+  useEffect(() => {
+    if (configurarHorarioDialogOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [configurarHorarioDialogOpen]);
+
+  useEffect(() => {
+    const onPopState = () => {
+      if (historyDepthRef.current > 0) {
+        historyDepthRef.current -= 1;
+      }
+      skipNextHistoryPushRef.current = true;
+      resolveBackNavigation();
+    };
+
+    window.addEventListener("popstate", onPopState);
+    return () => {
+      window.removeEventListener("popstate", onPopState);
+    };
+  }, [resolveBackNavigation]);
+
+  useEffect(() => {
+    const activeBackKey = configurarHorarioDialogOpen
+      ? "config-dialog"
+      : shoppingListMissingOpen
+        ? "shopping-list-missing-dialog"
+        : shoppingListEmptyOpen
+          ? "shopping-list-empty-dialog"
+          : appState;
+    const isBackNavigable = [
+      "config-dialog",
+      "shopping-list-missing-dialog",
+      "shopping-list-empty-dialog",
+      "day-detail",
+      "shopping-list",
+      "schedule-onboarding",
+      "error",
+      "confirm-overwrite",
+    ].includes(activeBackKey);
+
+    if (lastBackKeyRef.current === null) {
+      lastBackKeyRef.current = activeBackKey;
+      return;
+    }
+
+    if (skipNextHistoryPushRef.current) {
+      skipNextHistoryPushRef.current = false;
+      lastBackKeyRef.current = activeBackKey;
+      return;
+    }
+
+    if (activeBackKey !== lastBackKeyRef.current && isBackNavigable) {
+      window.history.pushState({ smartcookBack: true }, "");
+      historyDepthRef.current += 1;
+    }
+
+    lastBackKeyRef.current = activeBackKey;
+  }, [appState, configurarHorarioDialogOpen, shoppingListEmptyOpen, shoppingListMissingOpen]);
+
   const handleRequestGenerate = () => {
     setShoppingListMissingOpen(false);
     setShoppingListEmptyOpen(false);
@@ -86,12 +225,6 @@ function App() {
     setSelectedDia(dia);
     setActiveMealTab("comida");
     setAppState("day-detail");
-  };
-
-  const handleBackToCalendar = () => {
-    setShoppingListMissingOpen(false);
-    setShoppingListEmptyOpen(false);
-    setAppState("success");
   };
 
   const isListaCompraForCurrentPlan = (lista: ListaCompra | null): lista is ListaCompra => {
@@ -133,7 +266,8 @@ function App() {
       generarListaCompra();
       const saved = getSavedListaCompra();
       if (!isListaCompraForCurrentPlan(saved)) {
-        throw new Error("No se pudo recuperar una lista de la compra valida para la planificacion actual.");
+        console.error("No se pudo recuperar una lista de la compra valida para la planificacion actual.");
+        return;
       }
 
       setShoppingList(saved);
@@ -144,7 +278,66 @@ function App() {
     }
   };
 
-  const doGenerate = async () => {
+    const handleNavBarProfileClick = (action: "mi-perfil" | "configurar-horario") => {
+        if (action === "configurar-horario") {
+            setHorarioError("");
+            setConfigurarHorarioDialogOpen(true);
+        }
+    };
+
+    const handleLandingGetStarted = () => {
+        setHorarioError("");
+        setAppState("schedule-onboarding");
+    };
+
+    const closeConfigurarHorarioDialog = () => {
+        setHorarioError("");
+        setConfigurarHorarioDialogOpen(false);
+    };
+
+    const handleHorarioChange = (
+        mealType: MealTab,
+        timeType: HorarioField,
+        value: string
+    ) => {
+        setHorarios((prev) => ({
+            ...prev,
+            [mealType]: {
+                ...prev[mealType],
+                [timeType]: value,
+            },
+        }));
+        setHorarioError("");
+    };
+
+    const handleSaveHorarios = () => {
+        const validationError = validateHorarios(horarios);
+        if (validationError) {
+            setHorarioError(validationError);
+            return;
+        }
+
+        setHorarioError("");
+        saveHorariosToStorage(horarios);
+        console.log("Horarios configurados:", horarios);
+        closeConfigurarHorarioDialog();
+    };
+
+    const handleOnboardingGenerate = () => {
+        const validationError = validateHorarios(horarios);
+        if (validationError) {
+            setHorarioError(validationError);
+            return;
+        }
+
+        setHorarioError("");
+        saveHorariosToStorage(horarios);
+        console.log("Horarios configurados:", horarios);
+        void doGenerate();
+    };
+
+
+    const doGenerate = async () => {
     setAppState("loading");
     try {
       const saved = cargarPlanificacion();
@@ -175,8 +368,15 @@ function App() {
     planificacion: planificacion as Planificacion,
     onRegenerate: handleRequestGenerate,
     onDaySelect: handleDaySelect,
-    onShoppingListOpen: handleShoppingListOpen,
   };
+
+  const showNavBar = !["initializing", "landing", "schedule-onboarding", "loading", "error", "confirm-overwrite"].includes(appState);
+  const currentNavTab =
+    appState === "shopping-list"
+      ? "shopping-list"
+      : appState === "day-detail" || appState === "success"
+        ? "calendar"
+        : undefined;
 
   return (
       <div
@@ -186,13 +386,16 @@ function App() {
         {appState === "initializing" && <InitializingState />}
 
         {appState === "landing" && (
-            <LandingState onGetStarted={() => setAppState("generate")} />
+            <LandingState onGetStarted={handleLandingGetStarted} />
         )}
 
-        {appState === "generate" && (
-            <GenerateState
-                onGenerate={handleRequestGenerate}
-                onBack={() => setAppState("landing")}
+        {appState === "schedule-onboarding" && (
+            <ScheduleOnboardingState
+                horarios={horarios}
+                errorMsg={horarioError}
+                onHorarioChange={handleHorarioChange}
+                onBack={triggerBackNavigation}
+                onGenerate={handleOnboardingGenerate}
             />
         )}
 
@@ -229,7 +432,7 @@ function App() {
         {appState === "shopping-list" && shoppingList && (
             <ShoppingListScreen
                 lista={shoppingList}
-                onBack={handleBackToCalendar}
+                onBack={triggerBackNavigation}
             />
         )}
 
@@ -246,16 +449,81 @@ function App() {
                 dia={selectedDia}
                 activeTab={activeMealTab}
                 onTabChange={setActiveMealTab}
-                onBack={handleBackToCalendar}
+                onBack={triggerBackNavigation}
             />
         )}
 
         {appState === "error" && (
             <ErrorState
                 errorMsg={errorMsg}
-                onBack={() => setAppState("generate")}
+                onBack={triggerBackNavigation}
                 onRetry={() => void doGenerate()}
             />
+        )}
+
+        {/* Bottom Navigation Bar */}
+        {showNavBar && (
+            <BottomNavBar
+                onCalendarClick={() => setAppState("success")}
+                onShoppingListClick={handleShoppingListOpen}
+                onProfileClick={handleNavBarProfileClick}
+                activeTab={currentNavTab}
+            />
+        )}
+
+
+        {/* Configurar horarios dialog */}
+        {configurarHorarioDialogOpen && (
+            <div
+                className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4 backdrop-blur-sm"
+                onClick={closeConfigurarHorarioDialog}
+                role="presentation"
+            >
+              <div
+                  role="dialog"
+                  aria-modal="true"
+                  aria-label="Configurar mi horario"
+                  className="w-full sm:max-w-sm rounded-2xl sm:rounded-2xl border border-border bg-background shadow-xl animate-in fade-in zoom-in-95 duration-200"
+                  onClick={(event) => event.stopPropagation()}
+              >
+                {/* Header */}
+                <div className="border-b border-border px-5 py-4">
+                  <div className="flex items-start gap-3">
+                    <span className="mt-0.5 rounded-full bg-primary/10 p-1.5 text-primary shrink-0">
+                      <CalendarIcon className="size-5" />
+                    </span>
+                    <div>
+                      <h3 className="text-base font-semibold text-foreground">Configurar mi horario</h3>
+                      <p className="text-xs text-muted-foreground mt-1">Define tu disponibilidad para cocinar</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Content */}
+                <div className="px-5 py-6 space-y-6">
+                  <HorarioConfigFields horarios={horarios} onHorarioChange={handleHorarioChange} errorMsg={horarioError} />
+                </div>
+
+                {/* Footer */}
+                <div className="border-t border-border px-5 py-4 flex gap-2 justify-end">
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    className="rounded-lg px-4"
+                    onClick={closeConfigurarHorarioDialog}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    size="sm"
+                    className="rounded-lg px-4"
+                    onClick={handleSaveHorarios}
+                  >
+                    Guardar
+                  </Button>
+                </div>
+              </div>
+            </div>
         )}
       </div>
   );
