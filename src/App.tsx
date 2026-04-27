@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import "./App.css";
 
 import { CalendarView } from "@/components/planning/CalendarView";
@@ -51,6 +51,9 @@ function App() {
   const [shoppingList, setShoppingList] = useState<ListaCompra | null>(null);
   const [shoppingListMissingOpen, setShoppingListMissingOpen] = useState(false);
   const [shoppingListEmptyOpen, setShoppingListEmptyOpen] = useState(false);
+  const historyDepthRef = useRef(0);
+  const skipNextHistoryPushRef = useRef(false);
+  const lastBackKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
     migrateLegacyStorage();
@@ -77,6 +80,69 @@ function App() {
     return () => clearTimeout(initTimer);
   }, []);
 
+  const handleBackToCalendar = () => {
+    setShoppingListMissingOpen(false);
+    setShoppingListEmptyOpen(false);
+    setAppState("success");
+  };
+
+  const resolveBackNavigation = useCallback((): boolean => {
+    if (configurarHorarioDialogOpen) {
+      setHorarioError("");
+      setConfigurarHorarioDialogOpen(false);
+      return true;
+    }
+
+    if (shoppingListMissingOpen) {
+      setShoppingListMissingOpen(false);
+      return true;
+    }
+
+    if (shoppingListEmptyOpen) {
+      setShoppingListEmptyOpen(false);
+      return true;
+    }
+
+    if (appState === "day-detail" || appState === "shopping-list") {
+      handleBackToCalendar();
+      return true;
+    }
+
+    if (appState === "schedule-onboarding") {
+      setHorarioError("");
+      setAppState("landing");
+      return true;
+    }
+
+    if (appState === "error") {
+      setAppState(isFirstTime() ? "schedule-onboarding" : planificacion ? "success" : "no-plan-generated");
+      return true;
+    }
+
+    if (appState === "confirm-overwrite") {
+      setAppState(planificacion ? "success" : "no-plan-generated");
+      return true;
+    }
+
+    return false;
+  }, [
+    appState,
+    configurarHorarioDialogOpen,
+    planificacion,
+    shoppingListEmptyOpen,
+    shoppingListMissingOpen,
+  ]);
+
+  const triggerBackNavigation = useCallback(() => {
+    if (historyDepthRef.current > 0) {
+      skipNextHistoryPushRef.current = true;
+      window.history.back();
+      return;
+    }
+
+    resolveBackNavigation();
+  }, [resolveBackNavigation]);
+
   useEffect(() => {
     if (configurarHorarioDialogOpen) {
       document.body.style.overflow = "hidden";
@@ -87,6 +153,59 @@ function App() {
       document.body.style.overflow = "";
     };
   }, [configurarHorarioDialogOpen]);
+
+  useEffect(() => {
+    const onPopState = () => {
+      if (historyDepthRef.current > 0) {
+        historyDepthRef.current -= 1;
+      }
+      skipNextHistoryPushRef.current = true;
+      resolveBackNavigation();
+    };
+
+    window.addEventListener("popstate", onPopState);
+    return () => {
+      window.removeEventListener("popstate", onPopState);
+    };
+  }, [resolveBackNavigation]);
+
+  useEffect(() => {
+    const activeBackKey = configurarHorarioDialogOpen
+      ? "config-dialog"
+      : shoppingListMissingOpen
+        ? "shopping-list-missing-dialog"
+        : shoppingListEmptyOpen
+          ? "shopping-list-empty-dialog"
+          : appState;
+    const isBackNavigable = [
+      "config-dialog",
+      "shopping-list-missing-dialog",
+      "shopping-list-empty-dialog",
+      "day-detail",
+      "shopping-list",
+      "schedule-onboarding",
+      "error",
+      "confirm-overwrite",
+    ].includes(activeBackKey);
+
+    if (lastBackKeyRef.current === null) {
+      lastBackKeyRef.current = activeBackKey;
+      return;
+    }
+
+    if (skipNextHistoryPushRef.current) {
+      skipNextHistoryPushRef.current = false;
+      lastBackKeyRef.current = activeBackKey;
+      return;
+    }
+
+    if (activeBackKey !== lastBackKeyRef.current && isBackNavigable) {
+      window.history.pushState({ smartcookBack: true }, "");
+      historyDepthRef.current += 1;
+    }
+
+    lastBackKeyRef.current = activeBackKey;
+  }, [appState, configurarHorarioDialogOpen, shoppingListEmptyOpen, shoppingListMissingOpen]);
 
   const handleRequestGenerate = () => {
     setShoppingListMissingOpen(false);
@@ -106,12 +225,6 @@ function App() {
     setSelectedDia(dia);
     setActiveMealTab("comida");
     setAppState("day-detail");
-  };
-
-  const handleBackToCalendar = () => {
-    setShoppingListMissingOpen(false);
-    setShoppingListEmptyOpen(false);
-    setAppState("success");
   };
 
   const isListaCompraForCurrentPlan = (lista: ListaCompra | null): lista is ListaCompra => {
@@ -281,7 +394,7 @@ function App() {
                 horarios={horarios}
                 errorMsg={horarioError}
                 onHorarioChange={handleHorarioChange}
-                onBack={() => setAppState("landing")}
+                onBack={triggerBackNavigation}
                 onGenerate={handleOnboardingGenerate}
             />
         )}
@@ -319,7 +432,7 @@ function App() {
         {appState === "shopping-list" && shoppingList && (
             <ShoppingListScreen
                 lista={shoppingList}
-                onBack={handleBackToCalendar}
+                onBack={triggerBackNavigation}
             />
         )}
 
@@ -336,14 +449,14 @@ function App() {
                 dia={selectedDia}
                 activeTab={activeMealTab}
                 onTabChange={setActiveMealTab}
-                onBack={handleBackToCalendar}
+                onBack={triggerBackNavigation}
             />
         )}
 
         {appState === "error" && (
             <ErrorState
                 errorMsg={errorMsg}
-                onBack={() => setAppState(isFirstTime() ? "schedule-onboarding" : planificacion ? "success" : "no-plan-generated")}
+                onBack={triggerBackNavigation}
                 onRetry={() => void doGenerate()}
             />
         )}
