@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { RotateCcw } from "lucide-react";
+import { RotateCcw, ShoppingCart } from "lucide-react";
 import { MONTHS } from "@/lib/planning.constants";
 import { cn } from "@/lib/utils";
 import { formatFechaGenerado, getDayKey, isToday } from "@/lib/planning.utils";
@@ -10,9 +10,18 @@ interface CalendarViewProps {
   planificacion: Planificacion;
   onRegenerate: () => void;
   onDaySelect: (dia: DiaPlanning) => void;
+  onShoppingListOpen: () => void;
 }
 
-export function CalendarView({ planificacion, onRegenerate, onDaySelect }: CalendarViewProps) {
+export function buildPlanMap(dias: DiaPlanning[]): Map<string, DiaPlanning> {
+    const map = new Map<string, DiaPlanning>();
+    for (const dia of dias) {
+        map.set(getDayKey(dia.dia), dia);
+    }
+    return map;
+}
+
+export function CalendarView({ planificacion, onRegenerate, onDaySelect, onShoppingListOpen }: CalendarViewProps) {
   const hoy = new Date();
   const [viewDate, setViewDate] = useState(() => new Date(hoy.getFullYear(), hoy.getMonth(), 1));
   const listRef = useRef<HTMLDivElement | null>(null);
@@ -73,12 +82,11 @@ export function CalendarView({ planificacion, onRegenerate, onDaySelect }: Calen
   return (
       <section
           className="w-full max-w-3xl mx-auto calendar-enter rounded-2xl border border-border bg-background overflow-hidden">
-        <div className="relative px-5 pt-7 pb-5">
-          <div className="pr-12">
-            <p className="text-xs font-semibold tracking-[0.2em] text-muted-foreground uppercase">Planificacion
-              mensual</p>
+        <div className="px-5 pt-7 pb-5">
+          <div>
+            <p className="text-xs font-semibold tracking-[0.2em] text-muted-foreground uppercase">SmartCook</p>
             <h2 className="text-2xl font-bold text-foreground mt-1.5 text-balance">
-              Menú del mes
+              Menú semanal
             </h2>
             <p className="text-xs text-muted-foreground mt-0.5">
               Generado el {formatFechaGenerado(planificacion.generado_en)}

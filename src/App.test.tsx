@@ -4,7 +4,9 @@ import { render, screen, fireEvent, waitFor, cleanup, act } from "@testing-libra
 import App from "./App";
 import { savePlanificacion } from "@/lib/planning.storage";
 import { STORAGE_HORARIOS, STORAGE_META, STORAGE_PREFIX } from "@/lib/planning.constants";
-
+import { Planificacion } from "@/types/planning";
+import { ListaCompra } from "@/types/shopping";
+import { saveListaCompra } from "@/lib/shopping.storage";
 
 const FIRST_TIME_KEY = "smartcook_first_time";
 
@@ -41,13 +43,39 @@ function clearTestStorage() {
     localStorage.clear();
 }
 
+function installScrollMocks() {
+    Object.defineProperty(HTMLElement.prototype, "scrollTo", {
+        configurable: true,
+        value: vi.fn(),
+    });
+    Object.defineProperty(window, "scrollTo", {
+        configurable: true,
+        value: vi.fn(),
+    });
+    Object.defineProperty(window, "requestAnimationFrame", {
+        configurable: true,
+        value: (callback: FrameRequestCallback) => {
+            callback(0);
+            return 0;
+        },
+    });
+    Object.defineProperty(window, "scrollX", {
+        configurable: true,
+        value: 0,
+    });
+    Object.defineProperty(window, "scrollY", {
+        configurable: true,
+        value: 0,
+    });
+}
+
 afterEach(() => {
     cleanup();
     clearTestStorage();
     vi.restoreAllMocks();
 });
 
-function makePlanificacion(fecha: Date) {
+function makePlanificacion(fecha: Date): Planificacion {
     return {
         generado_en: fecha.toISOString(),
         dias: [
@@ -89,7 +117,7 @@ function makePlanificacion(fecha: Date) {
     };
 }
 
-const planHoy = () => makePlanificacion(new Date());
+const planHoy = (): Planificacion => makePlanificacion(new Date());
 
 async function advanceInit() {
     await act(async () => {
@@ -118,6 +146,52 @@ function seedPlanHoy() {
 
 function clickGenerateDesdeOnboarding() {
     fireEvent.click(screen.getByRole("button", { name: /Guardar y generar planificacion/i }));
+}
+
+function seedPlan(plan: Planificacion = planHoy()) {
+    savePlanificacion(plan);
+}
+
+function makePlanificacionConIngredientes(fecha: Date): Planificacion {
+    return {
+        generado_en: fecha.toISOString(),
+        dias: [
+            {
+                dia: fecha.toISOString(),
+                comida: {
+                    nombre: "Pasta con tomate",
+                    grupo_principal: "cereal",
+                    ingredientes: [
+                        { nombre: "Tomate", cantidad: 350, unidad: "g", categoria: "verdura" },
+                    ],
+                    pasos: ["Cocer la pasta"],
+                    tags: ["rapida"],
+                },
+                cena: {
+                    nombre: "Sopa",
+                    grupo_principal: "verduras",
+                    ingredientes: [
+                        { nombre: "Agua", cantidad: 1, unidad: "l", categoria: "otros" },
+                    ],
+                    pasos: ["Calentar"],
+                    tags: ["ligera"],
+                },
+            },
+        ],
+    };
+}
+
+function makeListaCompra(planificacionGeneradaEn: string, items: ListaCompra["items"]): ListaCompra {
+    return {
+        generado_en: new Date().toISOString(),
+        planificacion_generada_en: planificacionGeneradaEn,
+        total_items: items.length,
+        items,
+    };
+}
+
+function clickGenerateButton() {
+    fireEvent.click(screen.getByRole("button", { name: /Generar planificación/i }));
 }
 
 
@@ -161,10 +235,7 @@ describe("UNIDAD", () => {
     beforeEach(() => {
         installMemoryStorage();
         clearTestStorage();
-        Object.defineProperty(HTMLElement.prototype, "scrollTo", {
-            configurable: true,
-            value: vi.fn(),
-        });
+        installScrollMocks();
     });
 
     it("muestra spinner inicial y luego landing en primera apertura", async () => {
@@ -218,6 +289,133 @@ describe("UNIDAD", () => {
             cena: { inicio: "19:30", fin: "21:30" },
         });
     });
+
+    it("SC-06 muestra una lista guardada con ingredientes y cantidades", async () => {
+        seedNoEsPrimeraVez();
+        const plan = makePlanificacionConIngredientes(new Date());
+        seedPlan(plan);
+        saveListaCompra(makeListaCompra(plan.generado_en!, [
+            { nombre: "Tomate", cantidad: 350, unidad: "g", categoria: "verdura" },
+        ]));
+
+        render(<App />);
+        await advanceInit();
+        fireEvent.click(screen.getByRole("button", { name: /Lista de la compra/i }));
+
+        expect(screen.getByRole("heading", { name: "Lista de la compra" })).toBeTruthy();
+        expect(screen.getByText("Tomate")).toBeTruthy();
+        expect(screen.getByText("350 g")).toBeTruthy();
+        expect(screen.getByText("0 / 1")).toBeTruthy();
+    });
+
+    it("SC-06 muestra un aviso en la app si la lista guardada no tiene ingredientes", async () => {
+        seedNoEsPrimeraVez();
+        const plan = planHoy();
+        seedPlan(plan);
+        saveListaCompra(makeListaCompra(plan.generado_en!, []));
+
+        render(<App />);
+        await advanceInit();
+        fireEvent.click(screen.getByRole("button", { name: /Lista de la compra/i }));
+
+        expect(screen.getByRole("dialog", { name: "La lista generada está vacía" })).toBeTruthy();
+        expect(screen.getByText("La lista generada está vacía")).toBeTruthy();
+        expect(screen.queryByRole("heading", { name: "Lista de la compra" })).toBeNull();
+    });
+
+    it("SC-06 muestra el recuadro de generacion si no hay lista y abre la lista tras generar", async () => {
+        seedNoEsPrimeraVez();
+        const plan = makePlanificacionConIngredientes(new Date());
+        seedPlan(plan);
+
+        render(<App />);
+        await advanceInit();
+        fireEvent.click(screen.getByRole("button", { name: /Lista de la compra/i }));
+
+        expect(screen.getByText("No hay lista generada")).toBeTruthy();
+        expect(screen.getByText("Primero debe generarse la lista de la compra.")).toBeTruthy();
+
+        fireEvent.click(screen.getByRole("button", { name: "Generar" }));
+
+        expect(screen.getByRole("heading", { name: "Lista de la compra" })).toBeTruthy();
+        expect(screen.getByText("Tomate")).toBeTruthy();
+        expect(screen.getByText("350 g")).toBeTruthy();
+    });
+
+    it("SC-06 conserva los ingredientes marcados como comprados al volver a abrir la lista", async () => {
+        seedNoEsPrimeraVez();
+        const plan = makePlanificacionConIngredientes(new Date());
+        seedPlan(plan);
+        saveListaCompra(makeListaCompra(plan.generado_en!, [
+            { nombre: "Tomate", cantidad: 350, unidad: "g", categoria: "verdura" },
+        ]));
+
+        render(<App />);
+        await advanceInit();
+        fireEvent.click(screen.getByRole("button", { name: /Lista de la compra/i }));
+
+        const checkbox = screen.getByLabelText("Marcar Tomate como comprado") as HTMLInputElement;
+        fireEvent.click(checkbox);
+        expect(checkbox.checked).toBe(true);
+        expect(screen.getByText("1 / 1")).toBeTruthy();
+
+        fireEvent.click(screen.getByRole("button", { name: /Volver/i }));
+        fireEvent.click(screen.getByRole("button", { name: /Lista de la compra/i }));
+
+        const persistedCheckbox = screen.getByLabelText("Marcar Tomate como comprado") as HTMLInputElement;
+        expect(persistedCheckbox.checked).toBe(true);
+        expect(screen.getByText("1 / 1")).toBeTruthy();
+    });
+
+    it("SC-06 permite buscar ingredientes, reordena comprados y mantiene la vista al desmarcar", async () => {
+        seedNoEsPrimeraVez();
+        const plan = makePlanificacionConIngredientes(new Date());
+        seedPlan(plan);
+        saveListaCompra(makeListaCompra(plan.generado_en!, [
+            { nombre: "Tomate", cantidad: 350, unidad: "g", categoria: "verdura" },
+            { nombre: "Leche", cantidad: 1, unidad: "l", categoria: "lacteo" },
+            { nombre: "Pan", cantidad: 1, unidad: "unidad", categoria: "cereal" },
+        ]));
+
+        render(<App />);
+        await advanceInit();
+        fireEvent.click(screen.getByRole("button", { name: /Lista de la compra/i }));
+
+        const search = screen.getByRole("searchbox", { name: "Buscar ingrediente" });
+        fireEvent.change(search, { target: { value: "lech" } });
+        expect(screen.getByText("Leche")).toBeTruthy();
+        expect(screen.queryByText("Tomate")).toBeNull();
+
+        fireEvent.change(search, { target: { value: "" } });
+        fireEvent.click(screen.getByLabelText("Marcar Tomate como comprado"));
+        fireEvent.click(screen.getByLabelText("Marcar Pan como comprado"));
+
+        const itemNames = screen
+            .getAllByRole("checkbox")
+            .map((checkbox) => checkbox.getAttribute("aria-label"));
+        expect(itemNames).toEqual([
+            "Marcar Leche como comprado",
+            "Marcar Pan como comprado",
+            "Marcar Tomate como comprado",
+        ]);
+
+        Object.defineProperty(window, "scrollY", {
+            configurable: true,
+            value: 320,
+        });
+        fireEvent.click(screen.getByLabelText("Marcar Tomate como comprado"));
+
+        const itemNamesAfterUncheck = screen
+            .getAllByRole("checkbox")
+            .map((checkbox) => checkbox.getAttribute("aria-label"));
+        expect(itemNamesAfterUncheck).toEqual([
+            "Marcar Tomate como comprado",
+            "Marcar Leche como comprado",
+            "Marcar Pan como comprado",
+        ]);
+        expect((screen.getByLabelText("Marcar Tomate como comprado") as HTMLInputElement).checked).toBe(false);
+        expect(window.scrollTo).toHaveBeenCalledWith({ left: 0, top: 320, behavior: "auto" });
+    });
 });
 
 
@@ -226,10 +424,7 @@ describe("INTEGRACION", () => {
     beforeEach(() => {
         installMemoryStorage();
         clearTestStorage();
-        Object.defineProperty(HTMLElement.prototype, "scrollTo", {
-            configurable: true,
-            value: vi.fn(),
-        });
+        installScrollMocks();
     });
 
     it("si no es primera apertura y no hay planificación, muestra popup para generar", async () => {
@@ -307,10 +502,7 @@ describe("SISTEMA", () => {
     beforeEach(() => {
         installMemoryStorage();
         clearTestStorage();
-        Object.defineProperty(HTMLElement.prototype, "scrollTo", {
-            configurable: true,
-            value: vi.fn(),
-        });
+        installScrollMocks();
     });
 
     it("flujo completo: landing → generate → loading → éxito", async () => {
