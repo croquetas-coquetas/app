@@ -508,7 +508,7 @@ function App() {
                 <div className="border-t border-border px-5 py-4 flex gap-2 justify-end">
                   <Button
                     size="sm"
-                    variant="outline"
+                    variant="destructive"
                     className="rounded-lg px-4"
                     onClick={closeConfigurarHorarioDialog}
                   >

@@ -7,13 +7,27 @@ interface HorarioConfigFieldsProps {
 }
 
 export function HorarioConfigFields({ horarios, onHorarioChange, errorMsg }: HorarioConfigFieldsProps) {
+  const clearMealRange = (mealType: MealTab) => {
+    onHorarioChange(mealType, "inicio", "");
+    onHorarioChange(mealType, "fin", "");
+  };
+
   return (
     <>
       <div>
-        <h4 className="mb-3 text-sm font-semibold text-foreground">Comida</h4>
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <h4 className="text-sm font-semibold text-foreground">🥗 Comida</h4>
+          <button
+            type="button"
+            className="text-xs text-muted-foreground underline-offset-2 hover:underline"
+            onClick={() => clearMealRange("comida")}
+          >
+            Dejar vacio
+          </button>
+        </div>
         <div className="flex items-center gap-2">
           <div className="flex-1">
-            <label className="mb-2 block text-xs text-muted-foreground">De</label>
+            <label className="mb-2 block text-xs text-muted-foreground">Desde</label>
             <input
               type="time"
               value={horarios.comida.inicio}
@@ -34,10 +48,19 @@ export function HorarioConfigFields({ horarios, onHorarioChange, errorMsg }: Hor
       </div>
 
       <div>
-        <h4 className="mb-3 text-sm font-semibold text-foreground">Cena</h4>
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <h4 className="text-sm font-semibold text-foreground">🌙 Cena</h4>
+          <button
+            type="button"
+            className="text-xs text-muted-foreground underline-offset-2 hover:underline"
+            onClick={() => clearMealRange("cena")}
+          >
+            Dejar vacio
+          </button>
+        </div>
         <div className="flex items-center gap-2">
           <div className="flex-1">
-            <label className="mb-2 block text-xs text-muted-foreground">De</label>
+            <label className="mb-2 block text-xs text-muted-foreground">Desde</label>
             <input
               type="time"
               value={horarios.cena.inicio}

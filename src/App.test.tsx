@@ -285,6 +285,29 @@ describe("UNIDAD", () => {
         });
     });
 
+    it("permite dejar horarios vacios y los guarda vacios desde onboarding", async () => {
+        mockFetchOk(planHoy());
+        await irAConfigurarHorarioInicial();
+        const clearButtons = screen.getAllByRole("button", { name: /Dejar vacio/i });
+        fireEvent.click(clearButtons[0]);
+        fireEvent.click(clearButtons[1]);
+        clickGenerateDesdeOnboarding();
+        await waitFor(() => expect(screen.getByText(/Menú semanal/i)).toBeTruthy());
+        const raw = localStorage.getItem(STORAGE_HORARIOS);
+        expect(raw).toBeTruthy();
+        expect(JSON.parse(raw!)).toEqual({
+            comida: { inicio: "", fin: "" },
+            cena: { inicio: "", fin: "" },
+        });
+    });
+
+    it("muestra error cuando un rango queda incompleto", async () => {
+        await irAConfigurarHorarioInicial();
+        setHorarioFields(["", "14:00", "19:30", "21:30"]);
+        clickGenerateDesdeOnboarding();
+        expect(screen.getByText("En comida debes completar inicio y fin, o dejar ambos vacios.")).toBeTruthy();
+    });
+
     it("SC-06 muestra una lista guardada con ingredientes y cantidades", async () => {
         seedNoEsPrimeraVez();
         const plan = makePlanificacionConIngredientes(new Date());
