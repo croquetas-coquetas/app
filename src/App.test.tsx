@@ -190,11 +190,6 @@ function makeListaCompra(planificacionGeneradaEn: string, items: ListaCompra["it
     };
 }
 
-function clickGenerateButton() {
-    fireEvent.click(screen.getByRole("button", { name: /Generar planificación/i }));
-}
-
-
 function mockFetchOk(data: object) {
     vi.stubGlobal("fetch", vi.fn(() =>
         Promise.resolve({ ok: true, json: () => Promise.resolve(data) })
@@ -281,7 +276,7 @@ describe("UNIDAD", () => {
         await irAConfigurarHorarioInicial();
         setHorarioFields(["12:30", "14:00", "19:30", "21:30"]);
         clickGenerateDesdeOnboarding();
-        await waitFor(() => expect(screen.getByText(/Menú del mes/i)).toBeTruthy());
+        await waitFor(() => expect(screen.getByText(/Menú semanal/i)).toBeTruthy());
         const raw = localStorage.getItem(STORAGE_HORARIOS);
         expect(raw).toBeTruthy();
         expect(JSON.parse(raw!)).toEqual({
@@ -432,7 +427,7 @@ describe("INTEGRACION", () => {
         render(<App />);
         await advanceInit();
         expect(screen.getByText("No hay semana generada")).toBeTruthy();
-        expect(screen.getByText("Menú del mes")).toBeTruthy();
+        expect(screen.getByText("Menú semanal")).toBeTruthy();
         expect(screen.getByRole("button", { name: /Ver calendario/i })).toBeTruthy();
         expect(screen.getByRole("button", { name: /Generar lista de la compra/i })).toBeTruthy();
         expect(screen.getByRole("button", { name: /Abrir menú del perfil/i })).toBeTruthy();
@@ -443,7 +438,7 @@ describe("INTEGRACION", () => {
         seedPlanHoy();
         render(<App />);
         await advanceInit();
-        expect(screen.getByText("Menú del mes")).toBeTruthy();
+        expect(screen.getByText("Menú semanal")).toBeTruthy();
         expect(screen.getByText("Paella valenciana")).toBeTruthy();
         expect(screen.queryByText("Get Started")).toBeNull();
         expect(screen.getByRole("button", { name: /Regenerar planificación/i })).toBeTruthy();
@@ -487,7 +482,7 @@ describe("INTEGRACION", () => {
         mockFetchOk(plan);
         await irAConfigurarHorarioInicial();
         clickGenerateDesdeOnboarding();
-        await waitFor(() => screen.getByText(/Menú del mes/i));
+        await waitFor(() => screen.getByText(/Menú semanal/i));
         expect(localStorage.getItem(STORAGE_META)).toBeTruthy();
         expect(localStorage.getItem(`${STORAGE_PREFIX}dia_0`)).toBeTruthy();
         const meta = JSON.parse(localStorage.getItem(STORAGE_META)!);
@@ -515,7 +510,7 @@ describe("SISTEMA", () => {
         expect(screen.getByRole("heading", { name: /Configura tu horario/i })).toBeTruthy();
         clickGenerateDesdeOnboarding();
         expect(screen.getByText(/Generando tu menú/i)).toBeTruthy();
-        await waitFor(() => expect(screen.getByText(/Menú del mes/i)).toBeTruthy());
+        await waitFor(() => expect(screen.getByText(/Menú semanal/i)).toBeTruthy());
         expect(screen.getByText("Paella valenciana")).toBeTruthy();
         expect(screen.getByRole("button", { name: /Regenerar planificación/i })).toBeTruthy();
         expect(screen.getByRole("button", { name: /Abrir menú del perfil/i })).toBeTruthy();
@@ -530,7 +525,7 @@ describe("SISTEMA", () => {
         clickGenerateDesdeOnboarding();
         await waitFor(() => screen.getByText("Servidor caído"));
         fireEvent.click(screen.getByText("Reintentar"));
-        await waitFor(() => expect(screen.getByText(/Menú del mes/i)).toBeTruthy());
+        await waitFor(() => expect(screen.getByText(/Menú semanal/i)).toBeTruthy());
         expect(screen.getByText("Paella valenciana")).toBeTruthy();
     });
 
