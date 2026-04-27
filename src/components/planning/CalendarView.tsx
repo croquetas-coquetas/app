@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { RotateCcw, ShoppingCart } from "lucide-react";
+import { RotateCcw } from "lucide-react";
 import { MONTHS } from "@/lib/planning.constants";
 import { cn } from "@/lib/utils";
 import { formatFechaGenerado, getDayKey, isToday } from "@/lib/planning.utils";
@@ -10,7 +10,6 @@ interface CalendarViewProps {
   planificacion: Planificacion;
   onRegenerate: () => void;
   onDaySelect: (dia: DiaPlanning) => void;
-  onShoppingListOpen: () => void;
 }
 
 export function buildPlanMap(dias: DiaPlanning[]): Map<string, DiaPlanning> {
@@ -21,7 +20,7 @@ export function buildPlanMap(dias: DiaPlanning[]): Map<string, DiaPlanning> {
     return map;
 }
 
-export function CalendarView({ planificacion, onRegenerate, onDaySelect, onShoppingListOpen }: CalendarViewProps) {
+export function CalendarView({ planificacion, onRegenerate, onDaySelect }: CalendarViewProps) {
   const hoy = new Date();
   const [viewDate, setViewDate] = useState(() => new Date(hoy.getFullYear(), hoy.getMonth(), 1));
   const listRef = useRef<HTMLDivElement | null>(null);
@@ -83,27 +82,28 @@ export function CalendarView({ planificacion, onRegenerate, onDaySelect, onShopp
       <section
           className="w-full max-w-3xl mx-auto calendar-enter rounded-2xl border border-border bg-background overflow-hidden">
         <div className="px-5 pt-7 pb-5">
-          <div>
-            <p className="text-xs font-semibold tracking-[0.2em] text-muted-foreground uppercase">SmartCook</p>
-            <h2 className="text-2xl font-bold text-foreground mt-1.5 text-balance">
-              Menú semanal
-            </h2>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Generado el {formatFechaGenerado(planificacion.generado_en)}
-            </p>
-          </div>
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold tracking-[0.2em] text-muted-foreground uppercase">SmartCook</p>
+              <h2 className="text-2xl font-bold text-foreground mt-1.5 text-balance">
+                Menú semanal
+              </h2>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Generado el {formatFechaGenerado(planificacion.generado_en)}
+              </p>
+            </div>
 
-          {/* Regenerate button top right */}
-          <Button
-              variant="outline"
-              size="icon-sm"
-              onClick={onRegenerate}
-              className="absolute top-7 right-5 rounded-lg border-border/80"
-              aria-label="Regenerar planificación"
-              title="Regenerar planificación"
-          >
-            <RotateCcw className="size-5" />
-          </Button>
+            <Button
+                variant="outline"
+                size="icon-sm"
+                onClick={onRegenerate}
+                className="shrink-0 rounded-lg border-border/80"
+                aria-label="Regenerar planificación"
+                title="Regenerar planificación"
+            >
+              <RotateCcw className="size-5" />
+            </Button>
+          </div>
         </div>
 
         <div className="px-4 pb-3">

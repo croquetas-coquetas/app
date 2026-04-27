@@ -14,7 +14,7 @@ interface BottomNavBarProps {
   onCalendarClick: () => void;
   onShoppingListClick: () => void;
   onProfileClick?: (action: "mi-perfil" | "configurar-horario") => void;
-  activeTab?: "calendar" | "shopping" | "profile";
+  activeTab?: "calendar" | "shopping-list" | "profile";
 }
 
 export function BottomNavBar({
@@ -79,11 +79,11 @@ export function BottomNavBar({
             onClick={onShoppingListClick}
             className={cn(
               "rounded-xl h-12 w-12 transition-colors",
-              activeTab === "shopping"
+              activeTab === "shopping-list"
                 ? "text-primary"
                 : "text-muted-foreground hover:text-foreground"
             )}
-            style={activeTab === "shopping" ? { backgroundColor: "rgba(var(--color-primary-rgb, 22, 163, 74), 0.1)" } : undefined}
+            style={activeTab === "shopping-list" ? { backgroundColor: "rgba(var(--color-primary-rgb, 22, 163, 74), 0.1)" } : undefined}
             aria-label="Generar lista de la compra"
           >
             <ShoppingCart className="size-6" />

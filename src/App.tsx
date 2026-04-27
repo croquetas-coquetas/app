@@ -7,7 +7,6 @@ import { BottomNavBar } from "@/components/planning/BottomNavBar";
 import { HorarioConfigFields } from "@/components/planning/HorarioConfigFields";
 import { ConfirmOverwriteState } from "@/components/planning/states/ConfirmOverwriteState";
 import { LandingState } from "@/components/planning/states/LandingState";
-import { GenerateState } from "@/components/planning/states/GenerateState";
 import { ScheduleOnboardingState } from "@/components/planning/states/ScheduleOnboardingState";
 import { ErrorState } from "@/components/planning/states/ErrorState";
 import { LoadingState } from "@/components/planning/states/LoadingState";
@@ -33,7 +32,7 @@ import { getDiasPrevios } from "@/lib/planning.utils";
 import { loadHorariosFromStorage, saveHorariosToStorage, validateHorarios } from "@/lib/horarios";
 import { AppState, DiaPlanning, HorarioField, HorariosDisponibilidad, MealTab, Planificacion } from "@/types/planning";
 import { generarListaCompra } from "@/lib/generarLista";
-import {CalendarIcon, CheckCircle2} from "lucide-react";
+import { CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getSavedListaCompra } from "@/lib/shopping.storage";
 import { ListaCompra } from "@/types/shopping";
@@ -45,9 +44,7 @@ function App() {
   const [planificacionExistente, setPlanificacionExistente] = useState<Planificacion | null>(null);
   const [selectedDia, setSelectedDia] = useState<DiaPlanning | null>(null);
   const [activeMealTab, setActiveMealTab] = useState<MealTab>("comida");
-  const [listaItemsCount, setListaItemsCount] = useState<number | null>(null);
 
-  const [successListaDialogOpen, setSuccessListaDialogOpen] = useState(false);
   const [configurarHorarioDialogOpen, setConfigurarHorarioDialogOpen] = useState(false);
   const [horarioError, setHorarioError] = useState("");
   const [horarios, setHorarios] = useState<HorariosDisponibilidad>(() => loadHorariosFromStorage());
@@ -81,8 +78,7 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const isModalOpen = successListaDialogOpen || configurarHorarioDialogOpen;
-    if (isModalOpen) {
+    if (configurarHorarioDialogOpen) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
@@ -90,7 +86,7 @@ function App() {
     return () => {
       document.body.style.overflow = "";
     };
-  }, [successListaDialogOpen, configurarHorarioDialogOpen]);
+  }, [configurarHorarioDialogOpen]);
 
   const handleRequestGenerate = () => {
     setShoppingListMissingOpen(false);
@@ -157,7 +153,8 @@ function App() {
       generarListaCompra();
       const saved = getSavedListaCompra();
       if (!isListaCompraForCurrentPlan(saved)) {
-        throw new Error("No se pudo recuperar una lista de la compra valida para la planificacion actual.");
+        console.error("No se pudo recuperar una lista de la compra valida para la planificacion actual.");
+        return;
       }
 
       setShoppingList(saved);
@@ -167,16 +164,6 @@ function App() {
       console.error("Error al generar la lista de la compra:", err);
     }
   };
-
-    const handleGenerarLista = () => {
-        try {
-            const lista = generarListaCompra();
-            setListaItemsCount(lista.total_items);
-            setSuccessListaDialogOpen(true);
-        } catch (err) {
-            console.error("Error al generar la lista de la compra:", err);
-        }
-    };
 
     const handleNavBarProfileClick = (action: "mi-perfil" | "configurar-horario") => {
         if (action === "configurar-horario") {
@@ -268,11 +255,15 @@ function App() {
     planificacion: planificacion as Planificacion,
     onRegenerate: handleRequestGenerate,
     onDaySelect: handleDaySelect,
-    onShoppingListOpen: handleShoppingListOpen,
   };
 
-  const showNavBar = !["initializing", "landing", "schedule-onboarding", "generate", "loading", "error", "confirm-overwrite"].includes(appState);
-  const currentNavTab = appState === "day-detail" ? "calendar" : appState === "success" ? "calendar" : undefined;
+  const showNavBar = !["initializing", "landing", "schedule-onboarding", "loading", "error", "confirm-overwrite"].includes(appState);
+  const currentNavTab =
+    appState === "shopping-list"
+      ? "shopping-list"
+      : appState === "day-detail" || appState === "success"
+        ? "calendar"
+        : undefined;
 
   return (
       <div
@@ -292,13 +283,6 @@ function App() {
                 onHorarioChange={handleHorarioChange}
                 onBack={() => setAppState("landing")}
                 onGenerate={handleOnboardingGenerate}
-            />
-        )}
-
-        {appState === "generate" && (
-            <GenerateState
-                onGenerate={handleRequestGenerate}
-                onBack={() => setAppState("landing")}
             />
         )}
 
@@ -359,7 +343,7 @@ function App() {
         {appState === "error" && (
             <ErrorState
                 errorMsg={errorMsg}
-                onBack={() => setAppState(isFirstTime() ? "schedule-onboarding" : "generate")}
+                onBack={() => setAppState(isFirstTime() ? "schedule-onboarding" : planificacion ? "success" : "no-plan-generated")}
                 onRetry={() => void doGenerate()}
             />
         )}
@@ -368,45 +352,12 @@ function App() {
         {showNavBar && (
             <BottomNavBar
                 onCalendarClick={() => setAppState("success")}
-                onShoppingListClick={handleGenerarLista}
+                onShoppingListClick={handleShoppingListOpen}
                 onProfileClick={handleNavBarProfileClick}
                 activeTab={currentNavTab}
             />
         )}
 
-        {/* Success Lista Dialog */}
-        {successListaDialogOpen && (
-          <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4"
-            onClick={() => setSuccessListaDialogOpen(false)}
-            role="presentation"
-          >
-            <div
-              role="dialog"
-              aria-modal="true"
-              aria-label="Lista de la compra generada"
-              className="w-full max-w-sm rounded-2xl border border-border bg-background p-5 shadow-xl animate-in fade-in zoom-in-95 duration-200"
-              onClick={(event) => event.stopPropagation()}
-            >
-              <div className="flex items-start gap-3">
-                <span className="mt-0.5 rounded-full bg-primary/10 p-1.5 text-primary">
-                  <CheckCircle2 className="size-5" />
-                </span>
-                <div>
-                  <h3 className="text-base font-semibold text-foreground">Lista generada correctamente</h3>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Se han generado {listaItemsCount ?? 0} ingredientes para tu compra.
-                  </p>
-                </div>
-              </div>
-              <div className="mt-5 flex justify-end">
-                <Button size="sm" className="rounded-lg px-4" onClick={() => setSuccessListaDialogOpen(false)}>
-                  Entendido
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Configurar horarios dialog */}
         {configurarHorarioDialogOpen && (
