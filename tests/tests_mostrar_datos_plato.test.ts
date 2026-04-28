@@ -170,24 +170,24 @@ describe("Pruebas unitarias", () => {
         // ── inputs invalidos ─────────────────────────────────────────────────
 
         describe("inputs invalidos", () => {
-            it("devuelve 'no disponible' si se introduce undefined", () => {
-                expect(formatDuracion(undefined)).toBe("no disponible");
+            it("devuelve 'No disponible' si se introduce undefined", () => {
+                expect(formatDuracion(undefined)).toBe("No disponible");
             });
 
-            it("devuelve 'no disponible' si se introduce 0", () => {
-                expect(formatDuracion(0)).toBe("no disponible");
+            it("devuelve 'No disponible' si se introduce 0", () => {
+                expect(formatDuracion(0)).toBe("No disponible");
             });
 
-            it("devuelve 'no disponible' si se introduce negativo", () => {
-                expect(formatDuracion(-10)).toBe("no disponible");
+            it("devuelve 'No disponible' si se introduce negativo", () => {
+                expect(formatDuracion(-10)).toBe("No disponible");
             });
 
-            it("devuelve 'no disponible' si se introduce NaN", () => {
-                expect(formatDuracion(NaN)).toBe("no disponible");
+            it("devuelve 'No disponible' si se introduce NaN", () => {
+                expect(formatDuracion(NaN)).toBe("No disponible");
             });
 
-            it("devuelve 'no disponible' si se introduce infinto", () => {
-                expect(formatDuracion(Infinity)).toBe("no disponible");
+            it("devuelve 'No disponible' si se introduce infinto", () => {
+                expect(formatDuracion(Infinity)).toBe("No disponible");
             });
         });
 

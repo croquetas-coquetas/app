@@ -182,7 +182,7 @@ describe("guardar una planificacion y luego cargarla", () => {
         expect(formatDuracion(loaded.dias[0].cena.duracion)).toBe("1 hora y 30 minutos");
     });
 
-    it("devuelve 'no disponible' si la duracion de la comida cargada no esta definida", () => {
+    it("devuelve 'No disponible' si la duracion de la comida cargada no esta definida", () => {
         savePlanificacion(makePlanificacion([makeDia(0, {
             comida: makeReceta({ nombre: "Ensalada César", duracion: undefined }),
             cena: makeReceta({ nombre: "Sopa de tomate", duracion: undefined }),
@@ -190,10 +190,10 @@ describe("guardar una planificacion y luego cargarla", () => {
         const loaded = cargarPlanificacion();
         assert(loaded !== null, "la planificacion deberia estar cargada");
 
-        expect(formatDuracion(loaded.dias[0].comida.duracion)).toBe("no disponible");
+        expect(formatDuracion(loaded.dias[0].comida.duracion)).toBe("No disponible");
     });
 
-    it("devuelve 'no disponible' si la duracion de la cena cargada no esta definida", () => {
+    it("devuelve 'No disponible' si la duracion de la cena cargada no esta definida", () => {
         savePlanificacion(makePlanificacion([makeDia(0, {
             comida: makeReceta({ nombre: "Ensalada César", duracion: undefined }),
             cena: makeReceta({ nombre: "Sopa de tomate", duracion: undefined }),
@@ -201,10 +201,10 @@ describe("guardar una planificacion y luego cargarla", () => {
         const loaded = cargarPlanificacion();
         assert(loaded !== null, "la planificacion deberia estar cargada");
 
-        expect(formatDuracion(loaded.dias[0].cena.duracion)).toBe("no disponible");
+        expect(formatDuracion(loaded.dias[0].cena.duracion)).toBe("No disponible");
     });
 
-    it("devuelve 'no disponible' si la duracion del plato cargado es 0", () => {
+    it("devuelve 'No disponible' si la duracion del plato cargado es 0", () => {
         savePlanificacion(makePlanificacion([makeDia(0, {
             comida: makeReceta({ nombre: "Ensalada César", duracion: 0 }),
             cena: makeReceta({ nombre: "Sopa de tomate", duracion: 0 }),
@@ -212,8 +212,8 @@ describe("guardar una planificacion y luego cargarla", () => {
         const loaded = cargarPlanificacion();
         assert(loaded !== null, "la planificacion deberia estar cargada");
 
-        expect(formatDuracion(loaded.dias[0].comida.duracion)).toBe("no disponible");
-        expect(formatDuracion(loaded.dias[0].cena.duracion)).toBe("no disponible");
+        expect(formatDuracion(loaded.dias[0].comida.duracion)).toBe("No disponible");
+        expect(formatDuracion(loaded.dias[0].cena.duracion)).toBe("No disponible");
     });
 
     it("formatea la duracion de la comida y la cena de un mismo dia correctamente", () => {
