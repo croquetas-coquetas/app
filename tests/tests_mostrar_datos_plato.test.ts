@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { formatUnidad } from "@/lib/planning.utils";
 import { Ingrediente } from "@/types/planning";
-import {buildIngredientLabel, formatDuracion} from "../src/components/planning/DayFullscreenView";
+import { buildIngredientLabel, formatDuracion } from "../src/components/planning/DayFullscreenView";
 
 // ── PRUEBAS UNITARIAS ──────────────────────────────────────────────
 
@@ -106,7 +106,7 @@ describe("Pruebas unitarias", () => {
         });
     });
 
-// ── crear el texto indicando cantidad y el nombre del ingrediente ─────────────────────────────────────────────────
+    // ── crear el texto indicando cantidad y el nombre del ingrediente ─────────────────────────────────────────────────
 
     describe("buildIngredientLabel", () => {
 
@@ -194,24 +194,24 @@ describe("Pruebas unitarias", () => {
         // ── menos de una hora ───────────────────────────────────────────────────
 
         describe("menos de 60 minutos", () => {
-            it("devuelve '1 min' para 1 minuto", () => {
-                expect(formatDuracion(1)).toBe("1 min");
+            it("devuelve '1 minuto' para 1 minuto", () => {
+                expect(formatDuracion(1)).toBe("1 minuto");
             });
 
-            it("devuelve '60 min' para 60 minutos", () => {
-                expect(formatDuracion(60)).toBe("60 min");
+            it("devuelve '60 minutos' para 60 minutos", () => {
+                expect(formatDuracion(60)).toBe("60 minutos");
             });
 
             it("trunca los decimales", () => {
-                expect(formatDuracion(45.9)).toBe("45 min");
+                expect(formatDuracion(45.9)).toBe("45 minutos");
             });
         });
 
         // ── mas de 60 minutos ──────────────────────────────────────────────
 
         describe("mas de 60 minutos", () => {
-            it("devuelve '1 horas y 1 minutos' para 61 minutos", () => {
-                expect(formatDuracion(61)).toBe("1 horas y 1 minutos");
+            it("devuelve '1 hora y 1 minuto' para 61 minutos", () => {
+                expect(formatDuracion(61)).toBe("1 hora y 1 minuto");
             });
 
             it("devuelve '2 horas y 0 minutos' para 120 minutos", () => {
@@ -219,7 +219,7 @@ describe("Pruebas unitarias", () => {
             });
 
             it("trunca decimales antes de dividirlos en horas y minutos", () => {
-                expect(formatDuracion(90.9)).toBe("1 horas y 30 minutos");
+                expect(formatDuracion(90.9)).toBe("1 hora y 30 minutos");
             });
         });
     });

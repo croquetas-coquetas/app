@@ -14,11 +14,15 @@ export function formatDuracion(duracion?: number): string {
   if (!Number.isFinite(duracion) || (duracion ?? 0) <= 0) return "no disponible";
 
   const minutos = Math.floor(duracion as number);
-  if (minutos <= 60) return `${minutos} min`;
+  if (minutos <= 60) {
+    return minutos === 1 ? `${minutos} minuto` : `${minutos} minutos`;
+  }
 
   const horas = Math.floor(minutos / 60);
   const restoMinutos = minutos % 60;
-  return `${horas} horas y ${restoMinutos} minutos`;
+  const horasText = horas === 1 ? "hora" : "horas";
+  const minutosText = restoMinutos === 1 ? "minuto" : "minutos";
+  return `${horas} ${horasText} y ${restoMinutos} ${minutosText}`;
 }
 
 export function buildIngredientLabel(ing: Ingrediente): string {

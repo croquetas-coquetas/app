@@ -4,8 +4,8 @@ import { getDiasPrevios } from "@/lib/planning.utils";
 import { buildIngredientLabel } from "@/components/planning/DayFullscreenView";
 import { getDayKey } from "@/lib/planning.utils";
 import { Planificacion, DiaPlanning } from "@/types/planning";
-import {formatDuracion} from "../src/components/planning/DayFullscreenView";
-import {Receta} from "../src/types/planning";
+import { formatDuracion } from "../src/components/planning/DayFullscreenView";
+import { Receta } from "../src/types/planning";
 
 const makeReceta = (overrides: Partial<Receta> = {}): Receta => ({
     nombre: "Ensalada César",
@@ -26,11 +26,13 @@ const makeDia = (daysOffset: number, overrides: Partial<DiaPlanning> = {}): DiaP
     return {
         dia: date.toISOString(),
         comida: makeReceta({ nombre: "Ensalada César" }),
-        cena: makeReceta({ nombre: "Sopa de tomate", duracion: 90, pasos: ["Triturar el tomate", "Hervir"],
+        cena: makeReceta({
+            nombre: "Sopa de tomate", duracion: 90, pasos: ["Triturar el tomate", "Hervir"],
             tags: ["caliente"], ingredientes: [
                 { nombre: "Tomate", cantidad: 500, unidad: "gramos" },
                 { nombre: "Ajo", cantidad: 1, unidad: "dientes" },
-            ] }),
+            ]
+        }),
         ...overrides,
     };
 };
@@ -76,7 +78,7 @@ describe("guardar una planificacion y luego cargarla", () => {
 
     it("los nombres de los platos en la planificacion cargada coinciden con los de la almacenada", () => {
         const dias = [makeDia(0), makeDia(1), makeDia(2),
-            makeDia(3), makeDia(4), makeDia(5), makeDia(6)];
+        makeDia(3), makeDia(4), makeDia(5), makeDia(6)];
         const planificacion = makePlanificacion(dias);
 
         savePlanificacion(planificacion);
@@ -177,7 +179,7 @@ describe("guardar una planificacion y luego cargarla", () => {
         const loaded = cargarPlanificacion();
         assert(loaded !== null, "la planificacion deberia estar cargada");
 
-        expect(formatDuracion(loaded.dias[0].cena.duracion)).toBe("1 horas y 30 minutos");
+        expect(formatDuracion(loaded.dias[0].cena.duracion)).toBe("1 hora y 30 minutos");
     });
 
     it("devuelve 'no disponible' si la duracion de la comida cargada no esta definida", () => {
@@ -223,7 +225,7 @@ describe("guardar una planificacion y luego cargarla", () => {
         assert(loaded !== null, "la planificacion deberia estar cargada");
 
         const dia = loaded.dias[0];
-        expect(formatDuracion(dia.comida.duracion)).toBe("45 min");
+        expect(formatDuracion(dia.comida.duracion)).toBe("45 minutos");
         expect(formatDuracion(dia.cena.duracion)).toBe("2 horas y 0 minutos");
     });
 });
