@@ -26,6 +26,19 @@ class TagConstraintViolationError(PlanningError):
     """La planificación generada incumple las cuotas mínimas o máximas de algún tag nutricional."""
 
 
+class NoCompatibleRecipesError(PlanningError):
+    """No hay recetas compatibles con las restricciones activas para un turno concreto."""
+
+    def __init__(self, message: str, error_code: str, turno: str):
+        super().__init__(message)
+        self.error_code = error_code
+        self.turno = turno
+
+
+class InsufficientRecipesAfterDurationFilterError(InsufficientRecipesError):
+    """Hay recetas en la BD pero no las suficientes tras aplicar el filtro de duración."""
+
+
 CUOTAS: dict[str, dict[str, int]] = {
     "verdura":    {"min": 7, "max": 14},
     "lácteo":     {"min": 2, "max": 5},
@@ -168,12 +181,18 @@ class API_planificacion:
         """Devuelve los tags nutricionales de la receta leyendo directamente el campo 'tags'."""
         return [t for t in receta.get("tags", []) if t in CUOTAS]
 
+    def __duracion_receta(self, receta: dict[str, Any]) -> int:
+        """Devuelve la duración de la receta en minutos. Si no existe o es inválida, devuelve 0."""
+        duracion = receta.get("duracion")
+        return int(duracion) if isinstance(duracion, (int, float)) and duracion >= 0 else 0
+
     def __selecciona_plato_con_cuotas(
         self,
         recetas: list[dict[str, Any]],
         ids_recientes: deque[str],
         conteo: dict[str, int],
         plato_k: int,
+        duracion_max: int | None = None,
     ) -> dict[str, Any]:
 
         # cuantos platos quedan por elegir incluyendo este
@@ -217,6 +236,10 @@ class API_planificacion:
         # mejor repetir que quedarse sin opciones
         if not disponibles:
             disponibles = list(recetas)
+
+        # Filtro estricto de duración (SC-08-1)
+        if duracion_max is not None:
+            disponibles = [r for r in disponibles if self.__duracion_receta(r) <= duracion_max]
 
         # ahora filtramos según el estado de los grupos
         if urgentes:
@@ -281,7 +304,59 @@ class API_planificacion:
         # entre las mejores elegimos al azar para que no salga siempre lo mismo
         return deepcopy(self.__RNG.choice(candidatas_top))
 
-    def planifica(self, dias_previos: list[dict[str, Any]] | None = None) -> dict[str, Any]:
+    def __diagnostica_conflicto(
+        self,
+        recetas: list[dict[str, Any]],
+        ids_recientes: deque[str],
+        conteo: dict[str, int],
+        duracion_max: int | None,
+        turno: str,
+    ) -> NoCompatibleRecipesError:
+        """Diagnostica cuál restricción es la bloqueante cuando no hay recetas compatibles."""
+        # ¿La duración sola bloquea?
+        if duracion_max is not None:
+            por_duracion = [r for r in recetas if self.__duracion_receta(r) <= duracion_max]
+            if not por_duracion:
+                return NoCompatibleRecipesError(
+                    f"No hay recetas con duración ≤ {duracion_max} min para la {turno}. "
+                    "Amplía tu franja horaria o genera sin límite de tiempo.",
+                    error_code="DURATION_CONFLICT",
+                    turno=turno,
+                )
+
+        # ¿La recencia sola bloquea?
+        sin_recencia = [r for r in recetas if self.__identificador_receta(r) not in ids_recientes]
+        if not sin_recencia:
+            return NoCompatibleRecipesError(
+                f"Todos los platos disponibles para la {turno} han sido usados recientemente.",
+                error_code="RECENCY_CONFLICT",
+                turno=turno,
+            )
+
+        # ¿Los tags solos bloquean?
+        bloqueados = {g for g, c in CUOTAS.items() if conteo.get(g, 0) >= c["max"]}
+        sin_tags = [r for r in recetas if not all(t in bloqueados for t in self.__tags_nutricionales(r))]
+        if not sin_tags:
+            return NoCompatibleRecipesError(
+                f"Las cuotas nutricionales no permiten más platos para la {turno}.",
+                error_code="TAG_CONFLICT",
+                turno=turno,
+            )
+
+        # Conflicto combinado
+        return NoCompatibleRecipesError(
+            f"La combinación de franja horaria, historial reciente y cuotas nutricionales "
+            f"no deja ningún plato disponible para la {turno}.",
+            error_code="COMBINED_CONFLICT",
+            turno=turno,
+        )
+
+    def planifica(
+        self,
+        dias_previos: list[dict[str, Any]] | None = None,
+        duracion_max_comida: int | None = None,
+        duracion_max_cena: int | None = None,
+    ) -> dict[str, Any]:
         """
         Genera la planificación semanal teniendo en cuenta las restricciones
         nutricionales por tags y sin repetir plato en los últimos 14 días.
@@ -304,6 +379,22 @@ class API_planificacion:
             raise InsufficientRecipesError(
                 "No hay suficientes recetas para planificar el menú semanal."
             )
+
+        # SC-08-3: Verificación de catálogo insuficiente con restricción de duración
+        if duracion_max_comida is not None or duracion_max_cena is not None:
+            ids_viables = set()
+            for r in recetas:
+                dur = self.__duracion_receta(r)
+                comida_ok = duracion_max_comida is None or dur <= duracion_max_comida
+                cena_ok = duracion_max_cena is None or dur <= duracion_max_cena
+                if comida_ok or cena_ok:
+                    ids_viables.add(self.__identificador_receta(r))
+
+            if len(ids_viables) < self.__TOTAL_PLATOS:
+                raise InsufficientRecipesAfterDurationFilterError(
+                    "No hay suficiente variedad de recetas dentro de tu franja horaria para completar "
+                    "los 7 días. Puedes ampliar tu disponibilidad o generar sin límite de tiempo."
+                )
 
         ids_recientes: deque[str] = deque(maxlen=self.__TOTAL_PLATOS * 2)
         conteo_ventana: dict[str, int] = {g: 0 for g in CUOTAS}
@@ -350,8 +441,20 @@ class API_planificacion:
             }
 
             for turno in ("comida", "cena"):
+                # Determinar límite de duración para este turno
+                duracion_max = duracion_max_comida if turno == "comida" else duracion_max_cena
+
+                # SC-08-2: Comprobación preventiva de pool vacío
+                pool_test = [
+                    r for r in recetas
+                    if self.__identificador_receta(r) not in ids_recientes
+                    and (duracion_max is None or self.__duracion_receta(r) <= duracion_max)
+                ]
+                if not pool_test:
+                    raise self.__diagnostica_conflicto(recetas, ids_recientes, conteo_ventana, duracion_max, turno)
+
                 plato = self.__selecciona_plato_con_cuotas(
-                    recetas, ids_recientes, conteo_ventana, plato_k
+                    recetas, ids_recientes, conteo_ventana, plato_k, duracion_max
                 )
 
                 ids_recientes.append(self.__identificador_receta(plato))
