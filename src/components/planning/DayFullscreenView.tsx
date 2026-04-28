@@ -11,7 +11,7 @@ interface DayFullscreenViewProps {
 }
 
 export function formatDuracion(duracion?: number): string {
-  if (!Number.isFinite(duracion) || (duracion ?? 0) <= 0) return "no disponible";
+  if (!Number.isFinite(duracion) || (duracion ?? 0) <= 0) return "No disponible";
 
   const minutos = Math.floor(duracion as number);
   if (minutos <= 60) {
