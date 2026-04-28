@@ -168,7 +168,7 @@ describe("guardar una planificacion y luego cargarla", () => {
         const loaded = cargarPlanificacion();
         assert(loaded !== null, "la planificacion deberia estar cargada");
 
-        expect(formatDuracion(loaded.dias[0].comida.duracion)).toBe("30 min");
+        expect(formatDuracion(loaded.dias[0].comida.duracion)).toBe("30 minutos");
     });
 
     it("la duracion de un plato cargado puede ser formateada correctamente cuando dura mas de 60 minutos", () => {
