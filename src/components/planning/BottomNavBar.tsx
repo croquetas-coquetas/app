@@ -7,7 +7,6 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 
 interface BottomNavBarProps {
@@ -109,11 +108,11 @@ export function BottomNavBar({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" side="top" sideOffset={8}>
-              <DropdownMenuItem onClick={() => handleProfileAction("mi-perfil")}>
+              {/*<DropdownMenuItem onClick={() => handleProfileAction("mi-perfil")}>
                 <User className="size-4" />
                 <span>Mi perfil</span>
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
+              <DropdownMenuSeparator />*/}
               <DropdownMenuItem onClick={() => handleProfileAction("configurar-horario")}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
