@@ -1,5 +1,6 @@
 export const STORAGE_PREFIX = "smartcook_plan_";
 export const STORAGE_META = "smartcook_plan_meta";
+export const STORAGE_HORARIOS = "smartcook_horarios_disponibilidad";
 export const LEGACY_STORAGE_KEY = "smartcook_planificacion";
 export const API_URL = "https://appapi-ej7h.onrender.com/api/planificacion/semanal/";
 
