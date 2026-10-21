@@ -1,0 +1,86 @@
+name: Android App CI
+
+on:
+  push:
+    paths:
+      - 'android/**'
+      - 'src/**'
+      - 'public/**'
+      - 'index.html'
+      - 'package.json'
+      - 'bun.lock'
+      - 'src/package.json'
+      - 'vite.config.ts'
+      - 'tsconfig.json'
+      - 'tsconfig.node.json'
+      - 'capacitor.config.ts'
+      - 'components.json'
+      - '.github/workflows/android-ci.yml'
+      - 'tests/**'
+  pull_request:
+    paths:
+      - 'android/**'
+      - 'src/**'
+      - 'public/**'
+      - 'index.html'
+      - 'package.json'
+      - 'bun.lock'
+      - 'src/package.json'
+      - 'vite.config.ts'
+      - 'tsconfig.json'
+      - 'tsconfig.node.json'
+      - 'capacitor.config.ts'
+      - 'components.json'
+      - '.github/workflows/android-ci.yml'
+      - 'tests/**'
+
+permissions:
+  contents: read
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+          cache-dependency-path: |
+            android/**/*.gradle*
+            android/gradle/wrapper/gradle-wrapper.properties
+
+      - name: Install web dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Run web tests
+        if: ${{ hashFiles('src/**/*.test.ts', 'src/**/*.test.tsx', 'src/**/*.spec.ts', 'src/**/*.spec.tsx') != '' }}
+        run: bunx vitest run
+
+      - name: Build web app
+        run: bun run build
+
+      - name: Sync Capacitor Android project
+        run: bunx cap sync android
+
+      - name: Make Gradle wrapper executable
+        run: chmod +x android/gradlew
+
+      - name: Run Android tests and build debug APK
+        working-directory: android
+        run: ./gradlew --no-daemon test assembleDebug

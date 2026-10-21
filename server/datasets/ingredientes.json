@@ -1,0 +1,1910 @@
+[
+  {
+    "id": 1,
+    "nombre": "Tomate",
+    "categoria": "verdura",
+    "unidad": "g"
+  },
+  {
+    "id": 2,
+    "nombre": "Cebolla",
+    "categoria": "verdura",
+    "unidad": "g"
+  },
+  {
+    "id": 3,
+    "nombre": "Ajo",
+    "categoria": "verdura",
+    "unidad": "g"
+  },
+  {
+    "id": 4,
+    "nombre": "Pimiento rojo",
+    "categoria": "verdura",
+    "unidad": "g"
+  },
+  {
+    "id": 5,
+    "nombre": "Pimiento verde",
+    "categoria": "verdura",
+    "unidad": "g"
+  },
+  {
+    "id": 6,
+    "nombre": "Pimiento amarillo",
+    "categoria": "verdura",
+    "unidad": "g"
+  },
+  {
+    "id": 7,
+    "nombre": "Zanahoria",
+    "categoria": "verdura",
+    "unidad": "g"
+  },
+  {
+    "id": 8,
+    "nombre": "Patata",
+    "categoria": "verdura",
+    "unidad": "g"
+  },
+  {
+    "id": 9,
+    "nombre": "Batata",
+    "categoria": "verdura",
+    "unidad": "g"
+  },
+  {
+    "id": 10,
+    "nombre": "Lechuga",
+    "categoria": "verdura",
+    "unidad": "g"
+  },
+  {
+    "id": 11,
+    "nombre": "Espinacas",
+    "categoria": "verdura",
+    "unidad": "g"
+  },
+  {
+    "id": 12,
+    "nombre": "Calabacín",
+    "categoria": "verdura",
+    "unidad": "g"
+  },
+  {
+    "id": 13,
+    "nombre": "Berenjena",
+    "categoria": "verdura",
+    "unidad": "g"
+  },
+  {
+    "id": 14,
+    "nombre": "Brócoli",
+    "categoria": "verdura",
+    "unidad": "g"
+  },
+  {
+    "id": 15,
+    "nombre": "Coliflor",
+    "categoria": "verdura",
+    "unidad": "g"
+  },
+  {
+    "id": 16,
+    "nombre": "Pepino",
+    "categoria": "verdura",
+    "unidad": "g"
+  },
+  {
+    "id": 17,
+    "nombre": "Acelgas",
+    "categoria": "verdura",
+    "unidad": "g"
+  },
+  {
+    "id": 18,
+    "nombre": "Judías verdes",
+    "categoria": "verdura",
+    "unidad": "g"
+  },
+  {
+    "id": 19,
+    "nombre": "Champiñones",
+    "categoria": "verdura",
+    "unidad": "g"
+  },
+  {
+    "id": 20,
+    "nombre": "Puerro",
+    "categoria": "verdura",
+    "unidad": "g"
+  },
+  {
+    "id": 21,
+    "nombre": "Apio",
+    "categoria": "verdura",
+    "unidad": "g"
+  },
+  {
+    "id": 22,
+    "nombre": "Remolacha",
+    "categoria": "verdura",
+    "unidad": "g"
+  },
+  {
+    "id": 23,
+    "nombre": "Nabo",
+    "categoria": "verdura",
+    "unidad": "g"
+  },
+  {
+    "id": 24,
+    "nombre": "Rábano",
+    "categoria": "verdura",
+    "unidad": "g"
+  },
+  {
+    "id": 25,
+    "nombre": "Maíz dulce",
+    "categoria": "verdura",
+    "unidad": "g"
+  },
+  {
+    "id": 26,
+    "nombre": "Aguacate",
+    "categoria": "verdura",
+    "unidad": "g"
+  },
+  {
+    "id": 27,
+    "nombre": "Alcachofa",
+    "categoria": "verdura",
+    "unidad": "g"
+  },
+  {
+    "id": 28,
+    "nombre": "Espárragos",
+    "categoria": "verdura",
+    "unidad": "g"
+  },
+  {
+    "id": 29,
+    "nombre": "Coles de Bruselas",
+    "categoria": "verdura",
+    "unidad": "g"
+  },
+  {
+    "id": 30,
+    "nombre": "Endivias",
+    "categoria": "verdura",
+    "unidad": "g"
+  },
+  {
+    "id": 31,
+    "nombre": "Rúcula",
+    "categoria": "verdura",
+    "unidad": "g"
+  },
+  {
+    "id": 32,
+    "nombre": "Canónigos",
+    "categoria": "verdura",
+    "unidad": "g"
+  },
+  {
+    "id": 33,
+    "nombre": "Tomate cherry",
+    "categoria": "verdura",
+    "unidad": "g"
+  },
+  {
+    "id": 34,
+    "nombre": "Calabaza",
+    "categoria": "verdura",
+    "unidad": "g"
+  },
+  {
+    "id": 35,
+    "nombre": "Setas portobello",
+    "categoria": "verdura",
+    "unidad": "g"
+  },
+  {
+    "id": 36,
+    "nombre": "Shiitake",
+    "categoria": "verdura",
+    "unidad": "g"
+  },
+  {
+    "id": 37,
+    "nombre": "Cebolla morada",
+    "categoria": "verdura",
+    "unidad": "g"
+  },
+  {
+    "id": 38,
+    "nombre": "Cebolleta",
+    "categoria": "verdura",
+    "unidad": "g"
+  },
+  {
+    "id": 39,
+    "nombre": "Chalotas",
+    "categoria": "verdura",
+    "unidad": "g"
+  },
+  {
+    "id": 40,
+    "nombre": "Hinojo",
+    "categoria": "verdura",
+    "unidad": "g"
+  },
+  {
+    "id": 41,
+    "nombre": "Pollo entero",
+    "categoria": "carne",
+    "unidad": "g"
+  },
+  {
+    "id": 42,
+    "nombre": "Pechuga de pollo",
+    "categoria": "carne",
+    "unidad": "g"
+  },
+  {
+    "id": 43,
+    "nombre": "Muslo de pollo",
+    "categoria": "carne",
+    "unidad": "g"
+  },
+  {
+    "id": 44,
+    "nombre": "Alitas de pollo",
+    "categoria": "carne",
+    "unidad": "g"
+  },
+  {
+    "id": 45,
+    "nombre": "Ternera picada",
+    "categoria": "carne",
+    "unidad": "g"
+  },
+  {
+    "id": 46,
+    "nombre": "Filete de ternera",
+    "categoria": "carne",
+    "unidad": "g"
+  },
+  {
+    "id": 47,
+    "nombre": "Ossobuco de ternera",
+    "categoria": "carne",
+    "unidad": "g"
+  },
+  {
+    "id": 48,
+    "nombre": "Lomo de cerdo",
+    "categoria": "carne",
+    "unidad": "g"
+  },
+  {
+    "id": 49,
+    "nombre": "Costillas de cerdo",
+    "categoria": "carne",
+    "unidad": "g"
+  },
+  {
+    "id": 50,
+    "nombre": "Solomillo de cerdo",
+    "categoria": "carne",
+    "unidad": "g"
+  },
+  {
+    "id": 51,
+    "nombre": "Panceta",
+    "categoria": "carne",
+    "unidad": "g"
+  },
+  {
+    "id": 52,
+    "nombre": "Chorizo",
+    "categoria": "carne",
+    "unidad": "g"
+  },
+  {
+    "id": 53,
+    "nombre": "Morcilla",
+    "categoria": "carne",
+    "unidad": "g"
+  },
+  {
+    "id": 54,
+    "nombre": "Jamón serrano",
+    "categoria": "carne",
+    "unidad": "g"
+  },
+  {
+    "id": 55,
+    "nombre": "Jamón cocido",
+    "categoria": "carne",
+    "unidad": "g"
+  },
+  {
+    "id": 56,
+    "nombre": "Bacon",
+    "categoria": "carne",
+    "unidad": "g"
+  },
+  {
+    "id": 57,
+    "nombre": "Salchicha Frankfurt",
+    "categoria": "carne",
+    "unidad": "g"
+  },
+  {
+    "id": 58,
+    "nombre": "Salchicha fresca",
+    "categoria": "carne",
+    "unidad": "g"
+  },
+  {
+    "id": 59,
+    "nombre": "Cordero pierna",
+    "categoria": "carne",
+    "unidad": "g"
+  },
+  {
+    "id": 60,
+    "nombre": "Cordero chuletas",
+    "categoria": "carne",
+    "unidad": "g"
+  },
+  {
+    "id": 61,
+    "nombre": "Pavo pechuga",
+    "categoria": "carne",
+    "unidad": "g"
+  },
+  {
+    "id": 62,
+    "nombre": "Conejo",
+    "categoria": "carne",
+    "unidad": "g"
+  },
+  {
+    "id": 63,
+    "nombre": "Pato pechuga",
+    "categoria": "carne",
+    "unidad": "g"
+  },
+  {
+    "id": 64,
+    "nombre": "Ternera estofado",
+    "categoria": "carne",
+    "unidad": "g"
+  },
+  {
+    "id": 65,
+    "nombre": "Entrecot de ternera",
+    "categoria": "carne",
+    "unidad": "g"
+  },
+  {
+    "id": 66,
+    "nombre": "Fuet",
+    "categoria": "carne",
+    "unidad": "g"
+  },
+  {
+    "id": 67,
+    "nombre": "Salchichón",
+    "categoria": "carne",
+    "unidad": "g"
+  },
+  {
+    "id": 68,
+    "nombre": "Mortadela",
+    "categoria": "carne",
+    "unidad": "g"
+  },
+  {
+    "id": 69,
+    "nombre": "Butifarra",
+    "categoria": "carne",
+    "unidad": "g"
+  },
+  {
+    "id": 70,
+    "nombre": "Carne de potaje",
+    "categoria": "carne",
+    "unidad": "g"
+  },
+  {
+    "id": 71,
+    "nombre": "Merluza",
+    "categoria": "pescado",
+    "unidad": "g"
+  },
+  {
+    "id": 72,
+    "nombre": "Salmón fresco",
+    "categoria": "pescado",
+    "unidad": "g"
+  },
+  {
+    "id": 73,
+    "nombre": "Salmón ahumado",
+    "categoria": "pescado",
+    "unidad": "g"
+  },
+  {
+    "id": 74,
+    "nombre": "Atún fresco",
+    "categoria": "pescado",
+    "unidad": "g"
+  },
+  {
+    "id": 75,
+    "nombre": "Atún en lata",
+    "categoria": "pescado",
+    "unidad": "g"
+  },
+  {
+    "id": 76,
+    "nombre": "Sardinas frescas",
+    "categoria": "pescado",
+    "unidad": "g"
+  },
+  {
+    "id": 77,
+    "nombre": "Sardinas en lata",
+    "categoria": "pescado",
+    "unidad": "g"
+  },
+  {
+    "id": 78,
+    "nombre": "Gambas",
+    "categoria": "pescado",
+    "unidad": "g"
+  },
+  {
+    "id": 79,
+    "nombre": "Langostinos",
+    "categoria": "pescado",
+    "unidad": "g"
+  },
+  {
+    "id": 80,
+    "nombre": "Mejillones",
+    "categoria": "pescado",
+    "unidad": "g"
+  },
+  {
+    "id": 81,
+    "nombre": "Almejas",
+    "categoria": "pescado",
+    "unidad": "g"
+  },
+  {
+    "id": 82,
+    "nombre": "Berberechos",
+    "categoria": "pescado",
+    "unidad": "g"
+  },
+  {
+    "id": 83,
+    "nombre": "Bacalao fresco",
+    "categoria": "pescado",
+    "unidad": "g"
+  },
+  {
+    "id": 84,
+    "nombre": "Bacalao salado",
+    "categoria": "pescado",
+    "unidad": "g"
+  },
+  {
+    "id": 85,
+    "nombre": "Dorada",
+    "categoria": "pescado",
+    "unidad": "g"
+  },
+  {
+    "id": 86,
+    "nombre": "Lubina",
+    "categoria": "pescado",
+    "unidad": "g"
+  },
+  {
+    "id": 87,
+    "nombre": "Calamar",
+    "categoria": "pescado",
+    "unidad": "g"
+  },
+  {
+    "id": 88,
+    "nombre": "Pulpo",
+    "categoria": "pescado",
+    "unidad": "g"
+  },
+  {
+    "id": 89,
+    "nombre": "Sepia",
+    "categoria": "pescado",
+    "unidad": "g"
+  },
+  {
+    "id": 90,
+    "nombre": "Rape",
+    "categoria": "pescado",
+    "unidad": "g"
+  },
+  {
+    "id": 91,
+    "nombre": "Boquerones frescos",
+    "categoria": "pescado",
+    "unidad": "g"
+  },
+  {
+    "id": 92,
+    "nombre": "Anchoas en lata",
+    "categoria": "pescado",
+    "unidad": "g"
+  },
+  {
+    "id": 93,
+    "nombre": "Trucha",
+    "categoria": "pescado",
+    "unidad": "g"
+  },
+  {
+    "id": 94,
+    "nombre": "Rodaballo",
+    "categoria": "pescado",
+    "unidad": "g"
+  },
+  {
+    "id": 95,
+    "nombre": "Cangrejos",
+    "categoria": "pescado",
+    "unidad": "g"
+  },
+  {
+    "id": 96,
+    "nombre": "Nécora",
+    "categoria": "pescado",
+    "unidad": "g"
+  },
+  {
+    "id": 97,
+    "nombre": "Vieiras",
+    "categoria": "pescado",
+    "unidad": "g"
+  },
+  {
+    "id": 98,
+    "nombre": "Caballa",
+    "categoria": "pescado",
+    "unidad": "g"
+  },
+  {
+    "id": 99,
+    "nombre": "Pez espada",
+    "categoria": "pescado",
+    "unidad": "g"
+  },
+  {
+    "id": 100,
+    "nombre": "Surimi",
+    "categoria": "pescado",
+    "unidad": "g"
+  },
+  {
+    "id": 101,
+    "nombre": "Huevo",
+    "categoria": "lacteo",
+    "unidad": "g"
+  },
+  {
+    "id": 102,
+    "nombre": "Leche entera",
+    "categoria": "lacteo",
+    "unidad": "mL"
+  },
+  {
+    "id": 103,
+    "nombre": "Leche desnatada",
+    "categoria": "lacteo",
+    "unidad": "mL"
+  },
+  {
+    "id": 104,
+    "nombre": "Leche semidesnatada",
+    "categoria": "lacteo",
+    "unidad": "mL"
+  },
+  {
+    "id": 105,
+    "nombre": "Leche sin lactosa",
+    "categoria": "lacteo",
+    "unidad": "mL"
+  },
+  {
+    "id": 106,
+    "nombre": "Mantequilla",
+    "categoria": "lacteo",
+    "unidad": "g"
+  },
+  {
+    "id": 107,
+    "nombre": "Margarina",
+    "categoria": "lacteo",
+    "unidad": "g"
+  },
+  {
+    "id": 108,
+    "nombre": "Queso manchego",
+    "categoria": "lacteo",
+    "unidad": "g"
+  },
+  {
+    "id": 109,
+    "nombre": "Queso mozzarella",
+    "categoria": "lacteo",
+    "unidad": "g"
+  },
+  {
+    "id": 110,
+    "nombre": "Queso rallado",
+    "categoria": "lacteo",
+    "unidad": "g"
+  },
+  {
+    "id": 111,
+    "nombre": "Queso brie",
+    "categoria": "lacteo",
+    "unidad": "g"
+  },
+  {
+    "id": 112,
+    "nombre": "Queso camembert",
+    "categoria": "lacteo",
+    "unidad": "g"
+  },
+  {
+    "id": 113,
+    "nombre": "Queso parmesano",
+    "categoria": "lacteo",
+    "unidad": "g"
+  },
+  {
+    "id": 114,
+    "nombre": "Queso feta",
+    "categoria": "lacteo",
+    "unidad": "g"
+  },
+  {
+    "id": 115,
+    "nombre": "Queso ricotta",
+    "categoria": "lacteo",
+    "unidad": "g"
+  },
+  {
+    "id": 116,
+    "nombre": "Queso crema",
+    "categoria": "lacteo",
+    "unidad": "g"
+  },
+  {
+    "id": 117,
+    "nombre": "Queso de cabra",
+    "categoria": "lacteo",
+    "unidad": "g"
+  },
+  {
+    "id": 118,
+    "nombre": "Nata para cocinar",
+    "categoria": "lacteo",
+    "unidad": "mL"
+  },
+  {
+    "id": 119,
+    "nombre": "Nata para montar",
+    "categoria": "lacteo",
+    "unidad": "mL"
+  },
+  {
+    "id": 120,
+    "nombre": "Yogur natural",
+    "categoria": "lacteo",
+    "unidad": "g"
+  },
+  {
+    "id": 121,
+    "nombre": "Yogur griego",
+    "categoria": "lacteo",
+    "unidad": "g"
+  },
+  {
+    "id": 122,
+    "nombre": "Kéfir",
+    "categoria": "lacteo",
+    "unidad": "mL"
+  },
+  {
+    "id": 123,
+    "nombre": "Crème fraîche",
+    "categoria": "lacteo",
+    "unidad": "g"
+  },
+  {
+    "id": 124,
+    "nombre": "Arroz blanco",
+    "categoria": "cereal",
+    "unidad": "g"
+  },
+  {
+    "id": 125,
+    "nombre": "Arroz integral",
+    "categoria": "cereal",
+    "unidad": "g"
+  },
+  {
+    "id": 126,
+    "nombre": "Arroz basmati",
+    "categoria": "cereal",
+    "unidad": "g"
+  },
+  {
+    "id": 127,
+    "nombre": "Arroz para sushi",
+    "categoria": "cereal",
+    "unidad": "g"
+  },
+  {
+    "id": 128,
+    "nombre": "Pasta espagueti",
+    "categoria": "cereal",
+    "unidad": "g"
+  },
+  {
+    "id": 129,
+    "nombre": "Pasta macarrones",
+    "categoria": "cereal",
+    "unidad": "g"
+  },
+  {
+    "id": 130,
+    "nombre": "Pasta penne",
+    "categoria": "cereal",
+    "unidad": "g"
+  },
+  {
+    "id": 131,
+    "nombre": "Pasta tagliatelle",
+    "categoria": "cereal",
+    "unidad": "g"
+  },
+  {
+    "id": 132,
+    "nombre": "Pasta lasaña",
+    "categoria": "cereal",
+    "unidad": "g"
+  },
+  {
+    "id": 133,
+    "nombre": "Pasta farfalle",
+    "categoria": "cereal",
+    "unidad": "g"
+  },
+  {
+    "id": 134,
+    "nombre": "Cuscús",
+    "categoria": "cereal",
+    "unidad": "g"
+  },
+  {
+    "id": 135,
+    "nombre": "Quinoa",
+    "categoria": "cereal",
+    "unidad": "g"
+  },
+  {
+    "id": 136,
+    "nombre": "Avena",
+    "categoria": "cereal",
+    "unidad": "g"
+  },
+  {
+    "id": 137,
+    "nombre": "Harina de trigo",
+    "categoria": "cereal",
+    "unidad": "g"
+  },
+  {
+    "id": 138,
+    "nombre": "Harina integral",
+    "categoria": "cereal",
+    "unidad": "g"
+  },
+  {
+    "id": 139,
+    "nombre": "Pan de molde",
+    "categoria": "cereal",
+    "unidad": "g"
+  },
+  {
+    "id": 140,
+    "nombre": "Pan baguette",
+    "categoria": "cereal",
+    "unidad": "g"
+  },
+  {
+    "id": 141,
+    "nombre": "Pan integral",
+    "categoria": "cereal",
+    "unidad": "g"
+  },
+  {
+    "id": 142,
+    "nombre": "Pan de centeno",
+    "categoria": "cereal",
+    "unidad": "g"
+  },
+  {
+    "id": 143,
+    "nombre": "Pan de pita",
+    "categoria": "cereal",
+    "unidad": "g"
+  },
+  {
+    "id": 144,
+    "nombre": "Tortilla de trigo",
+    "categoria": "cereal",
+    "unidad": "g"
+  },
+  {
+    "id": 145,
+    "nombre": "Polenta",
+    "categoria": "cereal",
+    "unidad": "g"
+  },
+  {
+    "id": 146,
+    "nombre": "Bulgur",
+    "categoria": "cereal",
+    "unidad": "g"
+  },
+  {
+    "id": 147,
+    "nombre": "Mijo",
+    "categoria": "cereal",
+    "unidad": "g"
+  },
+  {
+    "id": 148,
+    "nombre": "Espelta",
+    "categoria": "cereal",
+    "unidad": "g"
+  },
+  {
+    "id": 149,
+    "nombre": "Lentejas pardinas",
+    "categoria": "legumbre",
+    "unidad": "g"
+  },
+  {
+    "id": 150,
+    "nombre": "Lentejas rojas",
+    "categoria": "legumbre",
+    "unidad": "g"
+  },
+  {
+    "id": 151,
+    "nombre": "Garbanzos",
+    "categoria": "legumbre",
+    "unidad": "g"
+  },
+  {
+    "id": 152,
+    "nombre": "Alubias blancas",
+    "categoria": "legumbre",
+    "unidad": "g"
+  },
+  {
+    "id": 153,
+    "nombre": "Alubias negras",
+    "categoria": "legumbre",
+    "unidad": "g"
+  },
+  {
+    "id": 154,
+    "nombre": "Alubias pintas",
+    "categoria": "legumbre",
+    "unidad": "g"
+  },
+  {
+    "id": 155,
+    "nombre": "Judías de la granja",
+    "categoria": "legumbre",
+    "unidad": "g"
+  },
+  {
+    "id": 156,
+    "nombre": "Guisantes",
+    "categoria": "legumbre",
+    "unidad": "g"
+  },
+  {
+    "id": 157,
+    "nombre": "Habas",
+    "categoria": "legumbre",
+    "unidad": "g"
+  },
+  {
+    "id": 158,
+    "nombre": "Edamame",
+    "categoria": "legumbre",
+    "unidad": "g"
+  },
+  {
+    "id": 159,
+    "nombre": "Soja en grano",
+    "categoria": "legumbre",
+    "unidad": "g"
+  },
+  {
+    "id": 160,
+    "nombre": "Tofu",
+    "categoria": "legumbre",
+    "unidad": "g"
+  },
+  {
+    "id": 161,
+    "nombre": "Tempeh",
+    "categoria": "legumbre",
+    "unidad": "g"
+  },
+  {
+    "id": 162,
+    "nombre": "Aceite de oliva virgen extra",
+    "categoria": "condimento",
+    "unidad": "mL"
+  },
+  {
+    "id": 163,
+    "nombre": "Aceite de girasol",
+    "categoria": "condimento",
+    "unidad": "mL"
+  },
+  {
+    "id": 164,
+    "nombre": "Aceite de sésamo",
+    "categoria": "condimento",
+    "unidad": "mL"
+  },
+  {
+    "id": 165,
+    "nombre": "Sal fina",
+    "categoria": "condimento",
+    "unidad": "g"
+  },
+  {
+    "id": 166,
+    "nombre": "Sal gruesa",
+    "categoria": "condimento",
+    "unidad": "g"
+  },
+  {
+    "id": 167,
+    "nombre": "Sal de Himalaya",
+    "categoria": "condimento",
+    "unidad": "g"
+  },
+  {
+    "id": 168,
+    "nombre": "Pimienta negra",
+    "categoria": "condimento",
+    "unidad": "g"
+  },
+  {
+    "id": 169,
+    "nombre": "Pimienta blanca",
+    "categoria": "condimento",
+    "unidad": "g"
+  },
+  {
+    "id": 170,
+    "nombre": "Pimentón dulce",
+    "categoria": "condimento",
+    "unidad": "g"
+  },
+  {
+    "id": 171,
+    "nombre": "Pimentón picante",
+    "categoria": "condimento",
+    "unidad": "g"
+  },
+  {
+    "id": 172,
+    "nombre": "Pimentón ahumado",
+    "categoria": "condimento",
+    "unidad": "g"
+  },
+  {
+    "id": 173,
+    "nombre": "Comino",
+    "categoria": "condimento",
+    "unidad": "g"
+  },
+  {
+    "id": 174,
+    "nombre": "Orégano",
+    "categoria": "condimento",
+    "unidad": "g"
+  },
+  {
+    "id": 175,
+    "nombre": "Albahaca seca",
+    "categoria": "condimento",
+    "unidad": "g"
+  },
+  {
+    "id": 176,
+    "nombre": "Romero seco",
+    "categoria": "condimento",
+    "unidad": "g"
+  },
+  {
+    "id": 177,
+    "nombre": "Tomillo seco",
+    "categoria": "condimento",
+    "unidad": "g"
+  },
+  {
+    "id": 178,
+    "nombre": "Laurel",
+    "categoria": "condimento",
+    "unidad": "g"
+  },
+  {
+    "id": 179,
+    "nombre": "Canela en polvo",
+    "categoria": "condimento",
+    "unidad": "g"
+  },
+  {
+    "id": 180,
+    "nombre": "Canela en rama",
+    "categoria": "condimento",
+    "unidad": "g"
+  },
+  {
+    "id": 181,
+    "nombre": "Cúrcuma",
+    "categoria": "condimento",
+    "unidad": "g"
+  },
+  {
+    "id": 182,
+    "nombre": "Curry en polvo",
+    "categoria": "condimento",
+    "unidad": "g"
+  },
+  {
+    "id": 183,
+    "nombre": "Jengibre en polvo",
+    "categoria": "condimento",
+    "unidad": "g"
+  },
+  {
+    "id": 184,
+    "nombre": "Jengibre fresco",
+    "categoria": "condimento",
+    "unidad": "g"
+  },
+  {
+    "id": 185,
+    "nombre": "Azafrán",
+    "categoria": "condimento",
+    "unidad": "g"
+  },
+  {
+    "id": 186,
+    "nombre": "Nuez moscada",
+    "categoria": "condimento",
+    "unidad": "g"
+  },
+  {
+    "id": 187,
+    "nombre": "Clavo",
+    "categoria": "condimento",
+    "unidad": "g"
+  },
+  {
+    "id": 188,
+    "nombre": "Vinagre de vino",
+    "categoria": "condimento",
+    "unidad": "mL"
+  },
+  {
+    "id": 189,
+    "nombre": "Vinagre balsámico",
+    "categoria": "condimento",
+    "unidad": "mL"
+  },
+  {
+    "id": 190,
+    "nombre": "Vinagre de manzana",
+    "categoria": "condimento",
+    "unidad": "mL"
+  },
+  {
+    "id": 191,
+    "nombre": "Salsa de soja",
+    "categoria": "condimento",
+    "unidad": "mL"
+  },
+  {
+    "id": 192,
+    "nombre": "Salsa Worcestershire",
+    "categoria": "condimento",
+    "unidad": "mL"
+  },
+  {
+    "id": 193,
+    "nombre": "Tomate frito",
+    "categoria": "condimento",
+    "unidad": "g"
+  },
+  {
+    "id": 194,
+    "nombre": "Tomate triturado lata",
+    "categoria": "condimento",
+    "unidad": "g"
+  },
+  {
+    "id": 195,
+    "nombre": "Caldo de pollo",
+    "categoria": "condimento",
+    "unidad": "mL"
+  },
+  {
+    "id": 196,
+    "nombre": "Caldo de verduras",
+    "categoria": "condimento",
+    "unidad": "mL"
+  },
+  {
+    "id": 197,
+    "nombre": "Caldo de pescado",
+    "categoria": "condimento",
+    "unidad": "mL"
+  },
+  {
+    "id": 198,
+    "nombre": "Mostaza de Dijon",
+    "categoria": "condimento",
+    "unidad": "g"
+  },
+  {
+    "id": 199,
+    "nombre": "Ketchup",
+    "categoria": "condimento",
+    "unidad": "g"
+  },
+  {
+    "id": 200,
+    "nombre": "Mayonesa",
+    "categoria": "condimento",
+    "unidad": "g"
+  },
+  {
+    "id": 201,
+    "nombre": "Tahini",
+    "categoria": "condimento",
+    "unidad": "g"
+  },
+  {
+    "id": 202,
+    "nombre": "Pasta de miso",
+    "categoria": "condimento",
+    "unidad": "g"
+  },
+  {
+    "id": 203,
+    "nombre": "Harissa",
+    "categoria": "condimento",
+    "unidad": "g"
+  },
+  {
+    "id": 204,
+    "nombre": "Sriracha",
+    "categoria": "condimento",
+    "unidad": "mL"
+  },
+  {
+    "id": 205,
+    "nombre": "Manzana",
+    "categoria": "fruta",
+    "unidad": "g"
+  },
+  {
+    "id": 206,
+    "nombre": "Naranja",
+    "categoria": "fruta",
+    "unidad": "g"
+  },
+  {
+    "id": 207,
+    "nombre": "Plátano",
+    "categoria": "fruta",
+    "unidad": "g"
+  },
+  {
+    "id": 208,
+    "nombre": "Fresa",
+    "categoria": "fruta",
+    "unidad": "g"
+  },
+  {
+    "id": 209,
+    "nombre": "Pera",
+    "categoria": "fruta",
+    "unidad": "g"
+  },
+  {
+    "id": 210,
+    "nombre": "Limón",
+    "categoria": "fruta",
+    "unidad": "g"
+  },
+  {
+    "id": 211,
+    "nombre": "Lima",
+    "categoria": "fruta",
+    "unidad": "g"
+  },
+  {
+    "id": 212,
+    "nombre": "Sandía",
+    "categoria": "fruta",
+    "unidad": "g"
+  },
+  {
+    "id": 213,
+    "nombre": "Melón",
+    "categoria": "fruta",
+    "unidad": "g"
+  },
+  {
+    "id": 214,
+    "nombre": "Uvas blancas",
+    "categoria": "fruta",
+    "unidad": "g"
+  },
+  {
+    "id": 215,
+    "nombre": "Uvas negras",
+    "categoria": "fruta",
+    "unidad": "g"
+  },
+  {
+    "id": 216,
+    "nombre": "Melocotón",
+    "categoria": "fruta",
+    "unidad": "g"
+  },
+  {
+    "id": 217,
+    "nombre": "Nectarina",
+    "categoria": "fruta",
+    "unidad": "g"
+  },
+  {
+    "id": 218,
+    "nombre": "Albaricoque",
+    "categoria": "fruta",
+    "unidad": "g"
+  },
+  {
+    "id": 219,
+    "nombre": "Ciruela",
+    "categoria": "fruta",
+    "unidad": "g"
+  },
+  {
+    "id": 220,
+    "nombre": "Cereza",
+    "categoria": "fruta",
+    "unidad": "g"
+  },
+  {
+    "id": 221,
+    "nombre": "Kiwi",
+    "categoria": "fruta",
+    "unidad": "g"
+  },
+  {
+    "id": 222,
+    "nombre": "Mango",
+    "categoria": "fruta",
+    "unidad": "g"
+  },
+  {
+    "id": 223,
+    "nombre": "Piña",
+    "categoria": "fruta",
+    "unidad": "g"
+  },
+  {
+    "id": 224,
+    "nombre": "Papaya",
+    "categoria": "fruta",
+    "unidad": "g"
+  },
+  {
+    "id": 225,
+    "nombre": "Coco",
+    "categoria": "fruta",
+    "unidad": "g"
+  },
+  {
+    "id": 226,
+    "nombre": "Granada",
+    "categoria": "fruta",
+    "unidad": "g"
+  },
+  {
+    "id": 227,
+    "nombre": "Higo",
+    "categoria": "fruta",
+    "unidad": "g"
+  },
+  {
+    "id": 228,
+    "nombre": "Frambuesa",
+    "categoria": "fruta",
+    "unidad": "g"
+  },
+  {
+    "id": 229,
+    "nombre": "Arándanos",
+    "categoria": "fruta",
+    "unidad": "g"
+  },
+  {
+    "id": 230,
+    "nombre": "Mora",
+    "categoria": "fruta",
+    "unidad": "g"
+  },
+  {
+    "id": 231,
+    "nombre": "Mandarina",
+    "categoria": "fruta",
+    "unidad": "g"
+  },
+  {
+    "id": 232,
+    "nombre": "Pomelo",
+    "categoria": "fruta",
+    "unidad": "g"
+  },
+  {
+    "id": 233,
+    "nombre": "Almendras",
+    "categoria": "fruto_seco",
+    "unidad": "g"
+  },
+  {
+    "id": 234,
+    "nombre": "Nueces",
+    "categoria": "fruto_seco",
+    "unidad": "g"
+  },
+  {
+    "id": 235,
+    "nombre": "Avellanas",
+    "categoria": "fruto_seco",
+    "unidad": "g"
+  },
+  {
+    "id": 236,
+    "nombre": "Pistachos",
+    "categoria": "fruto_seco",
+    "unidad": "g"
+  },
+  {
+    "id": 237,
+    "nombre": "Anacardos",
+    "categoria": "fruto_seco",
+    "unidad": "g"
+  },
+  {
+    "id": 238,
+    "nombre": "Cacahuetes",
+    "categoria": "fruto_seco",
+    "unidad": "g"
+  },
+  {
+    "id": 239,
+    "nombre": "Piñones",
+    "categoria": "fruto_seco",
+    "unidad": "g"
+  },
+  {
+    "id": 240,
+    "nombre": "Semillas de sésamo",
+    "categoria": "fruto_seco",
+    "unidad": "g"
+  },
+  {
+    "id": 241,
+    "nombre": "Semillas de chía",
+    "categoria": "fruto_seco",
+    "unidad": "g"
+  },
+  {
+    "id": 242,
+    "nombre": "Semillas de lino",
+    "categoria": "fruto_seco",
+    "unidad": "g"
+  },
+  {
+    "id": 243,
+    "nombre": "Pasas",
+    "categoria": "fruto_seco",
+    "unidad": "g"
+  },
+  {
+    "id": 244,
+    "nombre": "Dátiles",
+    "categoria": "fruto_seco",
+    "unidad": "g"
+  },
+  {
+    "id": 245,
+    "nombre": "Orejones",
+    "categoria": "fruto_seco",
+    "unidad": "g"
+  },
+  {
+    "id": 246,
+    "nombre": "Azúcar blanco",
+    "categoria": "dulce",
+    "unidad": "g"
+  },
+  {
+    "id": 247,
+    "nombre": "Azúcar moreno",
+    "categoria": "dulce",
+    "unidad": "g"
+  },
+  {
+    "id": 248,
+    "nombre": "Azúcar glas",
+    "categoria": "dulce",
+    "unidad": "g"
+  },
+  {
+    "id": 249,
+    "nombre": "Miel",
+    "categoria": "dulce",
+    "unidad": "g"
+  },
+  {
+    "id": 250,
+    "nombre": "Sirope de arce",
+    "categoria": "dulce",
+    "unidad": "mL"
+  },
+  {
+    "id": 251,
+    "nombre": "Chocolate negro 70%",
+    "categoria": "dulce",
+    "unidad": "g"
+  },
+  {
+    "id": 252,
+    "nombre": "Chocolate con leche",
+    "categoria": "dulce",
+    "unidad": "g"
+  },
+  {
+    "id": 253,
+    "nombre": "Cacao en polvo",
+    "categoria": "dulce",
+    "unidad": "g"
+  },
+  {
+    "id": 254,
+    "nombre": "Mermelada de fresa",
+    "categoria": "dulce",
+    "unidad": "g"
+  },
+  {
+    "id": 255,
+    "nombre": "Mermelada de naranja",
+    "categoria": "dulce",
+    "unidad": "g"
+  },
+  {
+    "id": 256,
+    "nombre": "Levadura seca",
+    "categoria": "dulce",
+    "unidad": "g"
+  },
+  {
+    "id": 257,
+    "nombre": "Levadura en polvo",
+    "categoria": "dulce",
+    "unidad": "g"
+  },
+  {
+    "id": 258,
+    "nombre": "Vainilla en vaina",
+    "categoria": "dulce",
+    "unidad": "g"
+  },
+  {
+    "id": 259,
+    "nombre": "Extracto de vainilla",
+    "categoria": "dulce",
+    "unidad": "mL"
+  },
+  {
+    "id": 260,
+    "nombre": "Agua mineral",
+    "categoria": "bebida",
+    "unidad": "mL"
+  },
+  {
+    "id": 261,
+    "nombre": "Vino blanco para cocinar",
+    "categoria": "bebida",
+    "unidad": "mL"
+  },
+  {
+    "id": 262,
+    "nombre": "Vino tinto para cocinar",
+    "categoria": "bebida",
+    "unidad": "mL"
+  },
+  {
+    "id": 263,
+    "nombre": "Cerveza",
+    "categoria": "bebida",
+    "unidad": "mL"
+  },
+  {
+    "id": 264,
+    "nombre": "Leche de coco",
+    "categoria": "bebida",
+    "unidad": "mL"
+  },
+  {
+    "id": 265,
+    "nombre": "Leche de almendras",
+    "categoria": "bebida",
+    "unidad": "mL"
+  },
+  {
+    "id": 266,
+    "nombre": "Leche de avena",
+    "categoria": "bebida",
+    "unidad": "mL"
+  },
+  {
+    "id": 267,
+    "nombre": "Zumo de naranja",
+    "categoria": "bebida",
+    "unidad": "mL"
+  },
+  {
+    "id": 268,
+    "nombre": "Zumo de limón",
+    "categoria": "bebida",
+    "unidad": "mL"
+  },
+  {
+    "id": 269,
+    "nombre": "Albahaca fresca",
+    "categoria": "hierba",
+    "unidad": "g"
+  },
+  {
+    "id": 270,
+    "nombre": "Perejil fresco",
+    "categoria": "hierba",
+    "unidad": "g"
+  },
+  {
+    "id": 271,
+    "nombre": "Cilantro fresco",
+    "categoria": "hierba",
+    "unidad": "g"
+  },
+  {
+    "id": 272,
+    "nombre": "Cebollino fresco",
+    "categoria": "hierba",
+    "unidad": "g"
+  },
+  {
+    "id": 273,
+    "nombre": "Menta fresca",
+    "categoria": "hierba",
+    "unidad": "g"
+  },
+  {
+    "id": 274,
+    "nombre": "Romero fresco",
+    "categoria": "hierba",
+    "unidad": "g"
+  },
+  {
+    "id": 275,
+    "nombre": "Tomillo fresco",
+    "categoria": "hierba",
+    "unidad": "g"
+  },
+  {
+    "id": 276,
+    "nombre": "Eneldo fresco",
+    "categoria": "hierba",
+    "unidad": "g"
+  },
+  {
+    "id": 277,
+    "nombre": "Estragón fresco",
+    "categoria": "hierba",
+    "unidad": "g"
+  },
+  {
+    "id": 278,
+    "nombre": "Salvia fresca",
+    "categoria": "hierba",
+    "unidad": "g"
+  },
+  {
+    "nombre": "Bicarbonato sódico",
+    "categoria": "condimento",
+    "unidad": "g",
+    "id": 279
+  },
+  {
+    "nombre": "Maicena",
+    "categoria": "cereal",
+    "unidad": "g",
+    "id": 280
+  },
+  {
+    "nombre": "Pan rallado",
+    "categoria": "cereal",
+    "unidad": "g",
+    "id": 281
+  },
+  {
+    "nombre": "Pimienta de cayena",
+    "categoria": "condimento",
+    "unidad": "g",
+    "id": 282
+  },
+  {
+    "nombre": "Ras el hanout",
+    "categoria": "condimento",
+    "unidad": "g",
+    "id": 283
+  },
+  {
+    "nombre": "Mezcla de hierbas provenzales",
+    "categoria": "condimento",
+    "unidad": "g",
+    "id": 284
+  },
+  {
+    "nombre": "Salsa de ostras",
+    "categoria": "condimento",
+    "unidad": "mL",
+    "id": 285
+  },
+  {
+    "nombre": "Leche evaporada",
+    "categoria": "lacteo",
+    "unidad": "mL",
+    "id": 286
+  },
+  {
+    "nombre": "Leche condensada",
+    "categoria": "lacteo",
+    "unidad": "g",
+    "id": 287
+  },
+  {
+    "nombre": "Gelatina en polvo",
+    "categoria": "dulce",
+    "unidad": "g",
+    "id": 288
+  },
+  {
+    "nombre": "Almidón de maíz",
+    "categoria": "cereal",
+    "unidad": "g",
+    "id": 289
+  },
+  {
+    "nombre": "Caldo de carne",
+    "categoria": "condimento",
+    "unidad": "mL",
+    "id": 290
+  },
+  {
+    "nombre": "Vino de jerez",
+    "categoria": "bebida",
+    "unidad": "mL",
+    "id": 291
+  },
+  {
+    "nombre": "Agua de rosas",
+    "categoria": "bebida",
+    "unidad": "mL",
+    "id": 292
+  },
+  {
+    "nombre": "Coco rallado",
+    "categoria": "fruto_seco",
+    "unidad": "g",
+    "id": 293
+  },
+  {
+    "nombre": "Harina de almendra",
+    "categoria": "fruto_seco",
+    "unidad": "g",
+    "id": 294
+  },
+  {
+    "nombre": "Mantequilla de cacahuete",
+    "categoria": "fruto_seco",
+    "unidad": "g",
+    "id": 295
+  },
+  {
+    "nombre": "Rábano picante (wasabi)",
+    "categoria": "condimento",
+    "unidad": "g",
+    "id": 296
+  },
+  {
+    "nombre": "Alga nori",
+    "categoria": "pescado",
+    "unidad": "g",
+    "id": 297
+  },
+  {
+    "nombre": "Alga wakame",
+    "categoria": "pescado",
+    "unidad": "g",
+    "id": 298
+  },
+  {
+    "nombre": "Pepinillos en vinagre",
+    "categoria": "verdura",
+    "unidad": "g",
+    "id": 299
+  },
+  {
+    "nombre": "Aceitunas verdes",
+    "categoria": "verdura",
+    "unidad": "g",
+    "id": 300
+  },
+  {
+    "nombre": "Aceitunas negras",
+    "categoria": "verdura",
+    "unidad": "g",
+    "id": 301
+  },
+  {
+    "nombre": "Alcaparras",
+    "categoria": "condimento",
+    "unidad": "g",
+    "id": 302
+  },
+  {
+    "nombre": "Trufa negra",
+    "categoria": "verdura",
+    "unidad": "g",
+    "id": 303
+  },
+  {
+    "nombre": "Guindilla fresca",
+    "categoria": "verdura",
+    "unidad": "g",
+    "id": 304
+  },
+  {
+    "nombre": "Jalapeño",
+    "categoria": "verdura",
+    "unidad": "g",
+    "id": 305
+  },
+  {
+    "nombre": "Okra",
+    "categoria": "verdura",
+    "unidad": "g",
+    "id": 306
+  },
+  {
+    "nombre": "Pak choi",
+    "categoria": "verdura",
+    "unidad": "g",
+    "id": 307
+  },
+  {
+    "nombre": "Endivia roja",
+    "categoria": "verdura",
+    "unidad": "g",
+    "id": 308
+  },
+  {
+    "nombre": "Tamarindo",
+    "categoria": "condimento",
+    "unidad": "g",
+    "id": 309
+  },
+  {
+    "nombre": "Pasta de curry rojo",
+    "categoria": "condimento",
+    "unidad": "g",
+    "id": 310
+  },
+  {
+    "nombre": "Pasta de curry verde",
+    "categoria": "condimento",
+    "unidad": "g",
+    "id": 311
+  },
+  {
+    "nombre": "Chucrut",
+    "categoria": "verdura",
+    "unidad": "g",
+    "id": 312
+  },
+  {
+    "nombre": "Kimchi",
+    "categoria": "verdura",
+    "unidad": "g",
+    "id": 313
+  },
+  {
+    "id": 314,
+    "nombre": "Arroz bomba",
+    "categoria": "cereal",
+    "unidad": "g"
+  },
+  {
+    "id": 315,
+    "nombre": "Pipas de calabaza",
+    "categoria": "fruto_seco",
+    "unidad": "g"
+  },
+  {
+    "id": 316,
+    "nombre": "Harina de garbanzo",
+    "categoria": "legumbre",
+    "unidad": "g"
+  },
+  {
+    "id": 317,
+    "nombre": "Pistachos",
+    "categoria": "fruto_seco",
+    "unidad": "g"
+  },
+  {
+    "id": 318,
+    "nombre": "Caracoles",
+    "categoria": "carne",
+    "unidad": "g"
+  }
+]

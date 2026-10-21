@@ -1,0 +1,60 @@
+name: Export Issues to PDF
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 2 * * *'
+
+jobs:
+  export-issues:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Export issues using GitHub CLI
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Exportar issues a JSON
+          gh issue list \
+            --repo ${{ github.repository }} \
+            --limit 1000 \
+            --json number,title,body,state,createdAt,updatedAt,comments,author \
+            > issues.json
+          
+          # Convertir JSON a CSV
+          python scripts/json_to_csv.py
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install pandas reportlab
+
+      - name: Convert CSV to PDF
+        run: python scripts/csv_to_pdf.py
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: issues-export
+          path: |
+            issues.csv
+            issues.pdf
+          retention-days: 30
+
+      - name: Display export summary
+        run: |
+          echo "✅ Export completed!"
+          if [ -f issues.pdf ]; then
+            ls -lh issues.pdf
+            echo "PDF ready for download in Artifacts"
+          fi
